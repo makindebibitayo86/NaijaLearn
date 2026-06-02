@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resource — NaijaLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/nav-auth.js"></script>
+  <style>
+    .resource-page { max-width: 780px; margin: 0 auto; padding: 40px 20px 80px; }
+
+    .back-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 14px; color: var(--muted); margin-bottom: 28px;
+      transition: color .2s;
+    }
+    .back-link:hover { color: var(--sage); }
+
+    .resource-hero {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 24px;
+    }
+
+    .resource-banner {
+      height: 130px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 56px;
+      background: var(--sage-l);
+    }
+
+    .resource-info { padding: 28px 32px 32px; }
+
+    .resource-tags {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;
+    }
+    .rtag {
+      padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+      background: var(--sage-l); color: var(--sage);
+    }
+    .rtag.gold { background: var(--gold-l); color: var(--gold); }
+    .rtag.plain { background: #F0F2F4; color: var(--ink2); }
+
+    .resource-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(20px, 4vw, 28px);
+      color: var(--ink);
+      line-height: 1.3;
+      margin-bottom: 10px;
+    }
+
+    .resource-desc {
+      font-size: 15px; color: var(--ink2); line-height: 1.6; margin-bottom: 24px;
+    }
+
+    .resource-meta-row {
+      display: flex; flex-wrap: wrap; gap: 20px;
+      padding: 16px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      margin-bottom: 28px;
+    }
+    .meta-item { display: flex; flex-direction: column; gap: 3px; }
+    .meta-label { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+    .meta-value { font-size: 14px; font-weight: 500; color: var(--ink); }
+
+    .uploader-row {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 28px;
+    }
+    .avatar-md {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--sage); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; flex-shrink: 0;
+      overflow: hidden;
+    }
+    .uploader-name { font-size: 14px; font-weight: 600; color: var(--ink); }
+    .uploader-sub  { font-size: 12px; color: var(--muted); }
+
+    .action-row { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    .btn-download {
+      flex: 1; min-width: 180px;
+      padding: 14px 24px;
+      background: var(--sage); color: #fff;
+      border: none; border-radius: var(--r);
+      font-size: 15px; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: background .2s;
+    }
+    .btn-download:hover { background: var(--sage-d); }
+
+    .btn-share {
+      padding: 14px 20px;
+      background: var(--white); color: var(--ink2);
+      border: 1px solid var(--border); border-radius: var(--r);
+      font-size: 15px; font-weight: 500; cursor: pointer;
+      display: flex; align-items: center; gap: 8px;
+      transition: border-color .2s, color .2s;
+    }
+    .btn-share:hover { border-color: var(--sage); color: var(--sage); }
+
+    .btn-danger {
+      padding: 14px 20px;
+      background: var(--white); color: #C0392B;
+      border: 1px solid #F5C6C6; border-radius: var(--r);
+      font-size: 15px; font-weight: 500; cursor: pointer;
+      display: flex; align-items: center; gap: 8px;
+      transition: background .2s, border-color .2s;
+    }
+    .btn-danger:hover { background: #FEF0F0; border-color: #C0392B; }
+
+    /* ── Preview card ── */
+    /* ── Auth gate for preview & download ── */
+    .preview-locked {
+      position: relative;
+      background: var(--sage-l);
+      border-radius: 12px;
+      overflow: hidden;
+      min-height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .preview-locked-blur {
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(
+        135deg,
+        var(--sage-l) 0px, var(--sage-l) 20px,
+        var(--sage-m) 20px, var(--sage-m) 22px
+      );
+      opacity: .45;
+      filter: blur(2px);
+    }
+    .preview-locked-box {
+      position: relative; z-index: 2;
+      text-align: center;
+      padding: 36px 28px;
+      background: rgba(255,255,255,.92);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      max-width: 320px;
+      box-shadow: 0 4px 24px rgba(0,0,0,.08);
+    }
+    .preview-locked-box .lock-icon { font-size: 40px; margin-bottom: 12px; }
+    .preview-locked-box h3 {
+      font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 8px;
+    }
+    .preview-locked-box p {
+      font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 20px;
+    }
+    .preview-locked-box .lock-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .btn-lock-signin {
+      padding: 10px 20px;
+      background: var(--sage); color: #fff;
+      border: none; border-radius: var(--r);
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      transition: background .2s;
+    }
+    .btn-lock-signin:hover { background: var(--sage-d); }
+    .btn-lock-signup {
+      padding: 10px 20px;
+      background: #fff; color: var(--sage);
+      border: 1.5px solid var(--sage); border-radius: var(--r);
+      font-size: 14px; font-weight: 600; cursor: pointer;
+      transition: background .2s;
+    }
+    .btn-lock-signup:hover { background: var(--sage-l); }
+
+    .preview-card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 14px; padding: 28px 32px;
+      box-shadow: var(--shadow-sm); margin-bottom: 24px;
+    }
+    .preview-card h3 { font-size: 15px; font-weight: 600; color: var(--ink); margin-bottom: 16px; }
+
+    .preview-frame {
+      width: 100%; height: 520px; border: none;
+      border-radius: 10px; background: #f5f5f5;
+      display: block;
+    }
+    .preview-fallback {
+      text-align: center; padding: 60px 20px; color: var(--muted);
+    }
+    .preview-fallback .pf-icon { font-size: 48px; margin-bottom: 14px; }
+    .preview-fallback p { font-size: 14px; line-height: 1.6; margin-bottom: 20px; }
+
+    /* ── Related ── */
+    .related-card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 14px; padding: 28px 32px;
+      box-shadow: var(--shadow-sm);
+    }
+    .related-card h3 { font-size: 15px; font-weight: 600; color: var(--ink); margin-bottom: 16px; }
+    .related-list { display: flex; flex-direction: column; gap: 10px; }
+
+    .related-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px; border-radius: 10px;
+      border: 1px solid var(--border); cursor: pointer;
+      transition: border-color .2s, background .2s;
+      text-decoration: none;
+    }
+    .related-item:hover { border-color: var(--sage); background: var(--sage-l); }
+    .related-icon { font-size: 22px; flex-shrink: 0; }
+    .related-text { flex: 1; min-width: 0; }
+    .related-title { font-size: 13px; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .related-sub   { font-size: 12px; color: var(--muted); }
+    .related-dl    { font-size: 12px; color: var(--muted); flex-shrink: 0; }
+
+    /* ── Loading/Error states ── */
+    .state-box {
+      text-align: center; padding: 80px 20px;
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 18px; box-shadow: var(--shadow-sm);
+    }
+    .state-box .state-icon { font-size: 48px; margin-bottom: 16px; }
+    .state-box h2 { font-size: 20px; font-weight: 600; color: var(--ink); margin-bottom: 8px; }
+    .state-box p  { font-size: 14px; color: var(--muted); }
+
+    /* ══════════════════════════════════════════
+       ── Reviews & Ratings ──
+       ══════════════════════════════════════════ */
+
+    .reviews-card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 14px; padding: 28px 32px;
+      box-shadow: var(--shadow-sm); margin-top: 24px;
+    }
+
+    /* Header row with average score */
+    .reviews-header {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
+      margin-bottom: 22px;
+    }
+    .reviews-header h3 { font-size: 15px; font-weight: 600; color: var(--ink); margin: 0; }
+    .avg-score {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .avg-stars { font-size: 20px; line-height: 1; }
+    .avg-num   { font-size: 22px; font-weight: 700; color: var(--ink); line-height: 1; }
+    .avg-count { font-size: 12px; color: var(--muted); }
+
+    /* Write-a-review form */
+    .review-form {
+      border: 1px solid var(--border); border-radius: 12px;
+      padding: 20px 22px; margin-bottom: 22px;
+      background: var(--cream);
+    }
+    .review-form-title {
+      font-size: 13px; font-weight: 600; color: var(--ink);
+      margin-bottom: 12px;
+    }
+
+    /* Star picker */
+    .star-picker {
+      display: flex; gap: 4px; margin-bottom: 12px;
+      flex-direction: row-reverse; justify-content: flex-end;
+    }
+    .star-picker input[type="radio"] { display: none; }
+    .star-picker label {
+      font-size: 26px; cursor: pointer; color: #DDE1E5;
+      transition: color .12s;
+      line-height: 1;
+    }
+    /* Highlight hovered star and all stars to its right (visually left) */
+    .star-picker label:hover,
+    .star-picker label:hover ~ label,
+    .star-picker input[type="radio"]:checked ~ label {
+      color: #F5B942;
+    }
+
+    .review-textarea {
+      width: 100%; box-sizing: border-box;
+      padding: 12px 14px;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px; color: var(--ink);
+      background: var(--white);
+      resize: vertical; min-height: 88px;
+      transition: border-color .2s;
+      margin-bottom: 12px;
+    }
+    .review-textarea:focus { outline: none; border-color: var(--sage); }
+    .review-textarea::placeholder { color: var(--muted); }
+
+    .btn-submit-review {
+      padding: 10px 22px;
+      background: var(--sage); color: #fff;
+      border: none; border-radius: 8px;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      transition: background .2s;
+    }
+    .btn-submit-review:hover { background: var(--sage-d); }
+    .btn-submit-review:disabled { opacity: .55; cursor: not-allowed; }
+
+    /* Sign-in nudge */
+    .review-signin-nudge {
+      font-size: 13px; color: var(--muted);
+      padding: 14px 0 6px;
+    }
+    .review-signin-nudge a { color: var(--sage); font-weight: 600; text-decoration: none; }
+    .review-signin-nudge a:hover { text-decoration: underline; }
+
+    /* Own-resource notice */
+    .review-own-notice {
+      font-size: 13px; color: var(--muted);
+      padding: 14px 0 6px; font-style: italic;
+    }
+
+    /* Individual review items */
+    .reviews-list { display: flex; flex-direction: column; gap: 16px; }
+
+    .review-item {
+      padding: 16px 0;
+      border-top: 1px solid var(--border);
+    }
+    .review-item:first-child { border-top: none; }
+
+    .review-top {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 6px;
+    }
+    .review-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--sage); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; flex-shrink: 0;
+      overflow: hidden;
+    }
+    .review-author { font-size: 13px; font-weight: 600; color: var(--ink); }
+    .review-date   { font-size: 11px; color: var(--muted); margin-left: auto; white-space: nowrap; }
+    .review-stars  { font-size: 14px; letter-spacing: 1px; }
+    .review-body   { font-size: 14px; color: var(--ink2); line-height: 1.55; margin-left: 42px; }
+
+    /* Delete own review */
+    .btn-delete-review {
+      background: none; border: none; cursor: pointer;
+      font-size: 11px; color: var(--muted);
+      padding: 0; margin-left: 8px;
+      transition: color .2s;
+    }
+    .btn-delete-review:hover { color: #C0392B; }
+
+    /* Empty reviews state */
+    .reviews-empty {
+      text-align: center; padding: 32px 0;
+      color: var(--muted); font-size: 14px;
+    }
+    .reviews-empty .re-icon { font-size: 32px; margin-bottom: 10px; }
+
+
+    .btn-save {
+      padding: 14px 20px;
+      background: var(--white); color: var(--ink2);
+      border: 1px solid var(--border); border-radius: var(--r);
+      font-size: 15px; font-weight: 500; cursor: pointer;
+      display: flex; align-items: center; gap: 8px;
+      transition: border-color .2s, color .2s, background .2s;
+      white-space: nowrap;
+    }
+    .btn-save:hover { border-color: var(--gold); color: var(--gold); }
+    .btn-save.saved {
+      border-color: var(--gold);
+      background: var(--gold-l);
+      color: var(--gold);
+      font-weight: 600;
+    }
+
+    @media (max-width: 600px) {
+      .resource-info { padding: 20px; }
+      .preview-card, .related-card, .reviews-card { padding: 20px; }
+      .preview-frame { height: 360px; }
+      .review-body { margin-left: 0; margin-top: 6px; }
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+
+  <style>
+    /* ── Suspension overlay on resource page ── */
+/* ── Suspension overlay on resource page ── */
+    #suspension-blur-wrap {
+      position: relative;
+    }
+    #suspension-blur-wrap.blurred > *:not(#suspension-notice) {
+      filter: blur(8px);
+      pointer-events: none;
+      user-select: none;
+    }
+    #suspension-notice {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(13,27,42,.55);
+      backdrop-filter: blur(4px);
+      padding: 20px;
+    }
+    .suspension-card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 40px 36px;
+      max-width: 440px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 24px 64px rgba(0,0,0,.3);
+      animation: suspPop .25s cubic-bezier(.34,1.4,.64,1);
+    }
+    @keyframes suspPop { from{transform:scale(.85);opacity:0} to{transform:scale(1);opacity:1} }
+    .suspension-card .susp-icon { font-size: 54px; margin-bottom: 16px; }
+    .suspension-card h2 { font-family:'Playfair Display',serif; font-size:22px; font-weight:700; color:#0D1B2A; margin:0 0 10px; }
+    .suspension-card p  { font-size:14px; color:#6B7F8E; line-height:1.65; margin:0 0 24px; }
+    .suspension-card .susp-btn {
+      display:inline-block; background:#3D7A6B; color:#fff;
+      padding:12px 28px; border-radius:10px;
+      font-size:14px; font-weight:600; text-decoration:none;
+      transition:background .2s;
+    }
+    .suspension-card .susp-btn:hover { background:#2d6457; }
+    .suspension-card .susp-home {
+      display:block; margin-top:14px; font-size:13px; color:#6B7F8E; text-decoration:none;
+    }
+    .suspension-card .susp-home:hover { color:#3D7A6B; }
+    [data-theme="dark"] .suspension-card { background:#1A2B3C; }
+    [data-theme="dark"] .suspension-card h2 { color:#E8EFF5; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="../index.html" class="nav-logo" style="display:inline-flex;align-items:center;text-decoration:none"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 110" width="226" height="48" role="img">
+  <title>NaijaLearn</title>
+  <style>@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&amp;family=DM+Sans:wght@500&amp;display=swap');
+    .nl-n{fill:#0D1B2A}.nl-l{fill:#3D7A6B}.nl-t{fill:#6B7F8E}
+    [data-theme="dark"] .nl-n{fill:#FAFAF7}[data-theme="dark"] .nl-l{fill:#5BBDA8}
+  </style>
+  <g transform="translate(20,15)">
+    <rect x="4" y="10" width="34" height="52" rx="5" fill="#3D7A6B"/>
+    <rect x="36" y="10" width="34" height="52" rx="5" fill="#2d6457"/>
+    <rect x="33" y="8" width="10" height="56" rx="4" fill="#1A4A3A"/>
+    <line x1="12" y1="24" x2="30" y2="24" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="33" x2="30" y2="33" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="42" x2="24" y2="42" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="51" x2="28" y2="51" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <circle cx="58" cy="26" r="9" fill="#C8882A"/>
+    <circle cx="58" cy="26" r="4.5" fill="#FAFAF7"/>
+    <line x1="58" y1="34" x2="52" y2="54" stroke="#C8882A" stroke-width="3" stroke-linecap="round"/>
+    <path d="M4 62 Q38 53 38 62 Q38 53 72 62" fill="none" stroke="#5BBDA8" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <text x="114" y="58" font-family="'Playfair Display',Georgia,serif" font-size="46" font-weight="700" letter-spacing="-1"><tspan class="nl-n">Naija</tspan><tspan class="nl-l">Learn</tspan></text>
+  <text x="115" y="80" font-family="'DM Sans',Arial,sans-serif" font-size="11" font-weight="500" letter-spacing="2.4" class="nl-t">EDUCATIONAL RESOURCE LIBRARY</text>
+</svg></a>
+  <div class="nav-links">
+    <a href="browse.html" class="nav-browse-tip" title="Search lesson notes, past questions &amp; schemes of work by subject, class, term or type">Browse</a>
+    <a href="upload.html" title="Share lesson notes, past questions &amp; schemes of work with Nigerian students">Upload</a>
+    <a href="signin.html" title="Sign in to your NaijaLearn account to upload, save and download resources" style="color:var(--sage)">Sign In</a>
+    <button class="btn-nav" title="Create a free account to access all resources" onclick="window.location.href='signup.html'">Get Started Free</button>
+  </div>
+  <button class="nav-toggle">☰</button>
+</nav>
+
+<div id="suspension-blur-wrap"><div class="resource-page">
+  <a href="browse.html" class="back-link">← Back to Browse</a>
+  <div id="resource-content">
+    <div class="state-box">
+      <div class="state-icon">⏳</div>
+      <h2>Loading resource…</h2>
+      <p>Please wait a moment.</p>
+    </div>
+  </div>
+
+  <!-- Reviews section — rendered separately so it never blocks the main content -->
+  <div id="reviews-section" style="display:none"></div>
+</div>
+
+<script>
+(function () {
+  var SUBJECT_STYLE = {
+    'Mathematics':       { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', text:'#1A4A3A', icon:'ti-math-function' },
+    'English Language':  { bg:'#FBF3E8', arc:'#C8882A', dot:'#3D7A6B', text:'#6B3A08', icon:'ti-book-2' },
+    'Biology':           { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', text:'#1A4A3A', icon:'ti-dna' },
+    'Physics':           { bg:'#FBF3E8', arc:'#C8882A', dot:'#3D7A6B', text:'#6B3A08', icon:'ti-atom' },
+    'Chemistry':         { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', text:'#1A4A3A', icon:'ti-flask' },
+    'Civic Education':   { bg:'#FBF3E8', arc:'#C8882A', dot:'#3D7A6B', text:'#6B3A08', icon:'ti-building-community' },
+    'Agricultural Science':    { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', text:'#1A4A3A', icon:'ti-plant' },
+    'Computer Studies':  { bg:'#FBF3E8', arc:'#C8882A', dot:'#3D7A6B', text:'#6B3A08', icon:'ti-device-laptop' },
+    'Economics':         { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', text:'#1A4A3A', icon:'ti-chart-line' },
+    'Geography':         { bg:'#FBF3E8', arc:'#C8882A', dot:'#3D7A6B', text:'#6B3A08', icon:'ti-world' },
+    'History':           { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', text:'#1A4A3A', icon:'ti-books' },
+    'Further Mathematics':{ bg:'#FBF3E8', arc:'#C8882A', dot:'#3D7A6B', text:'#6B3A08', icon:'ti-sum' }
+  };
+  var DEFAULT_STYLE = { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', text:'#1A4A3A', icon:'ti-file-text' };
+
+  function initials(name) {
+    return (name || '??').split(' ').slice(0,2).map(function(n){ return n[0] || ''; }).join('').toUpperCase();
+  }
+
+  function fmtSize(bytes) {
+    if (!bytes) return 'Unknown size';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes/1024).toFixed(1) + ' KB';
+    return (bytes/1048576).toFixed(1) + ' MB';
+  }
+
+  function fmtDate(ts) {
+    return ts ? new Date(ts).toLocaleDateString('en-NG', { day:'numeric', month:'long', year:'numeric' }) : '';
+  }
+
+  function fmtDateShort(ts) {
+    return ts ? new Date(ts).toLocaleDateString('en-NG', { day:'numeric', month:'short', year:'numeric' }) : '';
+  }
+
+  function setContent(html) {
+    document.getElementById('resource-content').innerHTML = html;
+  }
+
+  function isPDF(url) {
+    return url && (url.toLowerCase().includes('.pdf') || url.toLowerCase().includes('application/pdf'));
+  }
+
+  function starsHtml(rating, size) {
+    var s = size || 14;
+    var out = '';
+    for (var i = 1; i <= 5; i++) {
+      out += '<span style="color:' + (i <= rating ? '#F5B942' : '#DDE1E5') + ';font-size:' + s + 'px">★</span>';
+    }
+    return out;
+  }
+
+  /* ═══════════════════════════════════
+     REVIEWS — render & interactions
+     ═══════════════════════════════════ */
+
+  function renderReviews(reviews, session, resourceId, isOwner) {
+    var section = document.getElementById('reviews-section');
+    section.style.display = '';
+
+    // Compute average
+    var avg = 0;
+    if (reviews.length) {
+      avg = reviews.reduce(function(a, r) { return a + r.rating; }, 0) / reviews.length;
+    }
+
+    var avgStars = '';
+    for (var i = 1; i <= 5; i++) {
+      avgStars += '<span style="color:' + (i <= Math.round(avg) ? '#F5B942' : '#DDE1E5') + '">★</span>';
+    }
+
+    // Check if current user already left a review
+    var myReviewId = null;
+    if (session) {
+      var mine = reviews.find(function(r) { return r.reviewer_id === session.user.id; });
+      if (mine) myReviewId = mine.id;
+    }
+
+    /* ── Form area ── */
+    var formHTML = '';
+    if (!session) {
+      formHTML = '<p class="review-signin-nudge">💬 <a href="signin.html">Sign in</a> to leave a review.</p>';
+    } else if (isOwner) {
+      formHTML = '<p class="review-own-notice">You cannot review your own resource.</p>';
+    } else if (myReviewId) {
+      formHTML = '<p class="review-signin-nudge">✅ You have already reviewed this resource. Delete your review below to submit a new one.</p>';
+    } else {
+      formHTML =
+        '<div class="review-form">'+
+        '  <div class="review-form-title">Rate this resource</div>'+
+        '  <div class="star-picker" id="star-picker">'+
+        '    <input type="radio" name="rating" id="s5" value="5"><label for="s5" title="5 stars">★</label>'+
+        '    <input type="radio" name="rating" id="s4" value="4"><label for="s4" title="4 stars">★</label>'+
+        '    <input type="radio" name="rating" id="s3" value="3"><label for="s3" title="3 stars">★</label>'+
+        '    <input type="radio" name="rating" id="s2" value="2"><label for="s2" title="2 stars">★</label>'+
+        '    <input type="radio" name="rating" id="s1" value="1"><label for="s1" title="1 star">★</label>'+
+        '  </div>'+
+        '  <textarea class="review-textarea" id="review-body-input" placeholder="Share what you found useful (optional)…" maxlength="600"></textarea>'+
+        '  <button class="btn-submit-review" id="btn-submit-review" onclick="submitReview()">Post Review</button>'+
+        '</div>';
+    }
+
+    /* ── Review list ── */
+    var listHTML = '';
+    if (!reviews.length) {
+      listHTML =
+        '<div class="reviews-empty">'+
+        '  <div class="re-icon">💬</div>'+
+        '  <p>No reviews yet. Be the first to rate this resource!</p>'+
+        '</div>';
+    } else {
+      listHTML = '<div class="reviews-list">' +
+        reviews.map(function(r) {
+          var isMe = session && r.reviewer_id === session.user.id;
+          var deleteBtn = isMe
+            ? '<button class="btn-delete-review" onclick="deleteReview(' + r.id + ')" title="Delete my review">✕ Delete</button>'
+            : '';
+          return '<div class="review-item" id="review-' + r.id + '">'+
+            '<div class="review-top">'+
+            '  <div class="review-avatar">' + (r.profiles&&r.profiles.avatar_url?'<img src="'+esc(r.profiles.avatar_url)+'" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.style.display=\'none\'">':initials(r.profiles?r.profiles.full_name:'??')) + '</div>'+
+            '  <div>'+
+            '    <div class="review-author">' + esc(r.profiles ? r.profiles.full_name : 'Anonymous') + deleteBtn + '</div>'+
+            '    <div class="review-stars">' + starsHtml(r.rating, 13) + '</div>'+
+            '  </div>'+
+            '  <div class="review-date">' + fmtDateShort(r.created_at) + '</div>'+
+            '</div>'+
+            (r.body ? '<div class="review-body">' + esc(r.body) + '</div>' : '')+
+            '</div>';
+        }).join('') +
+        '</div>';
+    }
+
+    section.innerHTML =
+      '<div class="reviews-card">'+
+      '  <div class="reviews-header">'+
+      '    <h3>Reviews (' + reviews.length + ')</h3>'+
+      (reviews.length
+        ? '    <div class="avg-score"><div class="avg-stars">' + avgStars + '</div><div class="avg-num">' + avg.toFixed(1) + '</div><div class="avg-count">/ 5</div></div>'
+        : '') +
+      '  </div>'+
+      formHTML +
+      listHTML +
+      '</div>';
+  }
+
+  function esc(s) {
+    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  /* ── Submit review ── */
+  window.submitReview = function() {
+    var sb  = window._nlSb;
+    var res = window._resource;
+    var session = window._session;
+    if (!sb || !res || !session) return;
+
+    var ratingEl = document.querySelector('.star-picker input[type="radio"]:checked');
+    if (!ratingEl) { showToast('Please select a star rating.', 'error'); return; }
+    var rating = parseInt(ratingEl.value, 10);
+    var body   = (document.getElementById('review-body-input').value || '').trim();
+
+    var btn = document.getElementById('btn-submit-review');
+    btn.textContent = 'Posting…'; btn.disabled = true;
+
+    sb.from('reviews')
+      .insert({ resource_id: res.id, reviewer_id: session.user.id, rating: rating, body: body || null })
+      .then(function(result) {
+        if (result.error) {
+          showToast('Could not post review: ' + result.error.message, 'error');
+          btn.textContent = 'Post Review'; btn.disabled = false;
+        } else {
+          showToast('Review posted!', 'success');
+          loadReviews(sb, res.id, session, session.user.id === res.uploader_id);
+        }
+      });
+  };
+
+  /* ── Delete review ── */
+  window.deleteReview = function(reviewId) {
+    var sb  = window._nlSb;
+    var res = window._resource;
+    var session = window._session;
+    if (!sb || !res || !session) return;
+
+    sb.from('reviews')
+      .delete()
+      .eq('id', reviewId)
+      .eq('reviewer_id', session.user.id)   // RLS also enforces this
+      .then(function(result) {
+        if (result.error) {
+          showToast('Could not delete review: ' + result.error.message, 'error');
+        } else {
+          showToast('Review deleted.', 'info');
+          loadReviews(sb, res.id, session, session.user.id === res.uploader_id);
+        }
+      });
+  };
+
+  /* ── Fetch reviews and re-render ── */
+  function loadReviews(sb, resourceId, session, isOwner) {
+    sb.from('reviews')
+      .select('id,rating,body,created_at,reviewer_id,profiles(full_name,avatar_url)')
+      .eq('resource_id', resourceId)
+      .order('created_at', { ascending: false })
+      .then(function(result) {
+        renderReviews(result.data || [], session, resourceId, isOwner);
+      });
+  }
+
+  /* ═══════════════════════════════════
+     EXISTING resource render (unchanged)
+     ═══════════════════════════════════ */
+
+  function renderResource(r, related, session) {
+    var ss = SUBJECT_STYLE[r.subject] || DEFAULT_STYLE;
+    var uploader = (r.profiles && r.profiles.full_name) || 'Anonymous';
+    var uploaderAvatarUrl = (r.profiles && r.profiles.avatar_url) || null;
+    var verifiedBadge = (r.profiles && r.profiles.verified)
+      ? '<span class="rtag gold">✓ Verified</span>'
+      : r.verified
+      ? '<span class="rtag gold">✓ Community Verified</span>'
+      : '';
+
+    // Preview section — locked for guests
+    var previewHTML;
+    var lockedPreviewHTML =
+      '<div class="preview-locked">'+
+      '<div class="preview-locked-blur"></div>'+
+      '<div class="preview-locked-box">'+
+      '<div class="lock-icon">🔒</div>'+
+      '<h3>Sign in to preview this resource</h3>'+
+      '<p>Create a free account or sign in to preview, download, and save resources.</p>'+
+      '<div class="lock-btns">'+
+      '<button class="btn-lock-signin" onclick="window.location.href=\'signin.html?next=\'+encodeURIComponent(window.location.href)">Sign In</button>'+
+      '<button class="btn-lock-signup" onclick="window.location.href=\'signup.html\'">Create Account</button>'+
+      '</div>'+
+      '</div>'+
+      '</div>';
+
+    function getFileExt(url) {
+      if (!url) return '';
+      var clean = url.split('?')[0].toLowerCase();
+      var dot = clean.lastIndexOf('.');
+      return dot !== -1 ? clean.slice(dot + 1) : '';
+    }
+    function isOfficeDoc(url) {
+      var ext = getFileExt(url);
+      return ['doc','docx','ppt','pptx','xls','xlsx','odt','odp','ods'].indexOf(ext) !== -1;
+    }
+    function isImage(url) {
+      var ext = getFileExt(url);
+      return ['png','jpg','jpeg','gif','webp','svg'].indexOf(ext) !== -1;
+    }
+
+    if (!session) {
+      previewHTML = lockedPreviewHTML;
+    } else if (isPDF(r.file_url)) {
+      previewHTML =
+        '<iframe class="preview-frame" src="'+r.file_url+'" title="'+r.title+'" loading="lazy"></iframe>';
+    } else if (isOfficeDoc(r.file_url)) {
+      var viewerUrl = 'https://docs.google.com/viewer?embedded=true&url='+encodeURIComponent(r.file_url);
+      previewHTML =
+        '<div style="position:relative">'+
+        '<iframe class="preview-frame" src="'+viewerUrl+'" title="'+r.title+'" loading="lazy" allow="fullscreen"></iframe>'+
+        '<div style="font-size:11px;color:var(--muted);margin-top:6px;text-align:center">'+
+        'Preview powered by Google Docs Viewer — <button onclick="downloadResource()" style="background:none;border:none;color:var(--sage);cursor:pointer;font-size:11px;padding:0;text-decoration:underline">download original</button>'+
+        '</div>'+
+        '</div>';
+    } else if (isImage(r.file_url)) {
+      previewHTML =
+        '<div style="text-align:center;padding:16px 0">'+
+        '<img src="'+r.file_url+'" alt="'+r.title+'" style="max-width:100%;max-height:520px;border-radius:8px;border:1px solid var(--border)">'+
+        '</div>';
+    } else {
+      previewHTML =
+        '<div class="preview-fallback">'+
+        '<div class="pf-icon"><i class="ti '+ss.icon+'" style="font-size:48px;color:'+ss.arc+'"></i></div>'+
+        '<p>Preview is not available for this file type.<br>Download the file to open it.</p>'+
+        '<button class="btn-download" onclick="downloadResource()">⬇ Download File</button>'+
+        '</div>';
+    }
+
+    // Related items
+    var relatedHTML = '';
+    if (related && related.length) {
+      relatedHTML =
+        '<div class="related-card">'+
+        '<h3>More resources in '+r.subject+'</h3>'+
+        '<div class="related-list">'+
+        related.map(function(rel) {
+          var rs = SUBJECT_STYLE[rel.subject] || DEFAULT_STYLE;
+          return '<a class="related-item" href="resource.html?id='+rel.id+'">'+
+            '<div class="related-icon" style="background:'+rs.bg+';border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti '+rs.icon+'" style="font-size:18px;color:'+rs.arc+'"></i></div>'+
+            '<div class="related-text">'+
+            '<div class="related-title">'+rel.title+'</div>'+
+            '<div class="related-sub">'+rel.class_level+' · '+rel.term+'</div>'+
+            '</div>'+
+            '<div class="related-dl">⬇ '+Number(rel.downloads).toLocaleString()+'</div>'+
+            '</a>';
+        }).join('')+
+        '</div></div>';
+    }
+
+    document.title = r.title + ' — NaijaLearn';
+
+    setContent(
+      '<div class="resource-hero">'+
+      '  <div class="resource-banner" style="background:'+ss.bg+';position:relative;overflow:hidden;">'+
+      '    <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 780 130" preserveAspectRatio="xMidYMid slice">'+
+      '      <circle cx="760" cy="130" r="120" fill="none" stroke="'+ss.arc+'" stroke-width="28" opacity=".12"/>'+
+      '      <circle cx="760" cy="130" r="80" fill="none" stroke="'+ss.arc+'" stroke-width="18" opacity=".10"/>'+
+      '      <circle cx="760" cy="130" r="38" fill="'+ss.arc+'" opacity=".08"/>'+
+      '      <circle cx="38" cy="28" r="18" fill="'+ss.dot+'" opacity=".18"/>'+
+      '    </svg>'+
+      '    <div style="position:absolute;left:32px;top:50%;transform:translateY(-50%)">'+
+      '      <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:'+ss.arc+';opacity:.75;margin-bottom:6px">Subject</div>'+
+      '      <div style="font-family:\'Playfair Display\',Georgia,serif;font-size:26px;font-weight:700;color:'+ss.text+';line-height:1.1">'+r.subject+'</div>'+
+      '    </div>'+
+      '    <div style="position:absolute;right:28px;bottom:12px;opacity:.15">'+
+      '      <i class="ti '+ss.icon+'" style="font-size:72px;color:'+ss.arc+'"></i>'+
+      '    </div>'+
+      '  </div>'+
+      '  <div class="resource-info">'+
+      '    <div class="resource-tags">'+
+      '      <span class="rtag">'+r.subject+'</span>'+
+      '      <span class="rtag plain">'+r.class_level+'</span>'+
+      '      <span class="rtag plain">'+r.term+'</span>'+
+      '      <span class="rtag plain">'+r.week+'</span>'+
+      '      <span class="rtag plain">'+r.type+'</span>'+
+      '      '+verifiedBadge+
+      '    </div>'+
+      '    <h1 class="resource-title">'+r.title+'</h1>'+
+      (r.description ? '<p class="resource-desc">'+r.description+'</p>' : '')+
+      '    <div class="resource-meta-row">'+
+      '      <div class="meta-item"><span class="meta-label">Downloads</span><span class="meta-value">'+Number(r.downloads).toLocaleString()+'</span></div>'+
+      '      <div class="meta-item"><span class="meta-label">File size</span><span class="meta-value">'+fmtSize(r.file_size)+'</span></div>'+
+      '      <div class="meta-item"><span class="meta-label">Uploaded</span><span class="meta-value">'+fmtDate(r.created_at)+'</span></div>'+
+      '      <div class="meta-item"><span class="meta-label">File name</span><span class="meta-value">'+r.file_name+'</span></div>'+
+      '    </div>'+
+      '    <div class="uploader-row">'+
+      '      <div class="avatar-md">'+(uploaderAvatarUrl?'<img src="'+uploaderAvatarUrl+'" alt="'+uploader+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.style.display=\'none\'">':'')+(!uploaderAvatarUrl?initials(uploader):'')+'</div>'+
+      '      <div><a class="uploader-name" href="profile.html?id='+r.uploader_id+'" style="color:var(--ink);text-decoration:none;">'+uploader+'</a><div class="uploader-sub">Uploaded this resource</div></div>'+
+      '    </div>'+
+      '    <div class="action-row">'+
+      (session
+        ? '      <button class="btn-download" onclick="downloadResource()">⬇ Download File</button>'
+        : '      <button class="btn-download" onclick="promptSignIn(\'download\')" title="Sign in to download">🔒 Sign In to Download</button>')+
+      '      <button class="btn-save" id="btn-save" onclick="toggleSave()">🔖 Save</button>'+
+      '      <button class="btn-share" onclick="shareResource()">🔗 Copy Link</button>'+
+      (session && (session.user.id === r.uploader_id || window._nlUserRole === 'admin')
+        ? '      <button class="btn-danger" onclick="deleteResource()" title="Delete this resource permanently">🗑 Delete</button>'
+        : '')+
+      '    </div>'+
+      '  </div>'+
+      '</div>'+
+      '<div class="preview-card">'+
+      '  <h3>Preview</h3>'+
+      previewHTML+
+      '</div>'+
+      relatedHTML
+    );
+  }
+
+  // ── Suspension overlay ──
+  function showSuspensionBlock() {
+    var wrap = document.getElementById('suspension-blur-wrap');
+    if (wrap) wrap.classList.add('blurred');
+    if (document.getElementById('suspension-notice')) return;
+    var notice = document.createElement('div');
+    notice.id = 'suspension-notice';
+    notice.innerHTML =
+      '<div class="suspension-card">'+
+      '<div class="susp-icon">🚫</div>'+
+      '<h2>Account Suspended</h2>'+
+      '<p>Your account has been suspended by an administrator.<br>You cannot view resources while your account is suspended.</p>'+
+      '<a href="mailto:admin@naijlearn.com?subject=Account%20Suspension%20Appeal&body=Hello%2C%20I%20would%20like%20to%20appeal%20my%20account%20suspension." class="susp-btn">📧 Contact Admin to Appeal</a>'+
+      '<a href="../index.html" class="susp-home">← Return to Home</a>'+
+      '</div>';
+    document.body.appendChild(notice);
+  }
+
+  // ── Boot ──
+  var params = new URLSearchParams(window.location.search);
+  var id = parseInt(params.get('id'), 10);
+
+  if (!id) {
+    setContent(
+      '<div class="state-box">'+
+      '<div class="state-icon">🔍</div>'+
+      '<h2>Resource not found</h2>'+
+      '<p>No resource ID was provided. <a href="browse.html" style="color:var(--sage)">Browse all resources</a>.</p>'+
+      '</div>'
+    );
+    return; // nothing to fetch
+  }
+
+  // Wait for supabase to be ready
+  function whenReady(fn) {
+    if (window._nlSb) { fn(window._nlSb); return; }
+    setTimeout(function(){ whenReady(fn); }, 80);
+  }
+
+  whenReady(function(sb) {
+    // Fetch the resource + current session in parallel
+    Promise.all([
+      sb.from('resources')
+        .select('id,title,description,subject,class_level,term,week,type,file_url,file_name,file_size,downloads,verified,created_at,uploader_id,profiles(full_name,avatar_url,verified)')
+        .eq('id', id)
+        .single(),
+      sb.auth.getSession()
+    ]).then(function(results) {
+        var result  = results[0];
+        var session = results[1].data && results[1].data.session;
+
+        if (result.error || !result.data) {
+          setContent(
+            '<div class="state-box">'+
+            '<div class="state-icon">⚠️</div>'+
+            '<h2>Resource not found</h2>'+
+            '<p>This resource may have been removed. <a href="browse.html" style="color:var(--sage)">Browse other resources</a>.</p>'+
+            '</div>'
+          );
+          return;
+        }
+
+        var r = result.data;
+
+        // Expose for download/share/delete actions
+        window._resource = r;
+        window._session  = session;
+
+        // Suspension check is now handled by nav-auth.js before page content loads
+
+        // Fetch related (same subject, exclude self, top 4)
+        sb.from('resources')
+          .select('id,title,class_level,term,subject,downloads')
+          .eq('subject', r.subject)
+          .neq('id', r.id)
+          .order('downloads', { ascending: false })
+          .limit(4)
+          .then(function(rel) {
+            renderResource(r, rel.data || [], session);
+
+            // ── Load save state after render ──
+            if (session) {
+              sb.from('saved_resources')
+                .select('id')
+                .eq('user_id', session.user.id)
+                .eq('resource_id', r.id)
+                .maybeSingle()
+                .then(function(saveResult) {
+                  window._isSaved = !!(saveResult.data);
+                  updateSaveBtn();
+                });
+            }
+
+            // ── Load reviews after main content renders ──
+            var isOwner = session && session.user.id === r.uploader_id;
+            loadReviews(sb, r.id, session, isOwner);
+          });
+      });
+
+    // Download handler — auth-gated, increments counter then opens file
+    window.downloadResource = function() {
+      var r = window._resource;
+      var session = window._session;
+      if (!r) return;
+      if (!session) {
+        promptSignIn('download');
+        return;
+      }
+      sb.rpc('increment_downloads', { resource_id: r.id }).then(function(){});
+      window.open(r.file_url, '_blank', 'noopener');
+    };
+
+    // Save / unsave
+    window.toggleSave = function() {
+      var r = window._resource;
+      var session = window._session;
+      if (!r) return;
+      if (!session) {
+        showToast('Please sign in to save resources.', 'info');
+        setTimeout(function() {
+          window.location.href = 'signin.html?next=' + encodeURIComponent(window.location.href);
+        }, 1200);
+        return;
+      }
+      var btn = document.getElementById('btn-save');
+      if (btn) { btn.disabled = true; }
+
+      if (window._isSaved) {
+        // Unsave
+        sb.from('saved_resources')
+          .delete()
+          .eq('user_id', session.user.id)
+          .eq('resource_id', r.id)
+          .then(function(result) {
+            if (result.error) { showToast('Could not unsave: ' + result.error.message, 'error'); }
+            else { window._isSaved = false; showToast('Removed from saved resources.', 'info'); }
+            if (btn) { btn.disabled = false; }
+            updateSaveBtn();
+          });
+      } else {
+        // Save
+        sb.from('saved_resources')
+          .insert({ user_id: session.user.id, resource_id: r.id })
+          .then(function(result) {
+            if (result.error) { showToast('Could not save: ' + result.error.message, 'error'); }
+            else { window._isSaved = true; showToast('Saved to your dashboard! 🔖', 'success'); }
+            if (btn) { btn.disabled = false; }
+            updateSaveBtn();
+          });
+      }
+    };
+
+    window.updateSaveBtn = function() {
+      var btn = document.getElementById('btn-save');
+      if (!btn) return;
+      if (window._isSaved) {
+        btn.textContent = '🔖 Saved';
+        btn.classList.add('saved');
+        btn.title = 'Click to unsave';
+      } else {
+        btn.textContent = '🔖 Save';
+        btn.classList.remove('saved');
+        btn.title = 'Save to dashboard';
+      }
+    };
+
+    // Redirect guests to sign-in with a next param so they return after auth
+    window.promptSignIn = function(action) {
+      showToast('Please sign in to ' + (action || 'access') + ' this resource.', 'info');
+      setTimeout(function() {
+        window.location.href = 'signin.html?next=' + encodeURIComponent(window.location.href);
+      }, 1200);
+    };
+
+    // Share handler — copies current URL to clipboard
+    window.shareResource = function() {
+      var url = window.location.href;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(function() {
+          showToast('Link copied to clipboard!', 'success');
+        });
+      } else {
+        // Fallback for older browsers
+        var ta = document.createElement('textarea');
+        ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showToast('Link copied!', 'success');
+      }
+    };
+
+    // Delete handler — only shown to the uploader
+    window.deleteResource = function() {
+      var r = window._resource;
+      if (!r) return;
+
+      var isAdmin = window._nlUserRole === 'admin';
+      var confirmMsg = isAdmin
+        ? 'ADMIN: Permanently delete "' + r.title + '"?\n\nThis removes the resource for all users and cannot be undone.'
+        : 'Are you sure you want to delete "' + r.title + '"?\n\nThis cannot be undone.';
+
+      if (!confirm(confirmMsg)) return;
+
+      // Derive the storage path from the public URL
+      // URL format: .../storage/v1/object/public/resources/<uploader_id>/<filename>
+      var storagePath = null;
+      try {
+        var parts = r.file_url.split('/resources/');
+        if (parts[1]) storagePath = parts[1].split('?')[0]; // strip any query string
+      } catch(e) {}
+
+      var delBtn = document.querySelector('.btn-danger');
+      if (delBtn) { delBtn.textContent = 'Deleting…'; delBtn.disabled = true; }
+
+      // Step 1 — delete from DB (RLS ensures only uploader can do this)
+      sb.from('resources')
+        .delete()
+        .eq('id', r.id)
+        .then(function(dbResult) {
+          if (dbResult.error) {
+            showToast('Could not delete: ' + dbResult.error.message, 'error');
+            if (delBtn) { delBtn.textContent = '🗑 Delete'; delBtn.disabled = false; }
+            return;
+          }
+
+          // Step 2 — delete from Storage (best-effort; DB row is already gone)
+          if (storagePath) {
+            sb.storage.from('resources').remove([storagePath]).then(function(){});
+          }
+
+          showToast('Resource deleted.', 'success');
+          setTimeout(function() { window.location.href = 'browse.html'; }, 1200);
+        });
+    };
+  });
+
+  // Toast
+  function showToast(msg, type) {
+    var container = document.querySelector('.toast-container');
+    if (!container) { container = document.createElement('div'); container.className = 'toast-container'; document.body.appendChild(container); }
+    var icons = { success:'✓', error:'✕', info:'ℹ' };
+    var t = document.createElement('div');
+    t.className = 'toast ' + (type||'info');
+    t.innerHTML = '<span>'+(icons[type]||'ℹ')+'</span> ' + msg;
+    container.appendChild(t);
+    setTimeout(function(){ t.style.opacity='0'; t.style.transition='opacity .3s'; setTimeout(function(){ t.remove(); }, 300); }, 3500);
+  }
+})();
+</script>
+
+<footer>
+  <a href="../index.html" class="footer-logo" style="display:flex;justify-content:center;margin-bottom:8px;cursor:pointer;text-decoration:none"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 110" width="220" height="46" role="img">
+  <title>NaijaLearn</title>
+  <style>@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&amp;family=DM+Sans:wght@500&amp;display=swap');</style>
+  <g transform="translate(20,15)">
+    <rect x="4" y="10" width="34" height="52" rx="5" fill="#3D7A6B"/>
+    <rect x="36" y="10" width="34" height="52" rx="5" fill="#2d6457"/>
+    <rect x="33" y="8" width="10" height="56" rx="4" fill="#1A4A3A"/>
+    <line x1="12" y1="24" x2="30" y2="24" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="33" x2="30" y2="33" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="42" x2="24" y2="42" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="51" x2="28" y2="51" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <circle cx="58" cy="26" r="9" fill="#C8882A"/>
+    <circle cx="58" cy="26" r="4.5" fill="#FAFAF7"/>
+    <line x1="58" y1="34" x2="52" y2="54" stroke="#C8882A" stroke-width="3" stroke-linecap="round"/>
+    <path d="M4 62 Q38 53 38 62 Q38 53 72 62" fill="none" stroke="#5BBDA8" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <text x="114" y="58" font-family="'Playfair Display',Georgia,serif" font-size="46" font-weight="700" letter-spacing="-1"><tspan fill="#FAFAF7">Naija</tspan><tspan fill="#5BBDA8">Learn</tspan></text>
+  <text x="115" y="80" font-family="'DM Sans',Arial,sans-serif" font-size="11" font-weight="500" letter-spacing="2.4" fill="#6B7F8E">EDUCATIONAL RESOURCE LIBRARY</text>
+</svg></a>
+  <div class="footer-tagline">Nigeria's educational resource library — for teachers, parents, and students.</div>
+  <div class="footer-links">
+    <a href="about.html">About</a>
+    <a href="browse.html">Browse</a>
+    <a href="upload.html" title="Share lesson notes, past questions &amp; schemes of work with Nigerian students">Upload</a>
+    <a href="browse.html">Subjects</a>
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="terms.html">Terms</a>
+    <a href="contact.html">Contact</a>
+  </div>
+  <div class="footer-copy">© 2026 NaijaLearn. Built with ❤️ for Nigerian education.</div>
+</footer>
+</div><!-- /suspension-blur-wrap -->
+</body>
+</html>

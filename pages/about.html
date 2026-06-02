@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="About NaijaLearn — Nigeria's structured educational resource library built for teachers, parents, and students.">
+  <title>About Us — NaijaLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/nav-auth.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+  <style>
+    .static-hero {
+      background: linear-gradient(135deg, #0D1B2A 0%, #1A4A3A 100%);
+      padding: 80px 48px 72px;
+      text-align: center;
+      color: #fff;
+    }
+    .static-hero .badge {
+      display: inline-block;
+      background: rgba(91,189,168,.18);
+      color: #5BBDA8;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+    }
+    .static-hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(36px, 5vw, 60px);
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      color: #fff;
+    }
+    .static-hero h1 em { color: #5BBDA8; font-style: normal; }
+    .static-hero p {
+      font-size: 18px;
+      color: rgba(255,255,255,.75);
+      max-width: 580px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+    .static-body {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 72px 32px;
+    }
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--sage);
+      margin-bottom: 10px;
+    }
+    .static-body h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+    .static-body p {
+      font-size: 16px;
+      line-height: 1.8;
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+    .static-body section { margin-bottom: 64px; }
+    .values-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 24px;
+      margin-top: 32px;
+    }
+    .value-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 24px;
+    }
+    .value-icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+    .value-card h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+    .value-card p {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--muted);
+      margin: 0;
+    }
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 24px;
+      margin-top: 32px;
+    }
+    .team-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 20px;
+      text-align: center;
+    }
+    .team-avatar {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin: 0 auto 14px;
+    }
+    .team-card h3 { font-size: 15px; font-weight: 600; color: var(--ink); margin-bottom: 4px; }
+    .team-card p { font-size: 13px; color: var(--muted); margin: 0; }
+    .mission-block {
+      background: linear-gradient(135deg, #E8F4F0, #fff);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--sage);
+      border-radius: 12px;
+      padding: 32px;
+      margin: 32px 0;
+    }
+    .mission-block p {
+      font-size: 18px;
+      line-height: 1.7;
+      color: var(--ink);
+      font-style: italic;
+      margin: 0;
+    }
+    [data-theme="dark"] .mission-block {
+      background: linear-gradient(135deg, #1A3530, #18262F);
+    }
+    [data-theme="dark"] .team-avatar-green { background: #1A3530 !important; }
+    [data-theme="dark"] .team-avatar-gold  { background: #2A2010 !important; }
+    [data-theme="dark"] .team-avatar-blue  { background: #0F1E2A !important; }
+    [data-theme="dark"] .join-section {
+      background: var(--white) !important;
+    }
+    .stat-row {
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+      margin-top: 32px;
+    }
+    .stat-box {
+      flex: 1;
+      min-width: 140px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+    }
+    .stat-box .num {
+      font-family: 'Playfair Display', serif;
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--sage);
+    }
+    .stat-box .lbl { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    @media (max-width: 768px) {
+      .static-hero { padding: 60px 24px; }
+      .static-body { padding: 48px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="../index.html" class="nav-logo" style="display:inline-flex;align-items:center;text-decoration:none"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 110" width="226" height="48" role="img">
+  <title>NaijaLearn</title>
+  <style>@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&amp;family=DM+Sans:wght@500&amp;display=swap');
+    .nl-n{fill:#0D1B2A}.nl-l{fill:#3D7A6B}.nl-t{fill:#6B7F8E}
+    [data-theme="dark"] .nl-n{fill:#FAFAF7}[data-theme="dark"] .nl-l{fill:#5BBDA8}
+  </style>
+  <g transform="translate(20,15)">
+    <rect x="4" y="10" width="34" height="52" rx="5" fill="#3D7A6B"/>
+    <rect x="36" y="10" width="34" height="52" rx="5" fill="#2d6457"/>
+    <rect x="33" y="8" width="10" height="56" rx="4" fill="#1A4A3A"/>
+    <line x1="12" y1="24" x2="30" y2="24" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="33" x2="30" y2="33" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="42" x2="24" y2="42" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="51" x2="28" y2="51" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <circle cx="58" cy="26" r="9" fill="#C8882A"/>
+    <circle cx="58" cy="26" r="4.5" fill="#FAFAF7"/>
+    <line x1="58" y1="34" x2="52" y2="54" stroke="#C8882A" stroke-width="3" stroke-linecap="round"/>
+    <path d="M4 62 Q38 53 38 62 Q38 53 72 62" fill="none" stroke="#5BBDA8" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <text x="114" y="58" font-family="'Playfair Display',Georgia,serif" font-size="46" font-weight="700" letter-spacing="-1"><tspan class="nl-n">Naija</tspan><tspan class="nl-l">Learn</tspan></text>
+  <text x="115" y="80" font-family="'DM Sans',Arial,sans-serif" font-size="11" font-weight="500" letter-spacing="2.4" class="nl-t">EDUCATIONAL RESOURCE LIBRARY</text>
+</svg></a>
+  <div class="nav-links">
+    <a href="browse.html">Browse</a>
+    <a href="upload.html">Upload</a>
+    <a href="about.html" style="color:var(--sage);font-weight:600">About</a>
+    <a href="signin.html" style="color:var(--sage)">Sign In</a>
+    <button class="btn-nav" onclick="window.location.href='signup.html'">Get Started Free</button>
+  </div>
+  <button class="nav-toggle">☰</button>
+</nav>
+
+<!-- HERO -->
+<div class="static-hero">
+  <div class="badge">Our Story</div>
+  <h1>Built for the <em>Nigerian</em><br>classroom.</h1>
+  <p>NaijaLearn was born from a simple frustration — quality lesson materials existed, but were scattered, unstructured, and hard to find. We decided to fix that.</p>
+</div>
+
+<!-- BODY -->
+<div class="static-body">
+
+  <section>
+    <div class="section-label">Our Mission</div>
+    <h2>Every Nigerian student deserves a prepared teacher.</h2>
+    <p>We know what it's like — teachers spending hours searching WhatsApp groups for a lesson note, parents printing resources from shady websites, students going into exams underprepared. NaijaLearn exists to end that.</p>
+    <div class="mission-block">
+      <p>"We believe the future of Nigerian education starts with giving educators the right tools — structured, verified, and accessible to everyone, everywhere in the country."</p>
+    </div>
+    <p>Our platform lets teachers upload and share lesson notes, past questions, and schemes of work, organised by subject, class, term, and week — so anyone can find exactly what they need in seconds.</p>
+  </section>
+
+  <section>
+    <div class="section-label">By the numbers</div>
+    <h2>Growing every day.</h2>
+    <div class="stat-row">
+      <div class="stat-box"><div class="num" id="stat-resources">—</div><div class="lbl">Resources uploaded</div></div>
+      <div class="stat-box"><div class="num" id="stat-teachers">—</div><div class="lbl">Teachers contributing</div></div>
+      <div class="stat-box"><div class="num" id="stat-downloads">—</div><div class="lbl">Total downloads</div></div>
+      <div class="stat-box"><div class="num">36</div><div class="lbl">States covered</div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-label">What we stand for</div>
+    <h2>Our values.</h2>
+    <div class="values-grid">
+      <div class="value-card">
+        <div class="value-icon">🎯</div>
+        <h3>Structure over chaos</h3>
+        <p>Every resource is tagged by subject, class, term, and week — so finding the right note takes seconds, not hours.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">✅</div>
+        <h3>Quality first</h3>
+        <p>Our verification system ensures the resources on NaijaLearn are accurate, curriculum-aligned, and worth your time.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">🤝</div>
+        <h3>Community-driven</h3>
+        <p>Teachers upload, review, and improve each other's work. The platform gets better every time someone contributes.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">🌍</div>
+        <h3>Access for all</h3>
+        <p>Free to browse, free to download. NaijaLearn is for every student and teacher, regardless of school type or location.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">🇳🇬</div>
+        <h3>Built for Nigeria</h3>
+        <p>Designed around the NERDC curriculum, Nigerian school terms, and the realities of teaching and learning in Nigeria — not adapted from elsewhere.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">🔒</div>
+        <h3>Trust and safety</h3>
+        <p>We verify contributors, moderate content, and keep your data private. A platform teachers recommend must be one they can trust completely.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-label">The team</div>
+    <h2>People who care about Nigerian education.</h2>
+    <p>We're a small, passionate team of educators, developers, and parents who have lived the problem firsthand.</p>
+    <div class="team-grid">
+      <div class="team-card">
+        <div class="team-avatar team-avatar-green" style="background:#E8F4F0">📚</div>
+        <h3>Curriculum Team</h3>
+        <p>Educators who verify resources against the NERDC curriculum</p>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar team-avatar-gold" style="background:#FBF3E8">💻</div>
+        <h3>Product Team</h3>
+        <p>Developers building a platform that actually works on Nigerian internet</p>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar team-avatar-blue" style="background:#EDF6FF">🎓</div>
+        <h3>Community Team</h3>
+        <p>Former teachers supporting contributors and growing the library</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="join-section" style="text-align:center;background:var(--white);border:1px solid var(--border);border-radius:20px;padding:48px 32px">
+    <div class="section-label">Join us</div>
+    <h2 style="margin-bottom:12px">Contribute to the library.</h2>
+    <p style="max-width:480px;margin:0 auto 32px">If you're a teacher with great lesson notes, upload them. If you're a parent or student, start browsing. Every download and upload makes the library better for everyone.</p>
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
+      <button class="btn-primary" onclick="window.location.href='upload.html'">Upload a Resource</button>
+      <button class="btn-ghost" onclick="window.location.href='browse.html'">Browse the Library</button>
+    </div>
+  </section>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <a href="../index.html" class="footer-logo" style="display:flex;justify-content:center;margin-bottom:8px;cursor:pointer;text-decoration:none"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 110" width="220" height="46" role="img">
+  <title>NaijaLearn</title>
+  <style>@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&amp;family=DM+Sans:wght@500&amp;display=swap');</style>
+  <g transform="translate(20,15)">
+    <rect x="4" y="10" width="34" height="52" rx="5" fill="#3D7A6B"/>
+    <rect x="36" y="10" width="34" height="52" rx="5" fill="#2d6457"/>
+    <rect x="33" y="8" width="10" height="56" rx="4" fill="#1A4A3A"/>
+    <line x1="12" y1="24" x2="30" y2="24" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="33" x2="30" y2="33" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="42" x2="24" y2="42" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="51" x2="28" y2="51" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <circle cx="58" cy="26" r="9" fill="#C8882A"/>
+    <circle cx="58" cy="26" r="4.5" fill="#FAFAF7"/>
+    <line x1="58" y1="34" x2="52" y2="54" stroke="#C8882A" stroke-width="3" stroke-linecap="round"/>
+    <path d="M4 62 Q38 53 38 62 Q38 53 72 62" fill="none" stroke="#5BBDA8" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <text x="114" y="58" font-family="'Playfair Display',Georgia,serif" font-size="46" font-weight="700" letter-spacing="-1"><tspan fill="#FAFAF7">Naija</tspan><tspan fill="#5BBDA8">Learn</tspan></text>
+  <text x="115" y="80" font-family="'DM Sans',Arial,sans-serif" font-size="11" font-weight="500" letter-spacing="2.4" fill="#6B7F8E">EDUCATIONAL RESOURCE LIBRARY</text>
+</svg></a>
+  <div class="footer-tagline">Nigeria's educational resource library — for teachers, parents, and students.</div>
+  <div class="footer-links">
+    <a href="about.html">About</a>
+    <a href="browse.html">Browse</a>
+    <a href="upload.html">Upload</a>
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="terms.html">Terms</a>
+    <a href="contact.html">Contact</a>
+  </div>
+  <div class="footer-copy">© 2026 NaijaLearn. Built with ❤️ for Nigerian education.</div>
+</footer>
+
+<script>
+  // Load live stats
+  (function() {
+    function whenReady(fn) {
+      if (window._nlSb) { fn(window._nlSb); return; }
+      setTimeout(function(){ whenReady(fn); }, 80);
+    }
+    whenReady(function(sb) {
+      Promise.all([
+        sb.from('resources').select('id,downloads', { count: 'exact', head: false }),
+        sb.from('profiles').select('id', { count: 'exact', head: true })
+      ]).then(function(results) {
+        var resources = results[0].data || [];
+        var userCount = results[1].count || 0;
+        var totalDl   = resources.reduce(function(s,r){ return s+(r.downloads||0); }, 0);
+        document.getElementById('stat-resources').textContent  = resources.length.toLocaleString();
+        document.getElementById('stat-teachers').textContent   = userCount.toLocaleString();
+        document.getElementById('stat-downloads').textContent  = totalDl.toLocaleString();
+      });
+    });
+  })();
+</script>
+</body>
+</html>

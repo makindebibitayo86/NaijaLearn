@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile — NaijaLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/nav-auth.js"></script>
+  <style>
+    .profile-page{max-width:1080px;margin:0 auto;padding:36px 20px 80px}
+    .back-link{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);text-decoration:none;margin-bottom:24px;transition:color .2s}
+    .back-link:hover{color:var(--sage)}
+
+    /* Hero */
+    .profile-hero{background:linear-gradient(135deg,var(--sage) 0%,#2d9e85 60%,#1a7a60 100%);border-radius:20px;padding:36px 40px;margin-bottom:28px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:20px}
+    .profile-hero::before{content:'';position:absolute;top:-60px;right:-60px;width:240px;height:240px;border-radius:50%;background:rgba(255,255,255,.07)}
+    .profile-hero::after{content:'';position:absolute;bottom:-80px;left:30%;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.05)}
+    .hero-left{position:relative;z-index:1;flex:1}
+    .hero-name{font-family:'Playfair Display',serif;font-size:clamp(22px,4vw,32px);color:#fff;font-weight:700;margin-bottom:8px}
+    .hero-role{display:inline-block;background:rgba(255,255,255,.18);color:#fff;font-size:12px;font-weight:600;padding:3px 14px;border-radius:20px;text-transform:capitalize;margin-bottom:10px}
+    .hero-verified-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(200,136,42,.25);border:1px solid rgba(200,136,42,.5);color:#f5c97a;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;margin-left:8px}
+    .hero-bio{font-size:13px;color:rgba(255,255,255,.8);max-width:540px;line-height:1.6;margin-top:10px}
+    .hero-meta{display:flex;flex-wrap:wrap;gap:14px;margin-top:14px}
+    .hero-meta-item{display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,.75)}
+    .hero-meta-item a{color:rgba(255,255,255,.9);text-decoration:none;font-weight:600}
+    .hero-meta-item a:hover{text-decoration:underline}
+    .hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+    .btn-hero-primary{padding:10px 22px;background:#fff;color:var(--sage);border:none;border-radius:40px;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;transition:box-shadow .2s,transform .15s;white-space:nowrap}
+    .btn-hero-primary:hover{box-shadow:0 6px 20px rgba(0,0,0,.2);transform:translateY(-1px)}
+    .btn-hero-ghost{padding:10px 22px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:40px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;transition:background .2s;white-space:nowrap}
+    .btn-hero-ghost:hover{background:rgba(255,255,255,.25)}
+
+    /* ── Avatar ── */
+    .hero-avatar-wrap{position:relative;z-index:1;flex-shrink:0}
+    .hero-avatar{
+      width:90px;height:90px;border-radius:50%;
+      background:var(--gold);color:#fff;
+      font-size:32px;font-weight:700;
+      display:flex;align-items:center;justify-content:center;
+      border:4px solid rgba(255,255,255,.3);
+      overflow:hidden;position:relative;
+      flex-shrink:0;
+    }
+    .hero-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}
+
+    /* Camera overlay (only shown for own profile) */
+    .avatar-upload-btn{
+      position:absolute;inset:0;border-radius:50%;
+      background:rgba(0,0,0,.45);
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      opacity:0;transition:opacity .2s;cursor:pointer;border:none;
+      font-size:11px;font-weight:700;color:#fff;gap:3px;
+    }
+    .hero-avatar-wrap:hover .avatar-upload-btn{opacity:1;}
+    .avatar-upload-btn svg{width:22px;height:22px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    #avatar-file-input{display:none}
+
+    /* Upload progress ring */
+    .avatar-ring{
+      position:absolute;inset:-4px;border-radius:50%;
+      border:4px solid transparent;
+      border-top-color:#fff;
+      animation:spin .8s linear infinite;
+      display:none;
+    }
+    .avatar-uploading .avatar-ring{display:block;}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* Stats */
+    .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px}
+    .stat-card{background:var(--white);border:1px solid var(--border);border-radius:16px;padding:22px 20px;text-align:center;box-shadow:var(--shadow-sm);transition:box-shadow .2s,transform .15s}
+    .stat-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px)}
+    .stat-icon{font-size:22px;margin-bottom:8px}
+    .stat-num{font-size:30px;font-weight:700;color:var(--sage);line-height:1}
+    .stat-lbl{font-size:11px;color:var(--muted);margin-top:4px;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
+
+    /* Grid */
+    .profile-grid{display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start}
+
+    /* Panel */
+    .panel{background:var(--white);border:1px solid var(--border);border-radius:18px;box-shadow:var(--shadow-sm);overflow:hidden;margin-bottom:20px}
+    .panel:last-child{margin-bottom:0}
+    .panel-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid var(--border)}
+    .panel-title{font-size:15px;font-weight:700;color:var(--ink)}
+    .panel-action{font-size:12px;color:var(--sage);font-weight:600;text-decoration:none;cursor:pointer;background:none;border:none;padding:0}
+    .panel-action:hover{text-decoration:underline}
+    .panel-body{padding:20px 24px}
+
+    /* Res items */
+    .res-list{display:flex;flex-direction:column;gap:12px}
+    .res-item{display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:border-color .2s,box-shadow .2s;position:relative}
+    .res-item:hover{border-color:var(--sage-m);box-shadow:var(--shadow-sm)}
+    .res-item-thumb{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+    .res-item-body{flex:1;min-width:0}
+    .res-item-title{font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
+    .res-item-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .meta-pill{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--sage-l);color:var(--sage)}
+    .meta-pill.gold{background:#FBF3E8;color:var(--gold)}
+    .res-item-stat{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:4px;white-space:nowrap}
+    .verified-badge{position:absolute;top:8px;right:8px;font-size:10px;font-weight:700;color:#1D6B56;background:#E8F4F0;border:1px solid var(--sage-m);padding:2px 8px;border-radius:20px}
+    .empty-state{text-align:center;padding:40px 20px}
+    .empty-state .ei{font-size:40px;margin-bottom:12px}
+    .empty-state p{font-size:13px;color:var(--muted)}
+
+    /* About sidebar */
+    .about-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--ink2)}
+    .about-item:last-child{border-bottom:none}
+    .about-icon{font-size:16px;flex-shrink:0;width:22px;text-align:center}
+    .about-item a{color:var(--sage);text-decoration:none;font-weight:600}
+    .about-item a:hover{text-decoration:underline}
+
+    /* Edit panel */
+    .edit-panel{display:none;margin-bottom:20px}
+    .edit-panel.open{display:block}
+    .edit-status{display:none;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:500;margin-bottom:20px}
+    .edit-actions{display:flex;gap:12px;margin-top:24px}
+    .btn-save{padding:12px 28px;background:var(--sage);color:#fff;border:none;border-radius:var(--r);font-size:14px;font-weight:600;cursor:pointer;transition:background .2s}
+    .btn-save:hover{background:var(--sage-d)}
+    .btn-cancel-edit{padding:12px 20px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:var(--r);font-size:14px;cursor:pointer;transition:border-color .2s}
+    .btn-cancel-edit:hover{border-color:var(--muted)}
+
+    /* Photo upload hint strip */
+    .photo-hint{
+      display:flex;align-items:center;gap:10px;
+      background:#E8F4F0;border:1px solid var(--sage-m);border-radius:10px;
+      padding:10px 16px;font-size:12px;color:#1D6B56;font-weight:500;
+      margin-bottom:20px;
+    }
+    .photo-hint svg{width:18px;height:18px;flex-shrink:0;fill:none;stroke:#1D6B56;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+    /* State box */
+    .state-box{text-align:center;padding:100px 20px}
+    .state-box .state-icon{font-size:52px;margin-bottom:18px}
+    .state-box h2{font-size:22px;font-weight:700;color:var(--ink);margin-bottom:8px}
+    .state-box p{font-size:14px;color:var(--muted)}
+    .state-box a{color:var(--sage);font-weight:600;text-decoration:none}
+
+    /* Responsive */
+    @media(max-width:860px){.profile-grid{grid-template-columns:1fr}.profile-hero{flex-direction:column;align-items:flex-start}.hero-avatar-wrap{display:none}}
+    @media(max-width:520px){.profile-page{padding:20px 14px 60px}.profile-hero{padding:24px 20px}.stats-row{gap:10px}.stat-num{font-size:22px}.panel-body,.panel-header{padding:14px 16px}}
+  </style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+</head>
+<body>
+
+<nav>
+  <a href="../index.html" class="nav-logo" style="display:inline-flex;align-items:center;text-decoration:none"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 110" width="226" height="48" role="img">
+  <title>NaijaLearn</title>
+  <style>@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&amp;family=DM+Sans:wght@500&amp;display=swap');
+    .nl-n{fill:#0D1B2A}.nl-l{fill:#3D7A6B}.nl-t{fill:#6B7F8E}
+    [data-theme="dark"] .nl-n{fill:#FAFAF7}[data-theme="dark"] .nl-l{fill:#5BBDA8}
+  </style>
+  <g transform="translate(20,15)">
+    <rect x="4" y="10" width="34" height="52" rx="5" fill="#3D7A6B"/>
+    <rect x="36" y="10" width="34" height="52" rx="5" fill="#2d6457"/>
+    <rect x="33" y="8" width="10" height="56" rx="4" fill="#1A4A3A"/>
+    <line x1="12" y1="24" x2="30" y2="24" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="33" x2="30" y2="33" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="42" x2="24" y2="42" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="51" x2="28" y2="51" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <circle cx="58" cy="26" r="9" fill="#C8882A"/>
+    <circle cx="58" cy="26" r="4.5" fill="#FAFAF7"/>
+    <line x1="58" y1="34" x2="52" y2="54" stroke="#C8882A" stroke-width="3" stroke-linecap="round"/>
+    <path d="M4 62 Q38 53 38 62 Q38 53 72 62" fill="none" stroke="#5BBDA8" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <text x="114" y="58" font-family="'Playfair Display',Georgia,serif" font-size="46" font-weight="700" letter-spacing="-1"><tspan class="nl-n">Naija</tspan><tspan class="nl-l">Learn</tspan></text>
+  <text x="115" y="80" font-family="'DM Sans',Arial,sans-serif" font-size="11" font-weight="500" letter-spacing="2.4" class="nl-t">EDUCATIONAL RESOURCE LIBRARY</text>
+</svg></a>
+  <div class="nav-links">
+    <a href="browse.html" class="nav-browse-tip" title="Search lesson notes, past questions &amp; schemes of work by subject, class, term or type">Browse</a>
+    <a href="upload.html" title="Share lesson notes, past questions &amp; schemes of work with Nigerian students">Upload</a>
+    <a href="signin.html" title="Sign in to your NaijaLearn account to upload, save and download resources" style="color:var(--sage)">Sign In</a>
+    <button class="btn-nav" title="Create a free account to access all resources" onclick="window.location.href='signup.html'">Get Started Free</button>
+  </div>
+  <button class="nav-toggle">☰</button>
+</nav>
+
+<div class="profile-page">
+  <a href="javascript:history.back()" class="back-link">← Back</a>
+  <div id="profile-content">
+    <div class="state-box">
+      <div class="state-icon">⏳</div>
+      <h2>Loading profile…</h2>
+      <p>Please wait.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden file input for avatar upload -->
+<input type="file" id="avatar-file-input" accept="image/jpeg,image/png,image/webp" style="display:none">
+
+<script>
+(function(){
+  var SUBJECT_STYLE = {
+    'Mathematics':        { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', icon:'ti-math-function' },
+    'English Language':   { bg:'#FBF3E8', arc:'#C8882A', dot:'#3D7A6B', icon:'ti-book-2' },
+    'Biology':            { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', icon:'ti-dna' },
+    'Physics':            { bg:'#FBF3E8', arc:'#C8882A', dot:'#3D7A6B', icon:'ti-atom' },
+    'Chemistry':          { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', icon:'ti-flask' },
+    'Civic Education':    { bg:'#FBF3E8', arc:'#C8882A', dot:'#3D7A6B', icon:'ti-building-community' },
+    'Agricultural Science':     { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', icon:'ti-plant' },
+    'Computer Studies':   { bg:'#FBF3E8', arc:'#C8882A', dot:'#3D7A6B', icon:'ti-device-laptop' },
+    'Economics':          { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', icon:'ti-chart-line' },
+    'Geography':          { bg:'#FBF3E8', arc:'#C8882A', dot:'#3D7A6B', icon:'ti-world' },
+    'History':            { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', icon:'ti-books' },
+    'Further Mathematics':{ bg:'#FBF3E8', arc:'#C8882A', dot:'#3D7A6B', icon:'ti-sum' }
+  };
+  var DEFAULT_STYLE = { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', icon:'ti-file-text' };
+
+  function subjectThumbSmall(subject) {
+    var s = SUBJECT_STYLE[subject] || DEFAULT_STYLE;
+    return '<div style="width:52px;height:52px;border-radius:10px;background:'+s.bg+';flex-shrink:0;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center">'
+      + '<svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 52 52">'
+      + '<circle cx="52" cy="52" r="36" fill="none" stroke="'+s.arc+'" stroke-width="10" opacity=".14"/>'
+      + '<circle cx="8" cy="8" r="6" fill="'+s.dot+'" opacity=".2"/>'
+      + '</svg>'
+      + '<i class="ti '+s.icon+'" style="font-size:22px;color:'+s.arc+';position:relative;z-index:1"></i>'
+      + '</div>';
+  }
+
+  function initials(n){return(n||'??').split(' ').slice(0,2).map(function(x){return x[0]||'';}).join('').toUpperCase();}
+  function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  function fmtDate(ts){return ts?new Date(ts).toLocaleDateString('en-NG',{month:'long',year:'numeric'}):''}
+  function setContent(html){document.getElementById('profile-content').innerHTML=html;}
+  function setStatus(msg,type){
+    var bar=document.getElementById('edit-status');if(!bar)return;
+    bar.style.display='block';bar.textContent=msg;
+    var s={error:{bg:'#FEF0F0',color:'#C0392B',border:'#F5C6C6'},success:{bg:'#E8F4F0',color:'#1D6B56',border:'#B8DDD5'},info:{bg:'#EDF6FF',color:'#1A5276',border:'#AED6F1'}}[type]||{};
+    bar.style.background=s.bg;bar.style.color=s.color;bar.style.border='1px solid '+s.border;
+  }
+
+  /* ── Avatar helpers ── */
+  function buildAvatarEl(avatarUrl, name, isOwn){
+    var inner = avatarUrl
+      ? '<img src="'+esc(avatarUrl)+'" alt="'+esc(name)+'" onerror="this.style.display=\'none\'">'
+      : initials(name);
+    var btn = isOwn
+      ? '<button class="avatar-upload-btn" id="avatar-trigger" title="Change photo" aria-label="Upload profile photo">'
+          +'<svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>'
+          +'Change photo'
+          +'</button>'
+        +'<div class="avatar-ring"></div>'
+      : '';
+    return inner + btn;
+  }
+
+  window.openEdit=function(){var p=document.getElementById('edit-panel');if(p){p.classList.add('open');p.scrollIntoView({behavior:'smooth',block:'start'});}};
+  window.closeEdit=function(){var p=document.getElementById('edit-panel');if(p)p.classList.remove('open');};
+
+  window.saveProfile=function(){
+    var sb=window._nlSb;if(!sb)return;
+    var name=(document.getElementById('ep-name')?.value||'').trim();
+    var role=document.getElementById('ep-role')?.value;
+    var bio=(document.getElementById('ep-bio')?.value||'').trim();
+    var location=(document.getElementById('ep-location')?.value||'').trim();
+    var phone=(document.getElementById('ep-phone')?.value||'').trim();
+    var whatsapp=(document.getElementById('ep-whatsapp')?.value||'').trim();
+    var twitter=(document.getElementById('ep-twitter')?.value||'').trim();
+    if(!name)return setStatus('Full name is required.','error');
+    var btn=document.querySelector('.btn-save');
+    if(btn){btn.textContent='Saving…';btn.disabled=true;}
+    setStatus('Saving…','info');
+    sb.auth.getSession().then(function(res){
+      var session=res.data&&res.data.session;
+      if(!session){setStatus('Not signed in.','error');return;}
+      sb.from('profiles').update({full_name:name,role:role,bio:bio||null,location:location||null,phone:phone||null,whatsapp:whatsapp||null,twitter:twitter||null}).eq('id',session.user.id).then(function(result){
+        if(btn){btn.textContent='Save Changes';btn.disabled=false;}
+        if(result.error){setStatus('Error: '+result.error.message,'error');return;}
+        setStatus('✓ Profile updated!','success');
+        setTimeout(function(){window.location.reload();},1400);
+      });
+    });
+  };
+
+  /* ── Avatar upload ── */
+  function initAvatarUpload(userId){
+    var trigger=document.getElementById('avatar-trigger');
+    var fileInput=document.getElementById('avatar-file-input');
+    var avatarEl=document.querySelector('.hero-avatar');
+    if(!trigger||!fileInput||!avatarEl)return;
+
+    trigger.addEventListener('click',function(){fileInput.click();});
+
+    fileInput.addEventListener('change',function(){
+      var file=fileInput.files&&fileInput.files[0];
+      if(!file)return;
+
+      /* Validation */
+      if(file.size>2*1024*1024){
+        alert('Photo must be under 2 MB. Please choose a smaller image.');
+        fileInput.value='';return;
+      }
+      if(!['image/jpeg','image/png','image/webp'].includes(file.type)){
+        alert('Please upload a JPEG, PNG, or WebP image.');
+        fileInput.value='';return;
+      }
+
+      var sb=window._nlSb;if(!sb)return;
+      var ext=file.name.split('.').pop().toLowerCase()||'jpg';
+      var path=userId+'/passport.'+ext; /* object path inside the "avatars" bucket — no bucket prefix */
+
+      /* Show spinner */
+      avatarEl.classList.add('avatar-uploading');
+      trigger.style.display='none';
+
+      sb.storage.from('avatars').upload(path, file, {upsert:true, contentType:file.type})
+        .then(function(uploadRes){
+          if(uploadRes.error){
+            avatarEl.classList.remove('avatar-uploading');
+            trigger.style.display='';
+            alert('Upload failed: '+uploadRes.error.message);
+            return;
+          }
+
+          /* Get public URL */
+          var pubUrl=sb.storage.from('avatars').getPublicUrl(path).data.publicUrl;
+          /* Bust cache with timestamp */
+          pubUrl=pubUrl+(pubUrl.includes('?')?'&':'?')+'t='+Date.now();
+
+          /* Save to profiles table */
+          return sb.from('profiles').update({avatar_url:pubUrl}).eq('id',userId)
+            .then(function(updateRes){
+              avatarEl.classList.remove('avatar-uploading');
+              trigger.style.display='';
+              if(updateRes.error){alert('Saved photo but failed to update profile: '+updateRes.error.message);return;}
+
+              /* Swap UI immediately — no reload needed */
+              var existing=avatarEl.querySelector('img');
+              if(existing){existing.src=pubUrl;}
+              else{
+                /* Remove initials text node */
+                avatarEl.childNodes.forEach(function(n){if(n.nodeType===3)n.remove();});
+                var img=document.createElement('img');
+                img.src=pubUrl;img.alt='Profile photo';
+                avatarEl.insertBefore(img,avatarEl.firstChild);
+              }
+
+              /* Also update edit panel photo hint if present */
+              var hint=document.getElementById('photo-hint-text');
+              if(hint)hint.textContent='Photo uploaded ✓';
+            });
+        })
+        .catch(function(err){
+          avatarEl.classList.remove('avatar-uploading');
+          trigger.style.display='';
+          alert('Unexpected error: '+err.message);
+        });
+
+      fileInput.value=''; /* reset so same file can be re-selected */
+    });
+  }
+
+  function renderProfile(profile,resources,isOwn){
+    document.title=(profile.full_name||'Profile')+' — NaijaLearn';
+    var totalDL=resources.reduce(function(a,r){return a+(r.downloads||0);},0);
+    var verCount=resources.filter(function(r){return r.verified;}).length;
+
+    var verifiedBadge=profile.verified?'<span class="hero-verified-badge">⭐ Verified</span>':'';
+    var heroBio=profile.bio?'<p class="hero-bio">'+esc(profile.bio)+'</p>':'';
+
+    var metaItems='';
+    if(profile.location)metaItems+='<div class="hero-meta-item">📍 '+esc(profile.location)+'</div>';
+    if(profile.phone)metaItems+='<div class="hero-meta-item">📞 <a href="tel:'+esc(profile.phone)+'">'+esc(profile.phone)+'</a></div>';
+    if(profile.whatsapp){var wn=profile.whatsapp.replace(/\D/g,'');metaItems+='<div class="hero-meta-item">💬 <a href="https://wa.me/'+wn+'" target="_blank" rel="noopener">WhatsApp</a></div>';}
+    if(profile.twitter){var th=profile.twitter.replace(/^@/,'');metaItems+='<div class="hero-meta-item">🐦 <a href="https://twitter.com/'+esc(th)+'" target="_blank" rel="noopener">@'+esc(th)+'</a></div>';}
+    metaItems+='<div class="hero-meta-item">📅 Joined '+fmtDate(profile.created_at)+'</div>';
+
+    var heroActions=isOwn
+      ?'<div class="hero-actions">'
+        +'<button class="btn-hero-primary" onclick="openEdit()">✏️ Edit Profile</button>'
+        +'<a href="dashboard.html" class="btn-hero-ghost">⊞ Dashboard</a>'
+        +'</div>'
+      :'';
+
+    /* Avatar HTML */
+    var avatarInner=buildAvatarEl(profile.avatar_url, profile.full_name, isOwn);
+    var hero='<div class="profile-hero">'
+      +'<div class="hero-left">'
+      +'<div class="hero-name">'+esc(profile.full_name)+'</div>'
+      +'<span class="hero-role">'+esc(profile.role||'member')+'</span>'+verifiedBadge
+      +heroBio
+      +(metaItems?'<div class="hero-meta">'+metaItems+'</div>':'')
+      +heroActions
+      +'</div>'
+      +'<div class="hero-avatar-wrap"><div class="hero-avatar">'+avatarInner+'</div></div>'
+      +'</div>';
+
+    var stats='<div class="stats-row">'
+      +'<div class="stat-card"><div class="stat-icon">📚</div><div class="stat-num">'+resources.length+'</div><div class="stat-lbl">Uploads</div></div>'
+      +'<div class="stat-card"><div class="stat-icon">⬇</div><div class="stat-num">'+Number(totalDL).toLocaleString()+'</div><div class="stat-lbl">Downloads</div></div>'
+      +'<div class="stat-card"><div class="stat-icon">✅</div><div class="stat-num">'+verCount+'</div><div class="stat-lbl">Verified</div></div>'
+      +'</div>';
+
+    var PROFILE_PAGE_SIZE = 11;
+    window._allProfileRes = resources;
+    window._profileResShown = 0;
+
+    function renderProfileItem(r) {
+      return '<div class="res-item" onclick="window.location.href=\'resource.html?id='+r.id+'\'">'
+        +(r.verified?'<div class="verified-badge">✓ Verified</div>':'')
+        +subjectThumbSmall(r.subject)
+        +'<div class="res-item-body"><div class="res-item-title">'+esc(r.title)+'</div>'
+        +'<div class="res-item-meta"><span class="meta-pill">'+esc(r.class_level)+'</span><span class="meta-pill">'+esc(r.term)+'</span><span class="meta-pill gold">'+esc(r.type)+'</span></div></div>'
+        +'<div class="res-item-stat">⬇ '+Number(r.downloads||0).toLocaleString()+'</div>'
+        +'</div>';
+    }
+
+    window.showMoreProfileRes = function() {
+      var list = document.getElementById('profile-res-list');
+      var btn  = document.getElementById('profile-show-more');
+      var all  = window._allProfileRes;
+      var shown = window._profileResShown;
+      var next  = all.slice(shown, shown + PROFILE_PAGE_SIZE);
+      next.forEach(function(r) {
+        var wrapper = document.createElement('div');
+        wrapper.innerHTML = renderProfileItem(r);
+        list.appendChild(wrapper.firstChild);
+      });
+      window._profileResShown += next.length;
+      if (window._profileResShown >= all.length) {
+        btn.style.display = 'none';
+      } else {
+        var rem = all.length - window._profileResShown;
+        btn.textContent = 'Show more (' + rem + ' remaining)';
+      }
+    };
+
+    var profileFirstBatch = resources.slice(0, PROFILE_PAGE_SIZE);
+    window._profileResShown = profileFirstBatch.length;
+    var profileHasMore = resources.length > PROFILE_PAGE_SIZE;
+    var profileRemaining = resources.length - PROFILE_PAGE_SIZE;
+
+    var resItems=!resources.length
+      ?'<div class="empty-state"><div class="ei">📂</div><p>No uploads yet.'+(isOwn?'<br><a href="upload.html" style="color:var(--sage);font-weight:600">Upload your first resource →</a>':'')+'</p></div>'
+      :profileFirstBatch.map(renderProfileItem).join('');
+
+    var profileShowMoreBtn = profileHasMore
+      ? '<div style="text-align:center;padding:14px 0 4px">'
+        + '<button id="profile-show-more" onclick="showMoreProfileRes()" style="'
+        + 'background:none;border:1.5px solid var(--primary,#2563eb);color:var(--primary,#2563eb);'
+        + 'border-radius:8px;padding:8px 22px;font-size:0.9rem;font-weight:600;cursor:pointer;'
+        + 'transition:background 0.15s,color 0.15s;" '
+        + 'onmouseover="this.style.background=\'var(--primary,#2563eb)\';this.style.color=\'#fff\'" '
+        + 'onmouseout="this.style.background=\'none\';this.style.color=\'var(--primary,#2563eb)\'">'
+        + 'Show more (' + profileRemaining + ' remaining)'
+        + '</button></div>'
+      : '';
+
+    var uploadsPanel='<div class="panel">'
+      +'<div class="panel-header"><div class="panel-title">📚 Uploaded Resources ('+resources.length+')</div>'
+      +(isOwn?'<a href="upload.html" class="panel-action">＋ Add new</a>':'')
+      +'</div><div class="panel-body"><div class="res-list" id="profile-res-list">'+resItems+'</div>'
+      +profileShowMoreBtn
+      +'</div></div>';
+
+    var aboutItems='';
+    if(profile.location)aboutItems+='<div class="about-item"><span class="about-icon">📍</span>'+esc(profile.location)+'</div>';
+    if(profile.phone)aboutItems+='<div class="about-item"><span class="about-icon">📞</span><a href="tel:'+esc(profile.phone)+'">'+esc(profile.phone)+'</a></div>';
+    if(profile.whatsapp){var wn2=profile.whatsapp.replace(/\D/g,'');aboutItems+='<div class="about-item"><span class="about-icon">💬</span><a href="https://wa.me/'+wn2+'" target="_blank" rel="noopener">WhatsApp</a></div>';}
+    if(profile.twitter){var th2=profile.twitter.replace(/^@/,'');aboutItems+='<div class="about-item"><span class="about-icon">🐦</span><a href="https://twitter.com/'+esc(th2)+'" target="_blank" rel="noopener">@'+esc(th2)+'</a></div>';}
+    aboutItems+='<div class="about-item"><span class="about-icon">📅</span>Joined '+fmtDate(profile.created_at)+'</div>';
+    aboutItems+='<div class="about-item"><span class="about-icon">🎓</span>'+esc(profile.role||'member')+'</div>';
+
+    var sidebarAbout='<div class="panel">'
+      +'<div class="panel-header"><div class="panel-title">About</div></div>'
+      +'<div class="panel-body">'+aboutItems+'</div></div>';
+
+    var editPanel=isOwn
+      ?'<div class="edit-panel panel" id="edit-panel">'
+        +'<div class="panel-header"><div class="panel-title">✏️ Edit Your Profile</div><button class="panel-action" onclick="closeEdit()">✕ Close</button></div>'
+        +'<div class="panel-body">'
+        +'<div id="edit-status" class="edit-status"></div>'
+        /* Photo hint */
+        +'<div class="photo-hint">'
+        +'<svg viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>'
+        +'<span id="photo-hint-text">To update your passport photo, hover over your avatar (top-right of the profile card) and click <strong>Change photo</strong>. JPEG · PNG · WebP · max 2 MB.</span>'
+        +'</div>'
+        +'<div class="form-row">'
+        +'<div class="form-group"><label class="form-label">Full Name <span>*</span></label><input id="ep-name" class="form-input" type="text" value="'+esc(profile.full_name||'')+'" maxlength="80"></div>'
+        +'<div class="form-group"><label class="form-label">Role</label><select id="ep-role" class="form-input">'
+        +'<option value="teacher"'+(profile.role==='teacher'?' selected':'')+'>Teacher</option>'
+        +'<option value="student"'+(profile.role==='student'?' selected':'')+'>Student</option>'
+        +'</select></div></div>'
+        +'<div class="form-group"><label class="form-label">Bio <span style="font-weight:400;color:var(--muted)">(max 300 chars)</span></label><textarea id="ep-bio" class="form-textarea" rows="3" maxlength="300">'+esc(profile.bio||'')+'</textarea></div>'
+        +'<div class="form-row">'
+        +'<div class="form-group"><label class="form-label">Location</label><input id="ep-location" class="form-input" type="text" value="'+esc(profile.location||'')+'" placeholder="e.g. Lagos, Nigeria" maxlength="80"></div>'
+        +'<div class="form-group"><label class="form-label">Phone</label><input id="ep-phone" class="form-input" type="tel" value="'+esc(profile.phone||'')+'" placeholder="08012345678" maxlength="20"></div>'
+        +'</div>'
+        +'<div class="form-row">'
+        +'<div class="form-group"><label class="form-label">WhatsApp</label><input id="ep-whatsapp" class="form-input" type="tel" value="'+esc(profile.whatsapp||'')+'" placeholder="+2348012345678" maxlength="20"></div>'
+        +'<div class="form-group"><label class="form-label">Twitter / X</label><input id="ep-twitter" class="form-input" type="text" value="'+esc(profile.twitter||'')+'" placeholder="@username" maxlength="50"></div>'
+        +'</div>'
+        +'<div class="edit-actions"><button class="btn-save" onclick="saveProfile()">Save Changes</button><button class="btn-cancel-edit" onclick="closeEdit()">Cancel</button></div>'
+        +'</div></div>'
+      :'';
+
+    setContent(editPanel+hero+stats+'<div class="profile-grid"><div>'+uploadsPanel+'</div><div>'+sidebarAbout+'</div></div>');
+
+    /* Wire up avatar upload after DOM is ready */
+    if(isOwn){
+      initAvatarUpload(profile.id);
+    }
+  }
+
+  var profileId=new URLSearchParams(window.location.search).get('id');
+  if(!profileId){
+    setContent('<div class="state-box"><div class="state-icon">🔍</div><h2>No profile specified</h2><p>Click an uploader\'s name on any resource to view their profile.</p></div>');
+    return;
+  }
+
+  function whenReady(fn){if(window._nlSb){fn(window._nlSb);return;}setTimeout(function(){whenReady(fn);},80);}
+
+  whenReady(function(sb){
+    Promise.all([
+      sb.from('profiles').select('id,full_name,role,verified,bio,location,phone,whatsapp,twitter,avatar_url,created_at').eq('id',profileId).single(),
+      sb.from('resources').select('id,title,subject,class_level,term,type,verified,downloads,created_at').eq('uploader_id',profileId).order('created_at',{ascending:false}),
+      sb.auth.getSession()
+    ]).then(function(results){
+      var prof=results[0],res=results[1],session=results[2].data&&results[2].data.session;
+      if(prof.error||!prof.data){
+        setContent('<div class="state-box"><div class="state-icon">👤</div><h2>Profile not found</h2><p>This user may not exist. <a href="browse.html">Browse resources</a>.</p></div>');
+        return;
+      }
+      renderProfile(prof.data,res.data||[],session&&session.user.id===prof.data.id);
+    });
+  });
+})();
+</script>
+<footer>
+  <a href="../index.html" class="footer-logo" style="display:flex;justify-content:center;margin-bottom:8px;cursor:pointer;text-decoration:none"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 110" width="220" height="46" role="img">
+  <title>NaijaLearn</title>
+  <style>@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&amp;family=DM+Sans:wght@500&amp;display=swap');</style>
+  <g transform="translate(20,15)">
+    <rect x="4" y="10" width="34" height="52" rx="5" fill="#3D7A6B"/>
+    <rect x="36" y="10" width="34" height="52" rx="5" fill="#2d6457"/>
+    <rect x="33" y="8" width="10" height="56" rx="4" fill="#1A4A3A"/>
+    <line x1="12" y1="24" x2="30" y2="24" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="33" x2="30" y2="33" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="42" x2="24" y2="42" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="51" x2="28" y2="51" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <circle cx="58" cy="26" r="9" fill="#C8882A"/>
+    <circle cx="58" cy="26" r="4.5" fill="#FAFAF7"/>
+    <line x1="58" y1="34" x2="52" y2="54" stroke="#C8882A" stroke-width="3" stroke-linecap="round"/>
+    <path d="M4 62 Q38 53 38 62 Q38 53 72 62" fill="none" stroke="#5BBDA8" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <text x="114" y="58" font-family="'Playfair Display',Georgia,serif" font-size="46" font-weight="700" letter-spacing="-1"><tspan fill="#FAFAF7">Naija</tspan><tspan fill="#5BBDA8">Learn</tspan></text>
+  <text x="115" y="80" font-family="'DM Sans',Arial,sans-serif" font-size="11" font-weight="500" letter-spacing="2.4" fill="#6B7F8E">EDUCATIONAL RESOURCE LIBRARY</text>
+</svg></a>
+  <div class="footer-tagline">Nigeria's educational resource library — for teachers, parents, and students.</div>
+  <div class="footer-links">
+    <a href="about.html">About</a>
+    <a href="browse.html">Browse</a>
+    <a href="upload.html" title="Share lesson notes, past questions &amp; schemes of work with Nigerian students">Upload</a>
+    <a href="browse.html">Subjects</a>
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="terms.html">Terms</a>
+    <a href="contact.html">Contact</a>
+  </div>
+  <div class="footer-copy">© 2026 NaijaLearn. Built with ❤️ for Nigerian education.</div>
+</footer>
+</body>
+</html>

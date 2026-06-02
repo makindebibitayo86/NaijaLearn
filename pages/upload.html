@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Upload your lesson notes, schemes of work, and past questions to NaijaLearn.">
+  <title>Upload a Resource — NaijaLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../js/nav-auth.js"></script>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="../index.html" class="nav-logo" style="display:inline-flex;align-items:center;text-decoration:none"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 110" width="226" height="48" role="img">
+  <title>NaijaLearn</title>
+  <style>@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&amp;family=DM+Sans:wght@500&amp;display=swap');
+    .nl-n{fill:#0D1B2A}.nl-l{fill:#3D7A6B}.nl-t{fill:#6B7F8E}
+    [data-theme="dark"] .nl-n{fill:#FAFAF7}[data-theme="dark"] .nl-l{fill:#5BBDA8}
+  </style>
+  <g transform="translate(20,15)">
+    <rect x="4" y="10" width="34" height="52" rx="5" fill="#3D7A6B"/>
+    <rect x="36" y="10" width="34" height="52" rx="5" fill="#2d6457"/>
+    <rect x="33" y="8" width="10" height="56" rx="4" fill="#1A4A3A"/>
+    <line x1="12" y1="24" x2="30" y2="24" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="33" x2="30" y2="33" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="42" x2="24" y2="42" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="51" x2="28" y2="51" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <circle cx="58" cy="26" r="9" fill="#C8882A"/>
+    <circle cx="58" cy="26" r="4.5" fill="#FAFAF7"/>
+    <line x1="58" y1="34" x2="52" y2="54" stroke="#C8882A" stroke-width="3" stroke-linecap="round"/>
+    <path d="M4 62 Q38 53 38 62 Q38 53 72 62" fill="none" stroke="#5BBDA8" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <text x="114" y="58" font-family="'Playfair Display',Georgia,serif" font-size="46" font-weight="700" letter-spacing="-1"><tspan class="nl-n">Naija</tspan><tspan class="nl-l">Learn</tspan></text>
+  <text x="115" y="80" font-family="'DM Sans',Arial,sans-serif" font-size="11" font-weight="500" letter-spacing="2.4" class="nl-t">EDUCATIONAL RESOURCE LIBRARY</text>
+</svg></a>
+  <div class="nav-links">
+    <a href="browse.html" class="nav-browse-tip" title="Search lesson notes, past questions &amp; schemes of work by subject, class, term or type">Browse</a>
+    <a href="upload.html" title="Share lesson notes, past questions &amp; schemes of work with Nigerian students" class="active">Upload</a>
+    <a href="signin.html" title="Sign in to your NaijaLearn account to upload, save and download resources" style="color:var(--sage)">Sign In</a>
+    <button class="btn-nav" title="Create a free account to access all resources" onclick="window.location.href='signup.html'">Get Started Free</button>
+  </div>
+  <button class="nav-toggle">☰</button>
+</nav>
+
+<div class="upload-wrapper">
+
+  <div class="upload-page-title">Upload a Resource</div>
+  <div class="upload-page-sub">Share your lesson notes, schemes of work, or past questions with thousands of Nigerian teachers.</div>
+
+  <div class="upload-tip">
+    <strong>✓ Tips for a great upload:</strong><br>    Use a descriptive title (e.g. "SS2 Biology — Excretory System, First Term Week 4") <br>    Choose the correct subject and class level. <br>    Make sure your file is clearly formatted. <br>    Verified resources get 3× more downloads.
+  </div>
+
+  <form id="upload-form" novalidate>
+    <div class="upload-card">
+      <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--ink);margin-bottom:24px">Resource Details</div>
+
+      <div class="form-group">
+        <label class="form-label" for="res-title">Resource Title <span>*</span></label>
+        <input id="res-title" class="form-input" type="text" placeholder="e.g. SS2 Biology — Excretory System Lesson Note">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="res-description">Short Description</label>
+        <textarea id="res-description" class="form-textarea" placeholder="Briefly describe what's covered in this resource…"></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="res-subject">Subject <span>*</span></label>
+          <select id="res-subject" class="filter-select" style="padding:12px 16px">
+            <option value="">Select subject…</option>
+            <optgroup label="🔢 Sciences &amp; Mathematics">
+              <option>Mathematics</option>
+              <option>Further Mathematics</option>
+              <option>Biology</option>
+              <option>Chemistry</option>
+              <option>Physics</option>
+              <option>Agricultural Science</option>
+              <option>Computer Studies</option>
+              <option>Health Science</option>
+              <option>Home Economics</option>
+              <option>Physical Education</option>
+            </optgroup>
+            <optgroup label="📖 Languages &amp; Arts">
+              <option>English Language</option>
+              <option>Literature in English</option>
+              <option>Yoruba Language</option>
+              <option>French</option>
+              <option>Arabic</option>
+              <option>Fine Arts</option>
+              <option>Music</option>
+            </optgroup>
+            <optgroup label="🌍 Social Sciences &amp; Humanities">
+              <option>Economics</option>
+              <option>Geography</option>
+              <option>History</option>
+              <option>Government</option>
+              <option>Civic Education</option>
+              <option>Social Studies</option>
+              <option>Christian Religious Studies</option>
+              <option>Islamic Religious Studies</option>
+            </optgroup>
+            <optgroup label="💼 Vocational &amp; Technical">
+              <option>Technical Drawing</option>
+              <option>Woodwork</option>
+              <option>Metal Work</option>
+              <option>Auto Mechanics</option>
+              <option>Electrical Installation</option>
+              <option>Building Construction</option>
+              <option>Data Processing</option>
+              <option>Food &amp; Nutrition</option>
+              <option>Catering Craft Practice</option>
+              <option>Tourism</option>
+            </optgroup>
+            <optgroup label="📊 Commerce &amp; Business">
+              <option>Commerce</option>
+              <option>Accounting</option>
+              <option>Business Studies</option>
+              <option>Marketing</option>
+              <option>Typewriting</option>
+              <option>Office Practice</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="res-type">Resource Type <span>*</span></label>
+          <select id="res-type" class="filter-select" style="padding:12px 16px">
+            <option value="">Select type…</option>
+            <option value="Lesson Note">Lesson Note</option>
+            <option value="Scheme of Work">Scheme of Work</option>
+            <option value="Past Questions">Past Questions</option>
+            <option value="Activity">Activity / Assignment</option>
+            <option value="Examination">Examination</option>
+            <option value="Textbook Summary">Textbook Summary</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="res-class">Class Level <span>*</span></label>
+          <select id="res-class" class="filter-select" style="padding:12px 16px">
+            <option value="">Select class…</option>
+            <optgroup label="Primary">
+              <option>Primary 1</option><option>Primary 2</option><option>Primary 3</option>
+              <option>Primary 4</option><option>Primary 5</option><option>Primary 6</option>
+            </optgroup>
+            <optgroup label="Junior Secondary">
+              <option>JSS1</option><option>JSS2</option><option>JSS3</option>
+            </optgroup>
+            <optgroup label="Senior Secondary">
+              <option>SS1</option><option>SS2</option><option>SS3</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="res-term">Term <span>*</span></label>
+          <select id="res-term" class="filter-select" style="padding:12px 16px">
+            <option value="">Select term…</option>
+            <option>First Term</option>
+            <option>Second Term</option>
+            <option>Third Term</option>
+            <option>Full Year</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="res-week">Week / Period</label>
+        <select id="res-week" class="filter-select" style="padding:12px 16px">
+          <option value="General">General / Not specific</option>
+          <option value="Week 1">Week 1</option><option value="Week 2">Week 2</option><option value="Week 3">Week 3</option>
+          <option value="Week 4">Week 4</option><option value="Week 5">Week 5</option><option value="Week 6">Week 6</option>
+          <option value="Week 7">Week 7</option><option value="Week 8">Week 8</option><option value="Week 9">Week 9</option>
+          <option value="Week 10">Week 10</option><option value="Exam Prep">Exam Prep</option><option value="Full Term">Full Term</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="upload-card">
+      <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--ink);margin-bottom:24px">Attach File</div>
+
+      <label for="file-input">
+        <div class="dropzone" id="dropzone">
+          <input type="file" id="file-input" accept=".pdf,.doc,.docx,.ppt,.pptx">
+          <div class="dropzone-icon">📄</div>
+          <div class="dropzone-text">Click to upload or drag & drop</div>
+          <div class="dropzone-sub">PDF, Word (.docx), or PowerPoint (.pptx) — max 20MB</div>
+        </div>
+      </label>
+
+      <div id="file-info" style="margin-top:12px"></div>
+    </div>
+
+    <button type="submit" class="btn-full primary" style="margin-bottom:60px">Upload Resource</button>
+  </form>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <a href="../index.html" class="footer-logo" style="display:flex;justify-content:center;margin-bottom:8px;cursor:pointer;text-decoration:none"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 110" width="220" height="46" role="img">
+  <title>NaijaLearn</title>
+  <style>@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&amp;family=DM+Sans:wght@500&amp;display=swap');</style>
+  <g transform="translate(20,15)">
+    <rect x="4" y="10" width="34" height="52" rx="5" fill="#3D7A6B"/>
+    <rect x="36" y="10" width="34" height="52" rx="5" fill="#2d6457"/>
+    <rect x="33" y="8" width="10" height="56" rx="4" fill="#1A4A3A"/>
+    <line x1="12" y1="24" x2="30" y2="24" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="33" x2="30" y2="33" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="42" x2="24" y2="42" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="51" x2="28" y2="51" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <circle cx="58" cy="26" r="9" fill="#C8882A"/>
+    <circle cx="58" cy="26" r="4.5" fill="#FAFAF7"/>
+    <line x1="58" y1="34" x2="52" y2="54" stroke="#C8882A" stroke-width="3" stroke-linecap="round"/>
+    <path d="M4 62 Q38 53 38 62 Q38 53 72 62" fill="none" stroke="#5BBDA8" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <text x="114" y="58" font-family="'Playfair Display',Georgia,serif" font-size="46" font-weight="700" letter-spacing="-1"><tspan fill="#FAFAF7">Naija</tspan><tspan fill="#5BBDA8">Learn</tspan></text>
+  <text x="115" y="80" font-family="'DM Sans',Arial,sans-serif" font-size="11" font-weight="500" letter-spacing="2.4" fill="#6B7F8E">EDUCATIONAL RESOURCE LIBRARY</text>
+</svg></a>
+  <div class="footer-tagline">Nigeria's educational resource library — for teachers, parents, and students.</div>
+  <div class="footer-links">
+    <a href="../index.html">Home</a>
+    <a href="browse.html">Browse</a>
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="terms.html">Terms</a>
+  </div>
+  <div class="footer-copy">© 2026 NaijaLearn. Built with ❤️ for Nigerian education.</div>
+</footer>
+
+
+<script>
+  // Toast helper
+  function showToast(msg, type) {
+    let container = document.querySelector('.toast-container');
+    if (!container) { container = document.createElement('div'); container.className = 'toast-container'; document.body.appendChild(container); }
+    const icons = { success:'✓', error:'✕', info:'ℹ' };
+    const t = document.createElement('div');
+    t.className = `toast ${type}`; t.innerHTML = `<span>${icons[type]||'✓'}</span> ${msg}`;
+    container.appendChild(t);
+    setTimeout(() => { t.style.opacity='0'; t.style.transition='opacity .3s'; setTimeout(()=>t.remove(),300); }, 3500);
+  }
+</script>
+
+<script>
+  var sb = supabase.createClient(
+    'https://elawsqcbiuierkeziywz.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsYXdzcWNiaXVpZXJrZXppeXd6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MDA5NjEsImV4cCI6MjA5NDE3Njk2MX0.2h9hN3zRLPeLVFKeXtwqxv_dWvg6XXFzHXaheK6ZviI'
+  );
+
+  // ── Nav auth handled by nav-auth.js ──
+
+  var selectedFile = null;
+
+  // Auth guard — redirect if not signed in
+  sb.auth.getSession().then(function(result) {
+    if (!result.data || !result.data.session) {
+      showStatus('You must be signed in to upload. Redirecting…', 'error');
+      setTimeout(function() { window.location.href = 'signin.html'; }, 1800);
+    }
+  });
+
+  function showStatus(msg, type) {
+    var bar = document.getElementById('upload-status');
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'upload-status';
+      bar.style.cssText = 'padding:12px 16px;border-radius:10px;font-size:14px;font-weight:500;margin-bottom:16px;text-align:center';
+      var form = document.getElementById('upload-form');
+      form.parentNode.insertBefore(bar, form);
+    }
+    bar.style.display = 'block';
+    bar.textContent = msg;
+    var styles = {
+      error:   { bg: '#FEF0F0', color: '#C0392B', border: '#F5C6C6' },
+      success: { bg: '#E8F4F0', color: '#1D6B56', border: '#B8DDD5' },
+      info:    { bg: '#EDF6FF', color: '#1A5276', border: '#AED6F1' }
+    };
+    var s = styles[type] || styles.info;
+    bar.style.background = s.bg; bar.style.color = s.color; bar.style.border = '1px solid ' + s.border;
+  }
+
+  // Drag & drop
+  var dropzone = document.getElementById('dropzone');
+  var fileInput = document.getElementById('file-input');
+  var fileInfo  = document.getElementById('file-info');
+
+  if (dropzone) {
+    dropzone.addEventListener('click', function() { if (fileInput) fileInput.click(); });
+    dropzone.addEventListener('dragover', function(e) { e.preventDefault(); dropzone.style.borderColor='var(--sage)'; dropzone.style.background='var(--sage-l)'; });
+    dropzone.addEventListener('dragleave', function() { dropzone.style.borderColor=''; dropzone.style.background=''; });
+    dropzone.addEventListener('drop', function(e) { e.preventDefault(); dropzone.style.borderColor=''; dropzone.style.background=''; if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+  }
+  if (fileInput) { fileInput.addEventListener('change', function() { if (fileInput.files[0]) handleFile(fileInput.files[0]); }); }
+
+  function handleFile(file) {
+    var allowed = ['application/pdf','application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-powerpoint',
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation'];
+    if (!allowed.includes(file.type)) return showStatus('Only PDF, Word, or PowerPoint files are allowed.', 'error');
+    if (file.size > 20 * 1024 * 1024) return showStatus('File too large. Maximum 20MB.', 'error');
+    selectedFile = file;
+    var sizeMB = (file.size / (1024*1024)).toFixed(2);
+    fileInfo.innerHTML = '<div style="display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--sage-l);border-radius:10px;border:1px solid var(--sage-m)"><span style="font-size:24px">📄</span><div><div style="font-size:14px;font-weight:600;color:var(--ink)">'+file.name+'</div><div style="font-size:12px;color:var(--muted)">'+sizeMB+' MB</div></div><button onclick="clearFile()" style="margin-left:auto;background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted)">✕</button></div>';
+  }
+
+  window.clearFile = function() { selectedFile = null; if (fileInput) fileInput.value=''; if (fileInfo) fileInfo.innerHTML=''; };
+
+  // Form submit
+  document.getElementById('upload-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    var title    = document.getElementById('res-title').value.trim();
+    var desc     = document.getElementById('res-description') ? document.getElementById('res-description').value.trim() : '';
+    var subject  = document.getElementById('res-subject').value;
+    var classLvl = document.getElementById('res-class').value;
+    var term     = document.getElementById('res-term').value;
+    var week     = document.getElementById('res-week').value;
+    var type     = document.getElementById('res-type') ? document.getElementById('res-type').value : 'Lesson Note';
+    var btn      = document.querySelector('#upload-form button[type="submit"]');
+
+    if (!title)    return showStatus('Please enter a resource title.', 'error');
+    if (!subject)  return showStatus('Please select a subject.', 'error');
+    if (!classLvl) return showStatus('Please select a class level.', 'error');
+    if (!term)     return showStatus('Please select a term.', 'error');
+    // week always has a value (defaults to 'General')
+    if (!selectedFile) return showStatus('Please attach a file (PDF, Word, or PowerPoint).', 'error');
+
+    btn.textContent = 'Uploading…';
+    btn.disabled = true;
+    showStatus('Uploading file, please wait…', 'info');
+
+    sb.auth.getSession().then(function(sessionResult) {
+      var session = sessionResult.data && sessionResult.data.session;
+      if (!session) {
+        showStatus('Session expired. Please sign in again.', 'error');
+        btn.textContent = 'Upload Resource'; btn.disabled = false;
+        return;
+      }
+
+      var uploaderId = session.user.id;
+      var safeName = selectedFile.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+      var storagePath = uploaderId + '/' + Date.now() + '_' + safeName;
+
+      sb.storage.from('resources').upload(storagePath, selectedFile, { cacheControl: '3600', upsert: false })
+      .then(function(storageResult) {
+        if (storageResult.error) throw storageResult.error;
+
+        var publicUrlResult = sb.storage.from('resources').getPublicUrl(storagePath);
+        var fileUrl = publicUrlResult.data.publicUrl;
+
+        return sb.from('resources').insert({
+          title: title,
+          description: desc || null,
+          subject: subject,
+          class_level: classLvl,
+          term: term,
+          week: week,
+          type: type,
+          file_url: fileUrl,
+          file_name: selectedFile.name,
+          file_size: selectedFile.size,
+          uploader_id: uploaderId
+        });
+      })
+      .then(function(dbResult) {
+        if (dbResult.error) throw dbResult.error;
+        // Get the newly inserted row's id
+        return sb.from('resources')
+          .select('id')
+          .eq('uploader_id', uploaderId)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .then(function(idResult) {
+            showStatus('✓ Resource uploaded successfully! Redirecting…', 'success');
+            var newId = idResult.data && idResult.data[0] && idResult.data[0].id;
+            setTimeout(function() {
+              if (newId) {
+                window.location.href = 'resource.html?id=' + newId;
+              } else {
+                window.location.href = 'browse.html';
+              }
+            }, 1400);
+          });
+      })
+      .catch(function(err) {
+        console.error('Upload error:', err);
+        showStatus('Error: ' + (err.message || 'Upload failed. Please try again.'), 'error');
+        btn.textContent = 'Upload Resource';
+        btn.disabled = false;
+      });
+    });
+  });
+</script>
+
+</body>
+</html>

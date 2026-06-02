@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Get Verified — NaijaLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/nav-auth.js"></script>
+
+  <style>
+    .verify-page {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 40px 20px 80px;
+    }
+
+    /* ── Back link ── */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      text-decoration: none;
+      margin-bottom: 28px;
+      transition: color .2s;
+    }
+    .back-link:hover { color: var(--sage); }
+
+    /* ── Page header ── */
+    .verify-header {
+      margin-bottom: 28px;
+    }
+    .verify-badge-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #FBF3E8;
+      border: 1px solid #e8c97a;
+      color: var(--gold);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 4px 14px;
+      border-radius: 20px;
+      margin-bottom: 14px;
+      letter-spacing: .03em;
+      text-transform: uppercase;
+    }
+    .verify-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(22px, 4vw, 30px);
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 10px;
+      line-height: 1.2;
+    }
+    .verify-sub {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    /* ── Benefits strip ── */
+    .benefits-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .benefit-item {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      text-align: center;
+    }
+    .benefit-icon { font-size: 22px; margin-bottom: 6px; }
+    .benefit-text { font-size: 12px; font-weight: 600; color: var(--ink2); line-height: 1.4; }
+
+    /* ── Status cards (shown instead of form when not 'none') ── */
+    .status-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 40px 32px;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+    }
+    .status-card .sc-icon { font-size: 52px; margin-bottom: 16px; }
+    .status-card h2 { font-size: 20px; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+    .status-card p  { font-size: 14px; color: var(--muted); line-height: 1.7; max-width: 380px; margin: 0 auto 24px; }
+    .status-card .sc-date { font-size: 12px; color: var(--muted); margin-top: 12px; }
+
+    .status-pending  { border-color: #e8c97a; background: linear-gradient(135deg,#fdfbf5,#fff); }
+    .status-approved { border-color: var(--sage-m); background: linear-gradient(135deg,#f0faf7,#fff); }
+    .status-rejected { border-color: #f5c6c6; background: linear-gradient(135deg,#fff5f5,#fff); }
+
+    /* ── Form card ── */
+    .form-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 32px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 16px;
+    }
+
+    .form-section-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 18px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* select reuse from upload.html */
+    .form-select {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 14px;
+      font-family: inherit;
+      color: var(--ink);
+      background: var(--white);
+      outline: none;
+      transition: border-color .2s;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7F8E' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+    .form-select:focus { border-color: var(--sage); }
+
+    /* ── Subject checkboxes ── */
+    .subject-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .subj-check {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--ink2);
+      transition: border-color .2s, background .2s;
+      user-select: none;
+    }
+    .subj-check:has(input:checked) {
+      border-color: var(--sage);
+      background: var(--sage-l);
+      color: var(--sage);
+      font-weight: 600;
+    }
+    .subj-check input { accent-color: var(--sage); width: 14px; height: 14px; }
+
+    /* ── Status bar ── */
+    #status-bar {
+      display: none;
+      padding: 13px 18px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+
+    /* ── Submit ── */
+    .btn-submit-verify {
+      width: 100%;
+      padding: 15px;
+      background: var(--gold);
+      color: #fff;
+      border: none;
+      border-radius: var(--r);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: opacity .2s, transform .15s;
+    }
+    .btn-submit-verify:hover:not(:disabled) { opacity: .88; transform: translateY(-1px); }
+    .btn-submit-verify:disabled { opacity: .55; cursor: not-allowed; }
+
+    .disclaimer {
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 12px;
+      line-height: 1.6;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .benefits-strip { grid-template-columns: 1fr 1fr; }
+      .subject-grid   { grid-template-columns: 1fr 1fr; }
+      .form-card      { padding: 20px 16px; }
+    }
+    @media (max-width: 400px) {
+      .benefits-strip { grid-template-columns: 1fr; }
+    }
+
+    /* ── Toast ── */
+    .toast-container {
+      position: fixed; bottom: 24px; right: 24px;
+      z-index: 2000; display: flex; flex-direction: column; gap: 8px;
+    }
+    .toast {
+      padding: 12px 18px; border-radius: 10px;
+      font-size: 13px; font-weight: 500; color: #fff;
+      box-shadow: 0 4px 16px rgba(0,0,0,.18);
+      max-width: 300px;
+    }
+    .toast.success { background: var(--sage); }
+    .toast.error   { background: #e74c3c; }
+    .toast.info    { background: var(--ink2); }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="../index.html" class="nav-logo" style="display:inline-flex;align-items:center;text-decoration:none"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 110" width="226" height="48" role="img">
+  <title>NaijaLearn</title>
+  <style>@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&amp;family=DM+Sans:wght@500&amp;display=swap');
+    .nl-n{fill:#0D1B2A}.nl-l{fill:#3D7A6B}.nl-t{fill:#6B7F8E}
+    [data-theme="dark"] .nl-n{fill:#FAFAF7}[data-theme="dark"] .nl-l{fill:#5BBDA8}
+  </style>
+  <g transform="translate(20,15)">
+    <rect x="4" y="10" width="34" height="52" rx="5" fill="#3D7A6B"/>
+    <rect x="36" y="10" width="34" height="52" rx="5" fill="#2d6457"/>
+    <rect x="33" y="8" width="10" height="56" rx="4" fill="#1A4A3A"/>
+    <line x1="12" y1="24" x2="30" y2="24" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="33" x2="30" y2="33" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="42" x2="24" y2="42" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="51" x2="28" y2="51" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <circle cx="58" cy="26" r="9" fill="#C8882A"/>
+    <circle cx="58" cy="26" r="4.5" fill="#FAFAF7"/>
+    <line x1="58" y1="34" x2="52" y2="54" stroke="#C8882A" stroke-width="3" stroke-linecap="round"/>
+    <path d="M4 62 Q38 53 38 62 Q38 53 72 62" fill="none" stroke="#5BBDA8" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <text x="114" y="58" font-family="'Playfair Display',Georgia,serif" font-size="46" font-weight="700" letter-spacing="-1"><tspan class="nl-n">Naija</tspan><tspan class="nl-l">Learn</tspan></text>
+  <text x="115" y="80" font-family="'DM Sans',Arial,sans-serif" font-size="11" font-weight="500" letter-spacing="2.4" class="nl-t">EDUCATIONAL RESOURCE LIBRARY</text>
+</svg></a>
+  <div class="nav-links">
+    <a href="browse.html">Browse</a>
+    <a href="upload.html">Upload</a>
+    <a href="signin.html" style="color:var(--sage)">Sign In</a>
+    <button class="btn-nav" onclick="window.location.href='signup.html'">Get Started Free</button>
+  </div>
+  <button class="nav-toggle">☰</button>
+</nav>
+
+<div class="verify-page">
+  <a href="javascript:history.back()" class="back-link">← Back to Dashboard</a>
+
+  <div class="verify-header">
+    <div class="verify-badge-label">⭐ Teacher Verification</div>
+    <h1 class="verify-title">Apply for Verified Status</h1>
+    <p class="verify-sub">Verified teachers get a badge on their profile and resources. Your submission will be reviewed within 2–3 business days.</p>
+  </div>
+
+  <div class="benefits-strip">
+    <div class="benefit-item">
+      <div class="benefit-icon">🏅</div>
+      <div class="benefit-text">Verified badge on your profile & resources</div>
+    </div>
+    <div class="benefit-item">
+      <div class="benefit-icon">🔼</div>
+      <div class="benefit-text">Resources ranked higher in search results</div>
+    </div>
+    <div class="benefit-item">
+      <div class="benefit-icon">💬</div>
+      <div class="benefit-text">Increased trust from parents & students</div>
+    </div>
+  </div>
+
+  <!-- Dynamic content injected here -->
+  <div id="verify-root">
+    <div style="text-align:center;padding:60px 0;color:var(--muted)">
+      <div style="font-size:36px;margin-bottom:12px">⏳</div>
+      <div>Loading…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+
+  var SUPABASE_URL  = 'https://elawsqcbiuierkeziywz.supabase.co';
+  var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsYXdzcWNiaXVpZXJrZXppeXd6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MDA5NjEsImV4cCI6MjA5NDE3Njk2MX0.2h9hN3zRLPeLVFKeXtwqxv_dWvg6XXFzHXaheK6ZviI';
+
+  var SUBJECTS = [
+    'Mathematics','English Language','Biology','Physics','Chemistry',
+    'Civic Education','Agricultural Science','Computer Studies','Economics',
+    'Geography','History','Further Mathematics'
+  ];
+
+  var NG_STATES = [
+    'Abia','Adamawa','Akwa Ibom','Anambra','Bauchi','Bayelsa','Benue','Borno',
+    'Cross River','Delta','Ebonyi','Edo','Ekiti','Enugu','FCT (Abuja)','Gombe',
+    'Imo','Jigawa','Kaduna','Kano','Katsina','Kebbi','Kogi','Kwara','Lagos',
+    'Nasarawa','Niger','Ogun','Ondo','Osun','Oyo','Plateau','Rivers','Sokoto',
+    'Taraba','Yobe','Zamfara'
+  ];
+
+  function setStatus(msg, type) {
+    var bar = document.getElementById('status-bar');
+    if (!bar) return;
+    bar.style.display = 'block';
+    bar.textContent = msg;
+    var styles = {
+      error:   { bg: '#FEF0F0', color: '#C0392B', border: '#F5C6C6' },
+      success: { bg: '#E8F4F0', color: '#1D6B56', border: '#B8DDD5' },
+      info:    { bg: '#EDF6FF', color: '#1A5276', border: '#AED6F1' }
+    };
+    var s = styles[type] || styles.info;
+    bar.style.background = s.bg;
+    bar.style.color = s.color;
+    bar.style.border = '1px solid ' + s.border;
+  }
+
+  function fmtDate(ts) {
+    if (!ts) return '';
+    return new Date(ts).toLocaleDateString('en-NG', { day:'numeric', month:'long', year:'numeric' });
+  }
+
+  function showToast(msg, type) {
+    var container = document.querySelector('.toast-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.className = 'toast-container';
+      document.body.appendChild(container);
+    }
+    var toast = document.createElement('div');
+    toast.className = 'toast ' + (type || 'info');
+    toast.textContent = msg;
+    container.appendChild(toast);
+    setTimeout(function() {
+      toast.style.transition = 'opacity .4s';
+      toast.style.opacity = '0';
+      setTimeout(function() { toast.remove(); }, 420);
+    }, 4000);
+  }
+
+  /* ── Status cards (shown when a submission already exists) ── */
+  function renderStatus(profile) {
+    var st = profile.verification_status;
+    var root = document.getElementById('verify-root');
+
+    if (st === 'pending') {
+      root.innerHTML =
+        '<div class="status-card status-pending">'
+        + '<div class="sc-icon">⏳</div>'
+        + '<h2>Verification Under Review</h2>'
+        + '<p>We\'ve received your application and are reviewing your details. You\'ll be notified once a decision is made — usually within 2–3 business days.</p>'
+        + '<div class="sc-date">Submitted on ' + fmtDate(profile.verification_submitted_at) + '</div>'
+        + '</div>';
+      return;
+    }
+
+    if (st === 'approved') {
+      root.innerHTML =
+        '<div class="status-card status-approved">'
+        + '<div class="sc-icon">✅</div>'
+        + '<h2>You\'re Verified!</h2>'
+        + '<p>Your account has been verified. Your resources now carry the Verified badge and appear higher in search results. Thank you for contributing to Nigerian education.</p>'
+        + '<a href="dashboard.html" class="btn-verify" style="display:inline-block;padding:10px 28px;background:var(--sage);color:#fff;border-radius:30px;font-size:13px;font-weight:700;text-decoration:none">Back to Dashboard</a>'
+        + '</div>';
+      return;
+    }
+
+    if (st === 'rejected') {
+      root.innerHTML =
+        '<div class="status-card status-rejected">'
+        + '<div class="sc-icon">❌</div>'
+        + '<h2>Application Not Approved</h2>'
+        + '<p>Unfortunately we couldn\'t verify your details this time. Please double-check your information and submit again, or contact us at <a href="mailto:hello@naijalearn.ng" style="color:var(--sage)">hello@naijalearn.ng</a> if you think this is a mistake.</p>'
+        + '<button onclick="startReapply()" class="btn-submit-verify" style="width:auto;padding:10px 28px;margin-top:8px;background:var(--gold)">Re-apply</button>'
+        + '</div>';
+      return;
+    }
+
+    // st === 'none' — render the form
+    renderForm(profile, window._nlSb);
+  }
+
+  /* ── The submission form ── */
+  function renderForm(profile, sb, prefill) {
+    var stateOptions = NG_STATES.map(function(s) {
+      return '<option value="' + s + '">' + s + '</option>';
+    }).join('');
+
+    var subjectChecks = SUBJECTS.map(function(s) {
+      return '<label class="subj-check"><input type="checkbox" name="subjects" value="' + s + '"> ' + s + '</label>';
+    }).join('');
+
+    document.getElementById('verify-root').innerHTML =
+      '<div id="status-bar"></div>'
+
+      /* Section 1 – School details */
+      + '<div class="form-card">'
+      + '<div class="form-section-label">🏫 School Details</div>'
+
+      + '<div class="form-group">'
+      + '<label class="form-label" for="school-name">School Name <span>*</span></label>'
+      + '<input id="school-name" class="form-input" type="text" placeholder="e.g. Lagos Model College, Meiran">'
+      + '</div>'
+
+      + '<div class="form-row">'
+      + '<div class="form-group">'
+      + '<label class="form-label" for="school-state">State <span>*</span></label>'
+      + '<select id="school-state" class="form-select"><option value="">Select state</option>' + stateOptions + '</select>'
+      + '</div>'
+      + '<div class="form-group">'
+      + '<label class="form-label" for="school-type">School Type <span>*</span></label>'
+      + '<select id="school-type" class="form-select">'
+      + '<option value="">Select type</option>'
+      + '<option>Public Primary</option><option>Private Primary</option>'
+      + '<option>Public Secondary (JSS)</option><option>Private Secondary (JSS)</option>'
+      + '<option>Public Secondary (SSS)</option><option>Private Secondary (SSS)</option>'
+      + '<option>Combined (Primary + Secondary)</option>'
+      + '</select>'
+      + '</div>'
+      + '</div>'
+
+      + '<div class="form-group">'
+      + '<label class="form-label" for="school-lga">LGA / City</label>'
+      + '<input id="school-lga" class="form-input" type="text" placeholder="e.g. Alimosho">'
+      + '</div>'
+      + '</div>'
+
+      /* Section 2 – Teaching experience */
+      + '<div class="form-card">'
+      + '<div class="form-section-label">📚 Teaching Experience</div>'
+
+      + '<div class="form-row">'
+      + '<div class="form-group">'
+      + '<label class="form-label" for="years-exp">Years of Experience <span>*</span></label>'
+      + '<select id="years-exp" class="form-select">'
+      + '<option value="">Select range</option>'
+      + '<option>Less than 1 year</option><option>1–2 years</option>'
+      + '<option>3–5 years</option><option>6–10 years</option>'
+      + '<option>More than 10 years</option>'
+      + '</select>'
+      + '</div>'
+      + '<div class="form-group">'
+      + '<label class="form-label" for="qualification">Highest Qualification <span>*</span></label>'
+      + '<select id="qualification" class="form-select">'
+      + '<option value="">Select</option>'
+      + '<option>NCE</option><option>B.Ed</option><option>B.Sc / B.A (with PGDE)</option>'
+      + '<option>M.Ed / M.Sc</option><option>Ph.D</option><option>Other</option>'
+      + '</select>'
+      + '</div>'
+      + '</div>'
+
+      + '<div class="form-group">'
+      + '<label class="form-label">Subjects You Teach <span>*</span></label>'
+      + '<div class="subject-grid">' + subjectChecks + '</div>'
+      + '</div>'
+
+      + '</div>'
+
+      /* Section 3 – Identity */
+      + '<div class="form-card">'
+      + '<div class="form-section-label">🪪 Identity Confirmation</div>'
+
+      + '<div class="form-group">'
+      + '<label class="form-label" for="id-type">Form of Identification <span>*</span></label>'
+      + '<select id="id-type" class="form-select">'
+      + '<option value="">Select</option>'
+      + '<option>NIN (National Identity Number)</option>'
+      + '<option>Staff ID Card</option>'
+      + '<option>Teaching Registration Council (TRCN) Number</option>'
+      + '<option>WAEC/NECO Certificate</option>'
+      + '<option>University Degree Certificate</option>'
+      + '</select>'
+      + '</div>'
+
+      + '<div class="form-group">'
+      + '<label class="form-label" for="id-value">ID Number / Reference <span>*</span></label>'
+      + '<input id="id-value" class="form-input" type="text" placeholder="Enter the number or reference on your chosen ID">'
+      + '</div>'
+
+      + '<div class="form-group">'
+      + '<label class="form-label" for="extra-notes">Anything else you\'d like us to know?</label>'
+      + '<textarea id="extra-notes" class="form-textarea" placeholder="Optional — share any additional context about your teaching role."></textarea>'
+      + '</div>'
+
+      + '</div>'
+
+      /* Submit */
+      + '<button id="submit-btn" class="btn-submit-verify" onclick="submitVerification()">Submit Verification Request</button>'
+      + '<p class="disclaimer">We do not store copies of any official documents. Your information is used only to verify your teaching status and is covered by our Privacy Policy.</p>';
+
+    // Pre-fill fields when re-applying with previous data
+    if (prefill && typeof prefill === 'object') {
+      function setVal(id, val) {
+        var el = document.getElementById(id);
+        if (el && val != null) el.value = val;
+      }
+      setVal('school-name',  prefill.school_name);
+      setVal('school-state', prefill.school_state);
+      setVal('school-type',  prefill.school_type);
+      setVal('school-lga',   prefill.school_lga);
+      setVal('years-exp',    prefill.years_exp);
+      setVal('qualification',prefill.qualification);
+      setVal('id-type',      prefill.id_type);
+      setVal('id-value',     prefill.id_value);
+      setVal('extra-notes',  prefill.extra_notes);
+      // Tick the previously chosen subjects
+      if (Array.isArray(prefill.subjects)) {
+        document.querySelectorAll('input[name="subjects"]').forEach(function(cb) {
+          cb.checked = prefill.subjects.indexOf(cb.value) !== -1;
+        });
+      }
+      // Change submit label to reflect resubmission
+      var btn = document.getElementById('submit-btn');
+      if (btn) btn.textContent = 'Resubmit Verification Request';
+    }
+  }
+
+  /* ── Reapply: fetch previous data, show pre-filled form ── */
+  window.startReapply = function () {
+    var sb = window._nlSb;
+    sb.auth.getSession().then(function(result) {
+      var session = result.data && result.data.session;
+      if (!session) return;
+      sb.from('profiles')
+        .select('verification_data')
+        .eq('id', session.user.id)
+        .single()
+        .then(function(res) {
+          var prefill = (res.data && res.data.verification_data) || null;
+          window._nlReapply = true;   // flag submitVerification to UPDATE instead of RPC
+          renderForm(window._nlProfile, sb, prefill);
+        });
+    });
+  };
+
+  /* ── Form submission ── */
+  window.submitVerification = function () {
+    var sb = window._nlSb;
+
+    var schoolName  = (document.getElementById('school-name')?.value || '').trim();
+    var schoolState = document.getElementById('school-state')?.value || '';
+    var schoolType  = document.getElementById('school-type')?.value || '';
+    var schoolLga   = (document.getElementById('school-lga')?.value || '').trim();
+    var yearsExp    = document.getElementById('years-exp')?.value || '';
+    var qualification = document.getElementById('qualification')?.value || '';
+    var idType      = document.getElementById('id-type')?.value || '';
+    var idValue     = (document.getElementById('id-value')?.value || '').trim();
+    var extraNotes  = (document.getElementById('extra-notes')?.value || '').trim();
+
+    var subjects = Array.from(document.querySelectorAll('input[name="subjects"]:checked'))
+                        .map(function(el){ return el.value; });
+
+    if (!schoolName)   return setStatus('Please enter your school name.', 'error');
+    if (!schoolState)  return setStatus('Please select your state.', 'error');
+    if (!schoolType)   return setStatus('Please select your school type.', 'error');
+    if (!yearsExp)     return setStatus('Please select your years of experience.', 'error');
+    if (!qualification) return setStatus('Please select your qualification.', 'error');
+    if (!subjects.length) return setStatus('Please select at least one subject you teach.', 'error');
+    if (!idType)       return setStatus('Please select a form of identification.', 'error');
+    if (!idValue)      return setStatus('Please enter your ID number or reference.', 'error');
+
+    var btn = document.getElementById('submit-btn');
+    btn.textContent = 'Submitting…';
+    btn.disabled = true;
+    setStatus('Submitting your application, please wait…', 'info');
+
+    var payload = {
+      school_name:    schoolName,
+      school_state:   schoolState,
+      school_type:    schoolType,
+      school_lga:     schoolLga || null,
+      years_exp:      yearsExp,
+      qualification:  qualification,
+      subjects:       subjects,
+      id_type:        idType,
+      id_value:       idValue,
+      extra_notes:    extraNotes || null
+    };
+
+    // Reapply path: UPDATE the existing profile row directly
+    if (window._nlReapply) {
+      sb.auth.getSession().then(function(sessionResult) {
+        var session = sessionResult.data && sessionResult.data.session;
+        if (!session) {
+          setStatus('Session expired. Please sign in again.', 'error');
+          btn.textContent = 'Resubmit Verification Request';
+          btn.disabled = false;
+          return;
+        }
+        sb.from('profiles')
+          .update({
+            verification_status: 'pending',
+            verification_data: payload,
+            verification_submitted_at: new Date().toISOString()
+          })
+          .eq('id', session.user.id)
+          .then(function(result) {
+            if (result.error) {
+              setStatus('Error: ' + result.error.message, 'error');
+              btn.textContent = 'Resubmit Verification Request';
+              btn.disabled = false;
+              return;
+            }
+            window._nlReapply = false;
+            showToast('Resubmission sent — we\'ll review your application shortly.', 'success');
+            var fakeProfile = {
+              verification_status: 'pending',
+              verification_submitted_at: new Date().toISOString()
+            };
+            renderStatus(fakeProfile);
+          })
+          .catch(function(err) {
+            setStatus('Something went wrong. Please try again.', 'error');
+            btn.textContent = 'Resubmit Verification Request';
+            btn.disabled = false;
+          });
+      });
+      return;
+    }
+
+    // First-time submission path
+    sb.rpc('submit_verification', { payload: payload })
+      .then(function(result) {
+        if (result.error) {
+          setStatus('Error: ' + result.error.message, 'error');
+          btn.textContent = 'Submit Verification Request';
+          btn.disabled = false;
+          return;
+        }
+        // Show pending state
+        var fakeProfile = {
+          verification_status: 'pending',
+          verification_submitted_at: new Date().toISOString()
+        };
+        renderStatus(fakeProfile);
+      })
+      .catch(function(err) {
+        setStatus('Something went wrong. Please try again.', 'error');
+        btn.textContent = 'Submit Verification Request';
+        btn.disabled = false;
+      });
+  };
+
+  /* ── Boot ── */
+  function whenReady(fn) {
+    if (window._nlSb) { fn(window._nlSb); return; }
+    setTimeout(function(){ whenReady(fn); }, 80);
+  }
+
+  whenReady(function(sb) {
+    sb.auth.getSession().then(function(result) {
+      var session = result.data && result.data.session;
+
+      if (!session) {
+        document.getElementById('verify-root').innerHTML =
+          '<div style="text-align:center;padding:60px 20px">'
+          + '<div style="font-size:48px;margin-bottom:16px">🔒</div>'
+          + '<h2 style="font-size:20px;font-weight:700;color:var(--ink);margin-bottom:8px">Sign in to apply</h2>'
+          + '<p style="font-size:14px;color:var(--muted);margin-bottom:20px">You need an account to apply for verification.</p>'
+          + '<a href="signin.html?next=verify.html" style="display:inline-block;padding:10px 28px;background:var(--sage);color:#fff;border-radius:30px;font-size:13px;font-weight:700;text-decoration:none">Sign In</a>'
+          + '</div>';
+        return;
+      }
+
+      sb.from('profiles')
+        .select('id,full_name,role,verified,verification_status,verification_submitted_at,verification_data')
+        .eq('id', session.user.id)
+        .single()
+        .then(function(result) {
+          if (result.error || !result.data) {
+            document.getElementById('verify-root').innerHTML =
+              '<div style="text-align:center;padding:40px"><p style="color:var(--muted)">Could not load your profile. <a href="signin.html" style="color:var(--sage)">Try signing in again.</a></p></div>';
+            return;
+          }
+
+          var profile = result.data;
+          window._nlProfile = profile; // so re-apply button can call renderForm
+
+          // Already verified via backend? Treat as approved
+          if (profile.verified && profile.verification_status !== 'approved') {
+            profile.verification_status = 'approved';
+          }
+
+          renderStatus(profile);
+        });
+    });
+  });
+
+})();
+</script>
+
+<footer>
+  <a href="../index.html" class="footer-logo" style="display:flex;justify-content:center;margin-bottom:8px;cursor:pointer;text-decoration:none"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 110" width="220" height="46" role="img">
+  <title>NaijaLearn</title>
+  <style>@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&amp;family=DM+Sans:wght@500&amp;display=swap');</style>
+  <g transform="translate(20,15)">
+    <rect x="4" y="10" width="34" height="52" rx="5" fill="#3D7A6B"/>
+    <rect x="36" y="10" width="34" height="52" rx="5" fill="#2d6457"/>
+    <rect x="33" y="8" width="10" height="56" rx="4" fill="#1A4A3A"/>
+    <line x1="12" y1="24" x2="30" y2="24" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="33" x2="30" y2="33" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="42" x2="24" y2="42" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="51" x2="28" y2="51" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <circle cx="58" cy="26" r="9" fill="#C8882A"/>
+    <circle cx="58" cy="26" r="4.5" fill="#FAFAF7"/>
+    <line x1="58" y1="34" x2="52" y2="54" stroke="#C8882A" stroke-width="3" stroke-linecap="round"/>
+    <path d="M4 62 Q38 53 38 62 Q38 53 72 62" fill="none" stroke="#5BBDA8" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <text x="114" y="58" font-family="'Playfair Display',Georgia,serif" font-size="46" font-weight="700" letter-spacing="-1"><tspan fill="#FAFAF7">Naija</tspan><tspan fill="#5BBDA8">Learn</tspan></text>
+  <text x="115" y="80" font-family="'DM Sans',Arial,sans-serif" font-size="11" font-weight="500" letter-spacing="2.4" fill="#6B7F8E">EDUCATIONAL RESOURCE LIBRARY</text>
+</svg></a>
+  <div class="footer-tagline">Nigeria's educational resource library — for teachers, parents, and students.</div>
+  <div class="footer-links">
+    <a href="about.html">About</a>
+    <a href="browse.html">Browse</a>
+    <a href="upload.html">Upload</a>
+    <a href="browse.html">Subjects</a>
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="terms.html">Terms</a>
+    <a href="contact.html">Contact</a>
+  </div>
+  <div class="footer-copy">© 2026 NaijaLearn. Built with ❤️ for Nigerian education.</div>
+</footer>
+</body>
+</html>

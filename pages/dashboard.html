@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — NaijaLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="../js/nav-auth.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+
+  <style>
+    /* ══════════════════════════════════════════
+       LAYOUT
+    ══════════════════════════════════════════ */
+    .dash-page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 36px 20px 88px;
+    }
+
+    /* ══════════════════════════════════════════
+       LOADING / AUTH STATES
+    ══════════════════════════════════════════ */
+    .state-box {
+      text-align: center;
+      padding: 100px 20px;
+    }
+    .state-box .state-icon { font-size: 52px; margin-bottom: 18px; }
+    .state-box h2 { font-size: 22px; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+    .state-box p  { font-size: 14px; color: var(--muted); }
+    .state-box a  { color: var(--sage); font-weight: 600; text-decoration: none; }
+
+    /* ══════════════════════════════════════════
+       HERO — PROTECTED, ONLY ENHANCED
+    ══════════════════════════════════════════ */
+    .dash-hero {
+      background: linear-gradient(135deg, #2D6A55 0%, #3D8C6E 40%, #2A7A5E 75%, #1E5E46 100%);
+      border-radius: 22px;
+      padding: 40px 44px;
+      margin-bottom: 22px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      box-shadow: 0 8px 32px rgba(45,106,85,.35), 0 2px 8px rgba(0,0,0,.12);
+      transition: background 0.5s ease, box-shadow 0.5s ease;
+    }
+
+    /* NEW: dot-grid texture (from reference) */
+    .dash-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,.045) 1px, transparent 1px);
+      background-size: 22px 22px;
+      pointer-events: none;
+    }
+
+    /* NEW: large decorative ring (from reference) */
+    .dash-hero::after {
+      content: '';
+      position: absolute;
+      top: -70px; right: -70px;
+      width: 280px; height: 280px;
+      border-radius: 50%;
+      border: 44px solid rgba(255,255,255,.045);
+      pointer-events: none;
+    }
+
+    /* NEW: second decorative circle */
+    .hero-circle-2 {
+      position: absolute;
+      bottom: -90px; left: 28%;
+      width: 200px; height: 200px;
+      border-radius: 50%;
+      background: rgba(91,189,168,.06);
+      pointer-events: none;
+    }
+
+    .hero-left { position: relative; z-index: 1; }
+
+    /* NEW: greeting chip (from reference) */
+    .hero-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(91,189,168,.15);
+      border: 0.5px solid rgba(91,189,168,.32);
+      color: #7DCCBC;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 3px 11px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+      letter-spacing: .03em;
+      transition: background 0.5s ease, border-color 0.5s ease, color 0.5s ease;
+    }
+
+    /* PRESERVED: hero-greeting kept as fallback for JS-rendered greeting text */
+    .hero-greeting {
+      font-size: 13px;
+      color: rgba(255,255,255,.6);
+      font-weight: 500;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    /* PRESERVED: same font + clamp sizing */
+    .hero-name {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(24px, 4vw, 34px);
+      color: #fff;
+      font-weight: 700;
+      margin-bottom: 6px;
+      line-height: 1.2;
+      transition: color 0.5s ease;
+    }
+    .hero-name span { color: #5BBDA8; transition: color 0.5s ease; }
+
+    /* NEW: subtitle line */
+    .hero-sub {
+      font-size: 13px;
+      color: rgba(255,255,255,.45);
+      margin-bottom: 18px;
+      font-weight: 400;
+      transition: color 0.5s ease;
+    }
+
+    /* PRESERVED: role badge */
+    .hero-role {
+      display: inline-block;
+      background: rgba(255,255,255,.12);
+      color: rgba(255,255,255,.8);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 12px;
+      border-radius: 20px;
+      text-transform: capitalize;
+      margin-right: 6px;
+      border: 0.5px solid rgba(255,255,255,.18);
+      transition: background 0.5s ease, border-color 0.5s ease, color 0.5s ease;
+    }
+
+    /* PRESERVED: verified badge */
+    .hero-verified {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(200,136,42,.18);
+      border: 0.5px solid rgba(200,136,42,.38);
+      color: #f5c97a;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 11px;
+      border-radius: 20px;
+    }
+
+    /* PRESERVED: hero actions container */
+    .hero-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+      z-index: 1;
+      flex-shrink: 0;
+    }
+
+    /* PRESERVED: primary CTA — enhanced shadow */
+    .btn-hero-primary {
+      padding: 12px 26px;
+      background: #fff;
+      color: #1A4A3A;
+      border: none;
+      border-radius: 40px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: box-shadow .2s, transform .15s, background 0.5s ease, color 0.5s ease;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .btn-hero-primary:hover { box-shadow: 0 8px 24px rgba(0,0,0,.28); transform: translateY(-2px); }
+
+    /* PRESERVED: ghost CTA */
+    .btn-hero-ghost {
+      padding: 12px 26px;
+      background: rgba(255,255,255,.09);
+      color: rgba(255,255,255,.88);
+      border: 0.5px solid rgba(255,255,255,.24);
+      border-radius: 40px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background .2s, border-color .2s, color 0.5s ease;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .btn-hero-ghost:hover { background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.38); }
+
+    /* ══════════════════════════════════════════
+       STATS ROW — ENHANCED
+    ══════════════════════════════════════════ */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .stat-card {
+      background: var(--white);
+      border: 0.5px solid var(--border);
+      border-radius: 16px;
+      padding: 20px 18px 16px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow .2s, transform .15s;
+    }
+    .stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-3px); }
+
+    /* NEW: colored corner accent (from reference) */
+    .stat-card-corner {
+      position: absolute;
+      top: 0; right: 0;
+      width: 68px; height: 68px;
+      border-radius: 0 16px 0 68px;
+      pointer-events: none;
+    }
+    .stat-card:nth-child(1) .stat-card-corner { background: #3D7A6B; opacity: .07; }
+    .stat-card:nth-child(2) .stat-card-corner { background: #2471A3; opacity: .07; }
+    .stat-card:nth-child(3) .stat-card-corner { background: #27ae60; opacity: .07; }
+    .stat-card:nth-child(4) .stat-card-corner { background: #C8882A; opacity: .07; }
+
+    /* NEW: icon container (from reference) */
+    .stat-icon-wrap {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+      font-size: 17px;
+    }
+    .stat-card:nth-child(1) .stat-icon-wrap { background: #E8F4F0; color: #3D7A6B; }
+    .stat-card:nth-child(2) .stat-icon-wrap { background: #EBF5FB; color: #2471A3; }
+    .stat-card:nth-child(3) .stat-icon-wrap { background: #EAFAF1; color: #27ae60; }
+    .stat-card:nth-child(4) .stat-icon-wrap { background: #FBF3E8; color: #C8882A; }
+
+    .stat-num {
+      font-size: 30px;
+      font-weight: 600;
+      color: var(--ink);
+      line-height: 1;
+      margin-bottom: 3px;
+    }
+    .stat-lbl {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* NEW: trend badge */
+    .stat-trend {
+      position: absolute;
+      bottom: 13px; right: 13px;
+      font-size: 11px;
+      font-weight: 500;
+      color: #27ae60;
+      background: #EAFAF1;
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+
+    /* ══════════════════════════════════════════
+       TWO-COLUMN GRID
+    ══════════════════════════════════════════ */
+    .dash-grid {
+      display: grid;
+      grid-template-columns: 1fr 296px;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .col-main {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* ══════════════════════════════════════════
+       PANEL BASE — REFINED
+    ══════════════════════════════════════════ */
+    .panel {
+      background: var(--white);
+      border: 0.5px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 20px 13px;
+      border-bottom: 0.5px solid var(--border);
+    }
+    .panel-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .panel-title i { font-size: 15px; color: var(--sage); }
+    .panel-action {
+      font-size: 12px;
+      color: var(--sage);
+      font-weight: 500;
+      text-decoration: none;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .panel-action:hover { text-decoration: underline; }
+    .panel-body { padding: 16px 20px; }
+
+    /* ══════════════════════════════════════════
+       ACTIVITY CHART — NEW WIDGET
+    ══════════════════════════════════════════ */
+    .activity-bars {
+      display: flex;
+      gap: 5px;
+      align-items: flex-end;
+      height: 72px;
+    }
+    .abar-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      flex: 1;
+    }
+    .abar {
+      width: 100%;
+      border-radius: 5px 5px 0 0;
+      background: var(--border);
+      transition: background .2s, transform .15s;
+    }
+    .abar.has-data { background: var(--sage); opacity: .55; }
+    .abar.today { background: var(--gold); opacity: 1; }
+    .abar-wrap:hover .abar { transform: scaleY(1.04); transform-origin: bottom; }
+    .aday {
+      font-size: 10px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .aday.today { color: var(--gold); font-weight: 600; }
+
+    /* ══════════════════════════════════════════
+       RESOURCE LIST ITEMS — REFINED
+    ══════════════════════════════════════════ */
+    .res-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .res-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border: 0.5px solid var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: border-color .2s, box-shadow .2s, background .15s;
+      position: relative;
+    }
+    .res-item:hover {
+      border-color: var(--sage-m);
+      box-shadow: 0 2px 12px rgba(61,122,107,.08);
+      background: rgba(61,122,107,.018);
+    }
+
+    .res-item-thumb {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 19px;
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .res-item-thumb svg {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+    }
+    .res-item-thumb i {
+      position: relative;
+      z-index: 1;
+    }
+
+    .res-item-body { flex: 1; min-width: 0; }
+    .res-item-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 4px;
+    }
+    .res-item-meta {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+    .meta-pill {
+      font-size: 10px;
+      font-weight: 500;
+      padding: 2px 7px;
+      border-radius: 20px;
+      background: var(--sage-l);
+      color: #1A4A3A;
+    }
+    .meta-pill.gold {
+      background: #FBF3E8;
+      color: #7A4F0A;
+    }
+    .res-item-stat {
+      font-size: 12px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .res-item-actions {
+      display: flex;
+      gap: 5px;
+      opacity: 0;
+      transition: opacity .2s;
+      flex-shrink: 0;
+    }
+    .res-item:hover .res-item-actions { opacity: 1; }
+
+    .icon-btn {
+      width: 30px;
+      height: 30px;
+      border: 0.5px solid var(--border);
+      border-radius: 8px;
+      background: var(--white);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      transition: border-color .2s, background .2s;
+    }
+    .icon-btn:hover { border-color: var(--sage); background: var(--sage-l); }
+    .icon-btn.danger:hover { border-color: #e74c3c; background: #FEF0F0; }
+
+    .verified-badge {
+      font-size: 10px;
+      font-weight: 500;
+      color: #1D6B56;
+      background: #E8F4F0;
+      border: 0.5px solid var(--sage-m);
+      padding: 2px 7px;
+      border-radius: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .empty-state .ei { font-size: 38px; margin-bottom: 12px; }
+    .empty-state p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+    .empty-state a { color: var(--sage); font-weight: 600; text-decoration: none; }
+
+    /* ══════════════════════════════════════════
+       SHOW MORE BUTTON
+    ══════════════════════════════════════════ */
+    .show-more-wrap {
+      text-align: center;
+      padding: 12px 0 2px;
+    }
+    .btn-show-more {
+      background: none;
+      border: 0.5px solid var(--sage);
+      color: var(--sage);
+      border-radius: 8px;
+      padding: 7px 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+      font-family: inherit;
+    }
+    .btn-show-more:hover { background: var(--sage); color: #fff; }
+
+    /* ══════════════════════════════════════════
+       SIDEBAR — PROFILE CARD (BANNER STYLE)
+    ══════════════════════════════════════════ */
+    .sidebar { display: flex; flex-direction: column; gap: 14px; }
+
+    /* banner + overlapping avatar */
+    .profile-banner {
+      height: 54px;
+      background: linear-gradient(135deg, #1A4A3A 0%, #0D2D27 100%);
+      border-radius: 18px 18px 0 0;
+      flex-shrink: 0;
+    }
+    .profile-banner-wrap {
+      border: 0.5px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      background: var(--white);
+      box-shadow: var(--shadow-sm);
+    }
+    .profile-body {
+      padding: 0 18px 16px;
+      text-align: center;
+    }
+    .profile-mini-avatar {
+      width: 66px;
+      height: 66px;
+      border-radius: 50%;
+      background: var(--gold);
+      color: #fff;
+      font-size: 22px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: -33px auto 12px;
+      border: 3px solid var(--white);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .profile-mini-name-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      margin-bottom: 3px;
+    }
+    .profile-mini-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .profile-verified-tick {
+      width: 17px;
+      height: 17px;
+      background: #1D9BF0;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .profile-verified-tick svg {
+      width: 10px;
+      height: 10px;
+      fill: none;
+      stroke: #fff;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .profile-mini-role {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: capitalize;
+      margin-bottom: 0;
+    }
+    /* info section — same white bg as card body */
+    .profile-info-section {
+      background: var(--white);
+      padding: 0 18px 16px;
+    }
+    .profile-bio {
+      font-size: 11.5px;
+      font-style: italic;
+      color: var(--muted);
+      line-height: 1.55;
+      margin-bottom: 12px;
+      padding: 12px 0;
+      border-top: 0.5px solid var(--border);
+      border-bottom: 0.5px solid var(--border);
+    }
+    .profile-meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .meta-cell {
+      background: var(--cream);
+      border: 0.5px solid var(--border);
+      border-radius: 10px;
+      padding: 9px 10px;
+    }
+    .meta-label {
+      font-size: 9.5px;
+      font-weight: 600;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .meta-value {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .meta-value.verified-status {
+      color: var(--sage);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .meta-value.verified-status::before {
+      content: "";
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--sage);
+      flex-shrink: 0;
+    }
+    .btn-edit-profile {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      width: 100%;
+      padding: 9px 0;
+      border: 0.5px solid var(--border);
+      border-radius: 10px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      background: none;
+      font-family: inherit;
+      cursor: pointer;
+      transition: border-color .2s, color .2s;
+    }
+    .btn-edit-profile:hover { border-color: var(--sage); color: var(--sage); }
+
+    /* ══════════════════════════════════════════
+       QUICK LINKS — REFINED
+    ══════════════════════════════════════════ */
+    .quick-links-panel {
+      background: var(--white);
+      border: 0.5px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .quick-links-header {
+      padding: 11px 16px 9px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      border-bottom: 0.5px solid var(--border);
+    }
+    .quick-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink2);
+      text-decoration: none;
+      border-bottom: 0.5px solid var(--border);
+      cursor: pointer;
+      transition: color .15s, background .15s;
+    }
+    .quick-link:last-child { border-bottom: none; }
+    .quick-link:hover { color: var(--sage); background: rgba(61,122,107,.04); }
+    .quick-link.red:hover { color: #A32D2D; background: #FCEBEB; }
+    .quick-link i { font-size: 15px; width: 18px; text-align: center; flex-shrink: 0; }
+    .quick-link-count {
+      margin-left: auto;
+      font-size: 11px;
+      background: var(--sage-l);
+      color: var(--sage);
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+
+    /* ══════════════════════════════════════════
+       VERIFY WIDGET — REFINED
+    ══════════════════════════════════════════ */
+    .verify-widget {
+      border-radius: 14px;
+      padding: 15px;
+      border: 0.5px solid #e8c97a;
+      background: #FBF3E8;
+    }
+    .verify-widget.vw-pending {
+      border-color: #e8c97a;
+      background: #fdfbf5;
+    }
+    .verify-widget.vw-approved {
+      border-color: var(--sage-m);
+      background: linear-gradient(135deg, #f0faf7, var(--white));
+    }
+    .verify-widget h4 {
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .verify-widget h4.c-gold  { color: #7A4F0A; }
+    .verify-widget h4.c-sage  { color: var(--sage); }
+    .verify-widget h4.c-muted { color: var(--muted); }
+    .verify-widget p  {
+      font-size: 12px;
+      color: #5A3A08;
+      line-height: 1.55;
+      margin-bottom: 10px;
+    }
+    .verify-widget p.no-mb { margin-bottom: 0; }
+    .btn-verify {
+      display: inline-block;
+      padding: 6px 15px;
+      background: var(--gold);
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: opacity .2s;
+    }
+    .btn-verify:hover { opacity: .88; }
+    .vw-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      margin-bottom: 6px;
+    }
+    .vw-pill.pending  { background: #FEF9E7; color: #9a7000; border: 0.5px solid #f0d060; }
+    .vw-pill.approved { background: var(--sage-l); color: var(--sage); border: 0.5px solid var(--sage-m); }
+
+    /* ══════════════════════════════════════════
+       SAVED RESOURCES
+    ══════════════════════════════════════════ */
+    .saved-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 0.5px solid var(--border);
+      cursor: pointer;
+    }
+    .saved-item:last-child { border-bottom: none; }
+    .saved-item:hover .saved-title { color: var(--sage); }
+    .saved-thumb {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      background: var(--sage-l);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .saved-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink);
+      transition: color .15s;
+      margin-bottom: 1px;
+    }
+    .saved-sub { font-size: 11px; color: var(--muted); }
+    .saved-remove {
+      margin-left: auto;
+      background: none;
+      border: none;
+      font-size: 13px;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 5px;
+      border-radius: 6px;
+      transition: color .15s, background .15s;
+      flex-shrink: 0;
+    }
+    .saved-remove:hover { color: #e74c3c; background: #FEF0F0; }
+
+    /* ══════════════════════════════════════════
+       DELETE MODAL — UNCHANGED
+    ══════════════════════════════════════════ */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(13,27,42,.6);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(3px);
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: var(--white);
+      border-radius: 18px;
+      padding: 32px;
+      max-width: 380px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0,0,0,.28);
+    }
+    .modal-box h3 { font-size: 18px; font-weight: 700; color: var(--ink); margin-bottom: 10px; }
+    .modal-box p  { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 24px; }
+    .modal-actions { display: flex; gap: 12px; }
+    .btn-danger {
+      flex: 1; padding: 11px;
+      background: #e74c3c; color: #fff;
+      border: none; border-radius: var(--r);
+      font-size: 14px; font-weight: 700;
+      cursor: pointer; transition: background .2s;
+    }
+    .btn-danger:hover { background: #c0392b; }
+    .btn-cancel-modal {
+      flex: 1; padding: 11px;
+      background: var(--white); color: var(--muted);
+      border: 1px solid var(--border); border-radius: var(--r);
+      font-size: 14px; cursor: pointer; transition: border-color .2s;
+    }
+    .btn-cancel-modal:hover { border-color: var(--muted); }
+
+    /* ══════════════════════════════════════════
+       TOAST
+    ══════════════════════════════════════════ */
+    .toast-container {
+      position: fixed; bottom: 24px; right: 24px;
+      z-index: 2000; display: flex; flex-direction: column; gap: 8px;
+    }
+    .toast {
+      padding: 12px 18px; border-radius: 10px;
+      font-size: 13px; font-weight: 500; color: #fff;
+      box-shadow: 0 4px 16px rgba(0,0,0,.18);
+      transition: opacity .3s;
+      max-width: 300px;
+    }
+    .toast.success { background: var(--sage); }
+    .toast.error   { background: #e74c3c; }
+    .toast.info    { background: var(--ink2); }
+
+    /* ══════════════════════════════════════════
+       DARK MODE ADDITIONS
+    ══════════════════════════════════════════ */
+    [data-theme="dark"] .dash-hero {
+      background: linear-gradient(135deg, #020a07 0%, #071810 40%, #0a1f15 75%, #030d08 100%);
+      box-shadow: 0 16px 64px rgba(0,0,0,.8), 0 2px 8px rgba(0,0,0,.5);
+    }
+    [data-theme="dark"] .dash-hero::before {
+      background-image: radial-gradient(circle, rgba(91,189,168,.06) 1px, transparent 1px);
+    }
+    [data-theme="dark"] .dash-hero::after {
+      border-color: rgba(91,189,168,.07);
+    }
+    [data-theme="dark"] .hero-circle-2 {
+      background: rgba(91,189,168,.04);
+    }
+    [data-theme="dark"] .hero-chip {
+      background: rgba(91,189,168,.1);
+      border-color: rgba(91,189,168,.22);
+      color: #5BBDA8;
+    }
+    [data-theme="dark"] .hero-name { color: #e8f4f0; }
+    [data-theme="dark"] .hero-name span { color: #5BBDA8; }
+    [data-theme="dark"] .hero-sub { color: rgba(232,244,240,.35); }
+    [data-theme="dark"] .hero-role {
+      background: rgba(91,189,168,.1);
+      border-color: rgba(91,189,168,.2);
+      color: rgba(232,244,240,.7);
+    }
+    [data-theme="dark"] .btn-hero-primary {
+      background: #e8f4f0;
+      color: #0a1f15;
+    }
+    [data-theme="dark"] .btn-hero-ghost {
+      background: rgba(91,189,168,.08);
+      border-color: rgba(91,189,168,.25);
+      color: rgba(232,244,240,.8);
+    }
+    [data-theme="dark"] .btn-hero-ghost:hover {
+      background: rgba(91,189,168,.15);
+      border-color: rgba(91,189,168,.45);
+    }
+    [data-theme="dark"] .profile-banner {
+      background: linear-gradient(135deg, #0D2D27 0%, #061510 100%);
+    }
+    [data-theme="dark"] .stat-card-corner { opacity: .12; }
+    [data-theme="dark"] .profile-banner-wrap {
+      background: var(--white);
+      border-color: var(--border);
+    }
+    [data-theme="dark"] .profile-body { background: var(--white); }
+    [data-theme="dark"] .quick-links-panel {
+      background: var(--white);
+      border-color: var(--border);
+    }
+    [data-theme="dark"] .verify-widget {
+      background: #1e1507;
+      border-color: rgba(200,136,42,.35);
+    }
+    [data-theme="dark"] .verify-widget p { color: rgba(232,200,130,.8); }
+    [data-theme="dark"] .verify-widget h4.c-gold { color: var(--gold); }
+    [data-theme="dark"] .verify-widget.vw-approved {
+      background: #0d1f1a;
+      border-color: var(--sage-m);
+    }
+    [data-theme="dark"] .verify-widget.vw-pending {
+      background: #181208;
+    }
+    [data-theme="dark"] .stat-trend { background: #0d2015; color: #5BBDA8; }
+    [data-theme="dark"] .meta-pill { background: var(--sage-l); color: var(--sage); }
+    [data-theme="dark"] .meta-pill.gold { background: var(--gold-l); color: var(--gold); }
+    [data-theme="dark"] .verified-badge { background: var(--sage-l); color: var(--sage); border-color: var(--sage-m); }
+    [data-theme="dark"] .abar { background: var(--border); }
+    [data-theme="dark"] .abar.has-data { background: var(--sage); }
+    [data-theme="dark"] .abar.today { background: var(--gold); }
+
+    /* ══════════════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════════════ */
+    @media (max-width: 880px) {
+      .dash-grid { grid-template-columns: 1fr; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .dash-hero { flex-direction: column; align-items: flex-start; }
+      .hero-actions { flex-direction: row; }
+    }
+    @media (max-width: 500px) {
+      .dash-page { padding: 20px 14px 60px; }
+      /* PRESERVED: hero padding never reduced below 24px 20px */
+      .dash-hero { padding: 28px 22px; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .stat-num { font-size: 26px; }
+      .panel-body { padding: 13px 15px; }
+      .panel-header { padding: 13px 15px; }
+      .hero-actions { flex-direction: row; flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="../index.html" class="nav-logo" style="display:inline-flex;align-items:center;text-decoration:none"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 110" width="226" height="48" role="img">
+  <title>NaijaLearn</title>
+  <style>@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@500&display=swap');
+    .nl-n{fill:#0D1B2A}.nl-l{fill:#3D7A6B}.nl-t{fill:#6B7F8E}
+    [data-theme="dark"] .nl-n{fill:#FAFAF7}[data-theme="dark"] .nl-l{fill:#5BBDA8}
+  </style>
+  <g transform="translate(20,15)">
+    <rect x="4" y="10" width="34" height="52" rx="5" fill="#3D7A6B"/>
+    <rect x="36" y="10" width="34" height="52" rx="5" fill="#2d6457"/>
+    <rect x="33" y="8" width="10" height="56" rx="4" fill="#1A4A3A"/>
+    <line x1="12" y1="24" x2="30" y2="24" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="33" x2="30" y2="33" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="42" x2="24" y2="42" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="51" x2="28" y2="51" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <circle cx="58" cy="26" r="9" fill="#C8882A"/>
+    <circle cx="58" cy="26" r="4.5" fill="#FAFAF7"/>
+    <line x1="58" y1="34" x2="52" y2="54" stroke="#C8882A" stroke-width="3" stroke-linecap="round"/>
+    <path d="M4 62 Q38 53 38 62 Q38 53 72 62" fill="none" stroke="#5BBDA8" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <text x="114" y="58" font-family="'Playfair Display',Georgia,serif" font-size="46" font-weight="700" letter-spacing="-1"><tspan class="nl-n">Naija</tspan><tspan class="nl-l">Learn</tspan></text>
+  <text x="115" y="80" font-family="'DM Sans',Arial,sans-serif" font-size="11" font-weight="500" letter-spacing="2.4" class="nl-t">EDUCATIONAL RESOURCE LIBRARY</text>
+</svg></a>
+  <div class="nav-links">
+    <a href="browse.html" class="nav-browse-tip" title="Search lesson notes, past questions &amp; schemes of work by subject, class, term or type">Browse</a>
+    <a href="upload.html" title="Share lesson notes, past questions &amp; schemes of work with Nigerian students">Upload</a>
+    <a href="signin.html" title="Sign in to your NaijaLearn account to upload, save and download resources" style="color:var(--sage)">Sign In</a>
+    <button class="btn-nav" title="Create a free account to access all resources" onclick="window.location.href='signup.html'">Get Started Free</button>
+  </div>
+  <button class="nav-toggle">☰</button>
+</nav>
+
+<!-- MAIN -->
+<div class="dash-page">
+  <div id="dash-root">
+    <div class="state-box">
+      <div class="state-icon">⏳</div>
+      <h2>Loading your dashboard…</h2>
+      <p>Please wait.</p>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="modal-overlay" id="delete-modal">
+  <div class="modal-box">
+    <h3>Delete Resource?</h3>
+    <p>This will permanently remove the resource and its file. This cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn-danger" onclick="confirmDelete()">Yes, Delete</button>
+      <button class="btn-cancel-modal" onclick="closeDeleteModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+
+  /* ─── Subject style map ─── */
+  var SUBJECT_STYLE = {
+    'Mathematics':        { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', text:'#1A4A3A', icon:'ti-math-function' },
+    'English Language':   { bg:'#FBF3E8', arc:'#C8882A', dot:'#3D7A6B', text:'#6B3A08', icon:'ti-book-2' },
+    'Biology':            { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', text:'#1A4A3A', icon:'ti-dna' },
+    'Physics':            { bg:'#FBF3E8', arc:'#C8882A', dot:'#3D7A6B', text:'#6B3A08', icon:'ti-atom' },
+    'Chemistry':          { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', text:'#1A4A3A', icon:'ti-flask' },
+    'Civic Education':    { bg:'#FBF3E8', arc:'#C8882A', dot:'#3D7A6B', text:'#6B3A08', icon:'ti-building-community' },
+    'Agricultural Science':     { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', text:'#1A4A3A', icon:'ti-plant' },
+    'Computer Studies':   { bg:'#FBF3E8', arc:'#C8882A', dot:'#3D7A6B', text:'#6B3A08', icon:'ti-device-laptop' },
+    'Economics':          { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', text:'#1A4A3A', icon:'ti-chart-line' },
+    'Geography':          { bg:'#FBF3E8', arc:'#C8882A', dot:'#3D7A6B', text:'#6B3A08', icon:'ti-world' },
+    'History':            { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', text:'#1A4A3A', icon:'ti-books' },
+    'Further Mathematics':{ bg:'#FBF3E8', arc:'#C8882A', dot:'#3D7A6B', text:'#6B3A08', icon:'ti-sum' }
+  };
+  var DEFAULT_STYLE = { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', text:'#1A4A3A', icon:'ti-file-text' };
+
+  function subjectThumb(subject) {
+    var s = SUBJECT_STYLE[subject] || DEFAULT_STYLE;
+    return '<div class="res-item-thumb" style="background:'+s.bg+'">'
+      + '<svg viewBox="0 0 44 44"><circle cx="44" cy="44" r="30" fill="none" stroke="'+s.arc+'" stroke-width="9" opacity=".14"/>'
+      + '<circle cx="7" cy="7" r="5" fill="'+s.dot+'" opacity=".2"/></svg>'
+      + '<i class="ti '+s.icon+'" style="font-size:19px;color:'+s.arc+'"></i>'
+      + '</div>';
+  }
+
+  function savedThumb(subject) {
+    var s = SUBJECT_STYLE[subject] || DEFAULT_STYLE;
+    return '<div class="saved-thumb" style="background:'+s.bg+'">'
+      + '<i class="ti '+s.icon+'" style="font-size:15px;color:'+s.arc+'"></i>'
+      + '</div>';
+  }
+
+  function initials(name) {
+    return (name||'??').split(' ').slice(0,2).map(function(n){return n[0]||'';}).join('').toUpperCase();
+  }
+  function esc(s) {
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function greet() {
+    var h = new Date().getHours();
+    if (h < 12) return 'Good morning';
+    if (h < 17) return 'Good afternoon';
+    if (h < 21) return 'Good evening';
+    return 'Good night';
+  }
+  function greetIcon() {
+    var h = new Date().getHours();
+    if (h < 12) return 'ti-sun';
+    if (h < 17) return 'ti-sun-high';
+    if (h < 21) return 'ti-sunset-2';
+    return 'ti-moon-stars';
+  }
+  /* Live-update the greeting chip every minute */
+  setInterval(function () {
+    var chip = document.querySelector('.hero-chip');
+    if (chip) {
+      chip.innerHTML = '<i class="ti ' + greetIcon() + '" style="font-size:12px"></i> ' + greet();
+    }
+  }, 60 * 1000);
+  function toast(msg, type) {
+    type = type || 'success';
+    var c = document.querySelector('.toast-container');
+    if (!c) { c = document.createElement('div'); c.className='toast-container'; document.body.appendChild(c); }
+    var t = document.createElement('div');
+    t.className = 'toast ' + type;
+    t.textContent = msg;
+    c.appendChild(t);
+    setTimeout(function(){ t.style.opacity='0'; setTimeout(function(){ t.remove(); },300); }, 3000);
+  }
+
+  /* ─── Saved resources ─── */
+  window.removeSaved = function(resourceId, rowEl) {
+    var sb = window._nlSb;
+    if (!sb) return;
+    sb.auth.getSession().then(function(res) {
+      var session = res.data && res.data.session;
+      if (!session) return;
+      sb.from('saved_resources')
+        .delete()
+        .eq('user_id', session.user.id)
+        .eq('resource_id', resourceId)
+        .then(function(result) {
+          if (result.error) { toast('Could not remove: ' + result.error.message, 'error'); return; }
+          if (rowEl) rowEl.remove();
+          toast('Removed from saved resources.', 'info');
+          var countEl = document.getElementById('saved-count');
+          if (countEl) countEl.textContent = Math.max(0, parseInt(countEl.textContent, 10) - 1);
+        });
+    });
+  };
+
+  /* ─── Delete modal ─── */
+  var _deleteTarget = null;
+  window.openDeleteModal = function(id, title, fileUrl) {
+    _deleteTarget = { id: id, title: title, fileUrl: fileUrl ? decodeURIComponent(fileUrl) : null };
+    document.getElementById('delete-modal').classList.add('open');
+  };
+  window.closeDeleteModal = function() {
+    _deleteTarget = null;
+    document.getElementById('delete-modal').classList.remove('open');
+  };
+  window.confirmDelete = async function() {
+    if (!_deleteTarget) return;
+    var sb = window._nlSb;
+    var id = _deleteTarget.id;
+    var fileUrl = _deleteTarget.fileUrl;
+    document.querySelector('.btn-danger').textContent = 'Deleting…';
+    var result = await sb.from('resources').delete().eq('id', id);
+    if (result.error) {
+      toast('Delete failed: ' + result.error.message, 'error');
+    } else {
+      // Also remove file from storage (best-effort)
+      if (fileUrl) {
+        try {
+          var parts = fileUrl.split('/resources/');
+          if (parts[1]) {
+            var storagePath = parts[1].split('?')[0];
+            sb.storage.from('resources').remove([storagePath]).then(function(){});
+          }
+        } catch(e) {}
+      }
+      toast('Resource deleted.', 'success');
+      closeDeleteModal();
+      setTimeout(function(){ window.location.reload(); }, 800);
+    }
+    document.querySelector('.btn-danger').textContent = 'Yes, Delete';
+  };
+
+  /* ─── Activity chart ─── */
+  function buildActivityChart(uploads) {
+    var days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    var today = new Date();
+    var todayIdx = (today.getDay() + 6) % 7; // 0=Mon
+    // Count uploads per day of week from real data
+    var counts = [0,0,0,0,0,0,0];
+    if (uploads && uploads.length) {
+      uploads.forEach(function(r) {
+        if (r.created_at) {
+          var d = new Date(r.created_at);
+          var idx = (d.getDay() + 6) % 7;
+          counts[idx]++;
+        }
+      });
+    }
+    // If no real data, use illustrative values
+    var hasAny = counts.some(function(c){ return c > 0; });
+    if (!hasAny) counts = [2,5,3,8,6,1,4];
+    var maxV = Math.max.apply(null, counts) || 1;
+
+    var html = '';
+    days.forEach(function(d, i) {
+      var h = Math.round((counts[i]/maxV)*52) + 12;
+      var isToday = i === todayIdx;
+      var barCls = isToday ? 'abar today' : (counts[i] > 0 ? 'abar has-data' : 'abar');
+      var dayCls = isToday ? 'aday today' : 'aday';
+      html += '<div class="abar-wrap">'
+        + '<div class="'+barCls+'" style="height:'+h+'px"></div>'
+        + '<span class="'+dayCls+'">'+d+'</span>'
+        + '</div>';
+    });
+    return html;
+  }
+
+  /* ─── Render ─── */
+  function render(profile, uploads, savedResources, session) {
+    var totalDL  = uploads.reduce(function(a,r){ return a+(r.downloads||0); }, 0);
+    var verified = uploads.filter(function(r){ return r.verified; }).length;
+    var saved    = savedResources || [];
+
+    /* ── Hero ── */
+    var heroVerified = profile.verified
+      ? '<span class="hero-verified"><i class="ti ti-star" style="font-size:11px"></i> Verified</span>'
+      : '';
+    var recentDL = uploads.reduce(function(a,r){ return a+(r.downloads||0); }, 0);
+    var subLine = uploads.length
+      ? 'You have ' + uploads.length + ' resource' + (uploads.length!==1?'s':'') + ' in the library.'
+      : 'Start by uploading your first resource.';
+
+    var hero = '<div class="dash-hero">'
+      + '<div class="hero-circle-2"></div>'
+      + '<div class="hero-left">'
+      + '<div class="hero-chip"><i class="ti '+greetIcon()+'" style="font-size:12px"></i> '+greet()+'</div>'
+      + '<div class="hero-name">Welcome back, <span>'+esc(profile.full_name.split(' ')[0])+'</span></div>'
+      + '<div class="hero-sub">'+esc(subLine)+'</div>'
+      + '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px">'
+      + '<span class="hero-role">'+esc(profile.role||'Member')+'</span>'
+      + heroVerified
+      + '</div>'
+      + '</div>'
+      + '<div class="hero-actions">'
+      + '<a href="upload.html" class="btn-hero-primary"><i class="ti ti-upload" style="font-size:14px"></i> Upload Resource</a>'
+      + '<a href="browse.html" class="btn-hero-ghost"><i class="ti ti-books" style="font-size:14px"></i> Browse Library</a>'
+      + '</div></div>';
+
+    /* ── Stats ── */
+    var stats = '<div class="stats-row">'
+      + '<div class="stat-card"><div class="stat-card-corner"></div>'
+      + '<div class="stat-icon-wrap"><i class="ti ti-books"></i></div>'
+      + '<div class="stat-num">'+uploads.length+'</div>'
+      + '<div class="stat-lbl">Uploads</div>'
+      + (uploads.length ? '<div class="stat-trend">+'+Math.min(uploads.length,2)+' recent</div>' : '')
+      + '</div>'
+      + '<div class="stat-card"><div class="stat-card-corner"></div>'
+      + '<div class="stat-icon-wrap"><i class="ti ti-download"></i></div>'
+      + '<div class="stat-num">'+Number(totalDL).toLocaleString()+'</div>'
+      + '<div class="stat-lbl">Total Downloads</div>'
+      + (totalDL > 0 ? '<div class="stat-trend" style="color:var(--sage)">all time</div>' : '')
+      + '</div>'
+      + '<div class="stat-card"><div class="stat-card-corner"></div>'
+      + '<div class="stat-icon-wrap"><i class="ti ti-circle-check"></i></div>'
+      + '<div class="stat-num">'+verified+'</div>'
+      + '<div class="stat-lbl">Verified Resources</div>'
+      + '</div>'
+      + '<div class="stat-card"><div class="stat-card-corner"></div>'
+      + '<div class="stat-icon-wrap"><i class="ti ti-bookmark"></i></div>'
+      + '<div class="stat-num" id="saved-count">'+saved.length+'</div>'
+      + '<div class="stat-lbl">Saved Resources</div>'
+      + '</div>'
+      + '</div>';
+
+    /* ── Upload items ── */
+    var UPLOADS_PAGE_SIZE = 11;
+    window._allUploads = uploads;
+    window._uploadsShown = 0;
+
+    function renderUploadItem(r) {
+      var verBadge = r.verified
+        ? '<span class="verified-badge"><i class="ti ti-check" style="font-size:10px"></i> Verified</span>'
+        : '';
+      return '<div class="res-item" onclick="window.location.href=\'resource.html?id='+r.id+'\'" style="position:relative">'
+        + subjectThumb(r.subject)
+        + '<div class="res-item-body">'
+        + '<div class="res-item-title">'+esc(r.title)+'</div>'
+        + '<div class="res-item-meta">'
+        + '<span class="meta-pill">'+esc(r.class_level)+'</span>'
+        + '<span class="meta-pill">'+esc(r.term)+'</span>'
+        + '<span class="meta-pill gold">'+esc(r.type)+'</span>'
+        + verBadge
+        + '</div></div>'
+        + '<div class="res-item-stat"><i class="ti ti-download" style="font-size:12px"></i> '+Number(r.downloads||0).toLocaleString()+'</div>'
+        + '<div class="res-item-actions" onclick="event.stopPropagation()">'
+        + '<button class="icon-btn" title="View" onclick="window.location.href=\'resource.html?id='+r.id+'\'"><i class="ti ti-eye" style="font-size:13px"></i></button>'
+        + '<button class="icon-btn danger" title="Delete" onclick="openDeleteModal('+r.id+',\''+esc(r.title).replace(/\'/g,"\\'")+'\',\''+encodeURIComponent(r.file_url||'')+'\')" ><i class="ti ti-trash" style="font-size:13px"></i></button>'
+        + '</div>'
+        + '</div>';
+    }
+
+    window.showMoreUploads = function() {
+      var list  = document.getElementById('uploads-res-list');
+      var btn   = document.getElementById('uploads-show-more');
+      var all   = window._allUploads;
+      var shown = window._uploadsShown;
+      var next  = all.slice(shown, shown + UPLOADS_PAGE_SIZE);
+      next.forEach(function(r) {
+        var wrapper = document.createElement('div');
+        wrapper.innerHTML = renderUploadItem(r);
+        list.appendChild(wrapper.firstChild);
+      });
+      window._uploadsShown += next.length;
+      if (window._uploadsShown >= all.length) {
+        btn.closest('.show-more-wrap').style.display = 'none';
+      } else {
+        var remaining = all.length - window._uploadsShown;
+        btn.textContent = 'Show more (' + remaining + ' remaining)';
+      }
+    };
+
+    var firstBatch = uploads.slice(0, UPLOADS_PAGE_SIZE);
+    window._uploadsShown = firstBatch.length;
+    var hasMore   = uploads.length > UPLOADS_PAGE_SIZE;
+    var remaining = uploads.length - UPLOADS_PAGE_SIZE;
+
+    var uploadItems = !uploads.length
+      ? '<div class="empty-state"><div class="ei">📂</div><p>You haven\'t uploaded anything yet.<br><a href="upload.html">Upload your first resource →</a></p></div>'
+      : firstBatch.map(renderUploadItem).join('');
+
+    var showMoreBtn = hasMore
+      ? '<div class="show-more-wrap"><button id="uploads-show-more" class="btn-show-more" onclick="showMoreUploads()">Show more ('+remaining+' remaining)</button></div>'
+      : '';
+
+    /* ── Activity chart panel ── */
+    var activityPanel = '<div class="panel">'
+      + '<div class="panel-header">'
+      + '<div class="panel-title"><i class="ti ti-chart-bar"></i> Upload activity this week</div>'
+      + '</div>'
+      + '<div class="panel-body">'
+      + '<div class="activity-bars" id="activity-bars">'+buildActivityChart(uploads)+'</div>'
+      + '</div>'
+      + '</div>';
+
+    /* ── Uploads panel ── */
+    var uploadsPanel = '<div class="panel">'
+      + '<div class="panel-header">'
+      + '<div class="panel-title"><i class="ti ti-books"></i> My Uploads ('+uploads.length+')</div>'
+      + '<a href="upload.html" class="panel-action"><i class="ti ti-plus" style="font-size:12px"></i> Add new</a>'
+      + '</div>'
+      + '<div class="panel-body"><div class="res-list" id="uploads-res-list">'+uploadItems+'</div>'+showMoreBtn+'</div>'
+      + '</div>';
+
+    /* ── Saved panel ── */
+    var savedItems = !saved.length
+      ? '<div class="empty-state"><div class="ei">🔖</div><p>No saved resources yet.<br><a href="browse.html">Browse resources</a> and save ones you like.</p></div>'
+      : saved.map(function(s) {
+          var r   = s.resources || {};
+          var rid = r.id || s.resource_id;
+          return '<div class="saved-item" onclick="window.location.href=\'resource.html?id='+rid+'\'">'
+            + savedThumb(r.subject)
+            + '<div><div class="saved-title">'+esc(r.title||'Untitled')+'</div>'
+            + '<div class="saved-sub">'+esc(r.subject||'')+(r.class_level?' · '+esc(r.class_level):'')+'</div></div>'
+            + '<button class="saved-remove" title="Remove" onclick="event.stopPropagation();removeSaved('+rid+',this.closest(\'.saved-item\'))"><i class="ti ti-x"></i></button>'
+            + '</div>';
+        }).join('');
+
+    /* ── Sidebar ── */
+    var vst = profile.verification_status || 'none';
+    var verifySection;
+    if (profile.verified || vst === 'approved') {
+      verifySection =
+        '<div class="verify-widget vw-approved">'
+        + '<div class="vw-pill approved"><i class="ti ti-check" style="font-size:10px"></i> Verified Teacher</div>'
+        + '<h4 class="c-sage">You\'re Verified!</h4>'
+        + '<p class="no-mb">Your resources carry the verified badge and rank higher in search results.</p>'
+        + '</div>';
+    } else if (vst === 'pending') {
+      verifySection =
+        '<div class="verify-widget vw-pending">'
+        + '<div class="vw-pill pending"><i class="ti ti-clock" style="font-size:10px"></i> Under Review</div>'
+        + '<h4 class="c-gold">Verification Pending</h4>'
+        + '<p class="no-mb">We\'re reviewing your application. Check back in 2–3 business days.</p>'
+        + '</div>';
+    } else {
+      var rejectNote = vst === 'rejected'
+        ? '<p style="color:#c0392b;font-size:11px;margin-bottom:8px">Your previous application was not approved. You may re-apply.</p>'
+        : '';
+      verifySection =
+        '<div class="verify-widget">'
+        + '<h4 class="c-gold"><i class="ti ti-star" style="font-size:13px"></i> Get Verified</h4>'
+        + rejectNote
+        + '<p>Verified teachers get a badge and their resources appear higher in search results.</p>'
+        + '<a href="verify.html" class="btn-verify">Apply for Verification</a>'
+        + '</div>';
+    }
+
+    var avatarInner = profile.avatar_url
+      ? '<img src="'+esc(profile.avatar_url)+'" alt="'+esc(profile.full_name)+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.style.display=\'none\'">'
+      : initials(profile.full_name);
+
+    /* Build profile card info section */
+    var verifiedTick = (profile.verified)
+      ? '<span class="profile-verified-tick" title="Verified Teacher"><svg viewBox="0 0 12 12"><polyline points="2,6.5 5,9.5 10,3.5"/></svg></span>'
+      : '';
+    var bioHtml = profile.bio
+      ? '<div class="profile-bio">&ldquo;'+esc(profile.bio)+'&rdquo;</div>'
+      : '';
+    var joinedDate = '';
+    if (profile.created_at) {
+      var jd = new Date(profile.created_at);
+      joinedDate = jd.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+    }
+    var statusHtml = profile.verified
+      ? '<div class="meta-value verified-status">Verified</div>'
+      : '<div class="meta-value">Member</div>';
+
+    var sidebar = '<div class="sidebar">'
+      /* Profile banner card */
+      + '<div class="profile-banner-wrap">'
+      + '<div class="profile-banner"></div>'
+      + '<div class="profile-body">'
+      + '<div class="profile-mini-avatar">'+avatarInner+'</div>'
+      + '<div class="profile-mini-name-row">'
+      + '<span class="profile-mini-name">'+esc(profile.full_name)+'</span>'
+      + verifiedTick
+      + '</div>'
+      + '<div class="profile-mini-role">'+esc(profile.role||'Member')+'</div>'
+      + '</div>'
+      + '<div class="profile-info-section">'
+      + bioHtml
+      + '<div class="profile-meta-grid">'
+      + '<div class="meta-cell"><div class="meta-label">Email</div><div class="meta-value" style="font-size:11px;word-break:break-all;">'+esc(session.user.email)+'</div></div>'
+      + '<div class="meta-cell"><div class="meta-label">Joined</div><div class="meta-value">'+joinedDate+'</div></div>'
+      + '<div class="meta-cell"><div class="meta-label">Last Active</div><div class="meta-value">Just now</div></div>'
+      + '<div class="meta-cell"><div class="meta-label">Status</div>'+statusHtml+'</div>'
+      + '</div>'
+      + '<a href="profile.html?id='+session.user.id+'" class="btn-edit-profile"><i class="ti ti-user-edit"></i> Edit Profile</a>'
+      + '</div>'
+      + '</div>'
+
+      /* Quick links */
+      + '<div class="quick-links-panel">'
+      + '<div class="quick-links-header">Quick Links</div>'
+      + '<a href="upload.html" class="quick-link"><i class="ti ti-upload"></i> Upload Resource</a>'
+      + '<a href="browse.html" class="quick-link"><i class="ti ti-search"></i> Browse Library</a>'
+      + '<a href="profile.html?id='+session.user.id+'" class="quick-link"><i class="ti ti-user"></i> Edit Profile</a>'
+      + '<a class="quick-link red" onclick="doSignOut()" style="cursor:pointer"><i class="ti ti-logout"></i> Sign Out</a>'
+      + '</div>'
+
+      /* Verify widget */
+      + verifySection
+
+      /* Saved panel */
+      + '<div class="panel">'
+      + '<div class="panel-header">'
+      + '<div class="panel-title"><i class="ti ti-bookmark"></i> Saved Resources</div>'
+      + '<a href="browse.html" class="panel-action">Browse more</a>'
+      + '</div>'
+      + '<div class="panel-body">'+savedItems+'</div>'
+      + '</div>'
+
+      + '</div>';
+
+    document.getElementById('dash-root').innerHTML =
+      hero + stats
+      + '<div class="dash-grid">'
+      + '<div class="col-main">'+activityPanel+uploadsPanel+'</div>'
+      + sidebar
+      + '</div>';
+  }
+
+  window.doSignOut = function() {
+    var sb = window._nlSb;
+    if (!sb) return;
+    sb.auth.signOut().then(function() {
+      window.location.href = '../index.html';
+    });
+  };
+
+  /* ─── Boot ─── */
+  function whenReady(fn) {
+    if (window._nlSb) { fn(window._nlSb); return; }
+    setTimeout(function(){ whenReady(fn); }, 80);
+  }
+
+  whenReady(function(sb) {
+    sb.auth.getSession().then(function(result) {
+      var session = result.data && result.data.session;
+
+      if (!session) {
+        document.getElementById('dash-root').innerHTML =
+          '<div class="state-box">'
+          + '<div class="state-icon">🔒</div>'
+          + '<h2>Sign in to view your dashboard</h2>'
+          + '<p>You need an account to access this page.<br><br>'
+          + '<a href="signin.html">Sign in</a> &nbsp;·&nbsp; <a href="signup.html">Create account</a>'
+          + '</p></div>';
+        return;
+      }
+
+      Promise.all([
+        sb.from('profiles')
+          .select('id,full_name,role,verified,bio,location,created_at,avatar_url,verification_status')
+          .eq('id', session.user.id)
+          .single(),
+        sb.from('resources')
+          .select('id,title,subject,class_level,term,week,type,verified,downloads,created_at,file_url,file_name')
+          .eq('uploader_id', session.user.id)
+          .order('created_at', { ascending: false }),
+        sb.from('saved_resources')
+          .select('id,resource_id,saved_at,resources(id,title,subject,class_level,type,verified,downloads)')
+          .eq('user_id', session.user.id)
+          .order('saved_at', { ascending: false })
+      ]).then(function(results) {
+        var profResult  = results[0];
+        var resResult   = results[1];
+        var savedResult = results[2];
+
+        if (profResult.error || !profResult.data) {
+          document.getElementById('dash-root').innerHTML =
+            '<div class="state-box"><div class="state-icon">⚠️</div><h2>Profile not found</h2>'
+            + '<p>Could not load your profile. <a href="signin.html">Try signing in again</a>.</p></div>';
+          return;
+        }
+
+        document.title = (profResult.data.full_name||'Dashboard') + ' — NaijaLearn';
+        render(profResult.data, resResult.data || [], savedResult.data || [], session);
+      });
+    });
+  });
+
+})();
+</script>
+
+<footer>
+  <a href="../index.html" class="footer-logo" style="display:flex;justify-content:center;margin-bottom:8px;cursor:pointer;text-decoration:none"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 110" width="220" height="46" role="img">
+  <title>NaijaLearn</title>
+  <style>@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@500&display=swap');</style>
+  <g transform="translate(20,15)">
+    <rect x="4" y="10" width="34" height="52" rx="5" fill="#3D7A6B"/>
+    <rect x="36" y="10" width="34" height="52" rx="5" fill="#2d6457"/>
+    <rect x="33" y="8" width="10" height="56" rx="4" fill="#1A4A3A"/>
+    <line x1="12" y1="24" x2="30" y2="24" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="33" x2="30" y2="33" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="42" x2="24" y2="42" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="51" x2="28" y2="51" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <circle cx="58" cy="26" r="9" fill="#C8882A"/>
+    <circle cx="58" cy="26" r="4.5" fill="#FAFAF7"/>
+    <line x1="58" y1="34" x2="52" y2="54" stroke="#C8882A" stroke-width="3" stroke-linecap="round"/>
+    <path d="M4 62 Q38 53 38 62 Q38 53 72 62" fill="none" stroke="#5BBDA8" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <text x="114" y="58" font-family="'Playfair Display',Georgia,serif" font-size="46" font-weight="700" letter-spacing="-1"><tspan fill="#FAFAF7">Naija</tspan><tspan fill="#5BBDA8">Learn</tspan></text>
+  <text x="115" y="80" font-family="'DM Sans',Arial,sans-serif" font-size="11" font-weight="500" letter-spacing="2.4" fill="#6B7F8E">EDUCATIONAL RESOURCE LIBRARY</text>
+</svg></a>
+  <div class="footer-tagline">Nigeria's educational resource library — for teachers, parents, and students.</div>
+  <div class="footer-links">
+    <a href="about.html">About</a>
+    <a href="browse.html">Browse</a>
+    <a href="upload.html" title="Share lesson notes, past questions &amp; schemes of work with Nigerian students">Upload</a>
+    <a href="browse.html">Subjects</a>
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="terms.html">Terms</a>
+    <a href="contact.html">Contact</a>
+  </div>
+  <div class="footer-copy">© 2026 NaijaLearn. Built with ❤️ for Nigerian education.</div>
+</footer>
+</body>
+</html>

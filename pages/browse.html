@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Browse lesson notes, schemes of work, and past questions by subject, class, term, and week.">
+  <title>Browse Resources — NaijaLearn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/styles.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="../js/nav-auth.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+  <style>
+    /* ── Dark mode fix: filter & sort dropdowns ── */
+    [data-theme="dark"] .filter-dropdown,
+    [data-theme="dark"] .sort-select {
+      background: var(--white);
+      color: var(--ink);
+      border-color: var(--border);
+    }
+    [data-theme="dark"] .filter-dropdown:focus,
+    [data-theme="dark"] .sort-select:focus {
+      background: var(--white);
+      border-color: var(--sage);
+    }
+    /* Native <option> and <optgroup> inherit the dropdown colours */
+    [data-theme="dark"] .filter-dropdown option,
+    [data-theme="dark"] .filter-dropdown optgroup,
+    [data-theme="dark"] .sort-select option {
+      background: var(--white);
+      color: var(--ink);
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="../index.html" class="nav-logo" style="display:inline-flex;align-items:center;text-decoration:none"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 110" width="226" height="48" role="img">
+  <title>NaijaLearn</title>
+  <style>@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&amp;family=DM+Sans:wght@500&amp;display=swap');
+    .nl-n{fill:#0D1B2A}.nl-l{fill:#3D7A6B}.nl-t{fill:#6B7F8E}
+    [data-theme="dark"] .nl-n{fill:#FAFAF7}[data-theme="dark"] .nl-l{fill:#5BBDA8}
+  </style>
+  <g transform="translate(20,15)">
+    <rect x="4" y="10" width="34" height="52" rx="5" fill="#3D7A6B"/>
+    <rect x="36" y="10" width="34" height="52" rx="5" fill="#2d6457"/>
+    <rect x="33" y="8" width="10" height="56" rx="4" fill="#1A4A3A"/>
+    <line x1="12" y1="24" x2="30" y2="24" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="33" x2="30" y2="33" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="42" x2="24" y2="42" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="51" x2="28" y2="51" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <circle cx="58" cy="26" r="9" fill="#C8882A"/>
+    <circle cx="58" cy="26" r="4.5" fill="#FAFAF7"/>
+    <line x1="58" y1="34" x2="52" y2="54" stroke="#C8882A" stroke-width="3" stroke-linecap="round"/>
+    <path d="M4 62 Q38 53 38 62 Q38 53 72 62" fill="none" stroke="#5BBDA8" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <text x="114" y="58" font-family="'Playfair Display',Georgia,serif" font-size="46" font-weight="700" letter-spacing="-1"><tspan class="nl-n">Naija</tspan><tspan class="nl-l">Learn</tspan></text>
+  <text x="115" y="80" font-family="'DM Sans',Arial,sans-serif" font-size="11" font-weight="500" letter-spacing="2.4" class="nl-t">EDUCATIONAL RESOURCE LIBRARY</text>
+</svg></a>
+  <div class="nav-links">
+    <a href="browse.html" class="active nav-browse-tip" title="Search lesson notes, past questions &amp; schemes of work by subject, class, term or type">Browse</a>
+    <a href="upload.html" title="Share lesson notes, past questions &amp; schemes of work with Nigerian students">Upload</a>
+    <a href="signin.html" title="Sign in to your NaijaLearn account to upload, save and download resources" style="color:var(--sage)">Sign In</a>
+    <button class="btn-nav" title="Create a free account to access all resources" onclick="window.location.href='signup.html'">Get Started Free</button>
+  </div>
+  <button class="nav-toggle">☰</button>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="browse-header">
+  <div style="max-width:1200px;margin:0 auto">
+    <div class="browse-title">Browse Resources</div>
+    <div class="browse-sub">Lesson notes, schemes of work, and past questions — all tagged to the Nigerian curriculum.</div>
+    <div style="margin-top:20px;display:flex;gap:10px;align-items:center">
+      <div class="search-input-wrap" style="max-width:480px;margin:0;flex:1">
+        <div class="search-icon">🔍</div>
+        <input id="browse-search" class="search-input" type="text" placeholder="Search by topic, subject, or class…">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="browse-layout">
+
+  <!-- FILTER PANEL -->
+  <aside class="filter-panel">
+    <div class="filter-panel-title">
+      Filters
+      <span class="filter-clear">Clear all</span>
+    </div>
+
+    <!-- SUBJECT DROPDOWN FILTER -->
+    <div class="filter-group">
+      <div class="filter-group-label">Subject</div>
+      <div class="filter-dropdown-wrap">
+        <select id="subject-select" class="filter-dropdown">
+          <option value="">— All Subjects —</option>
+          <optgroup label="🔢 Sciences &amp; Mathematics">
+            <option value="Mathematics">Mathematics</option>
+            <option value="Further Mathematics">Further Mathematics</option>
+            <option value="Biology">Biology</option>
+            <option value="Chemistry">Chemistry</option>
+            <option value="Physics">Physics</option>
+            <option value="Agricultural Science">Agricultural Science</option>
+            <option value="Computer Studies">Computer Studies</option>
+            <option value="Health Science">Health Science</option>
+            <option value="Home Economics">Home Economics</option>
+            <option value="Physical Education">Physical Education</option>
+          </optgroup>
+          <optgroup label="📖 Languages &amp; Arts">
+            <option value="English Language">English Language</option>
+            <option value="Literature in English">Literature in English</option>
+            <option value="Yoruba Language">Yoruba Language</option>
+            <option value="French">French</option>
+            <option value="Arabic">Arabic</option>
+            <option value="Fine Arts">Fine Arts</option>
+            <option value="Music">Music</option>
+          </optgroup>
+          <optgroup label="🌍 Social Sciences &amp; Humanities">
+            <option value="Economics">Economics</option>
+            <option value="Geography">Geography</option>
+            <option value="History">History</option>
+            <option value="Government">Government</option>
+            <option value="Civic Education">Civic Education</option>
+            <option value="Social Studies">Social Studies</option>
+            <option value="Christian Religious Studies">Christian Religious Studies</option>
+            <option value="Islamic Religious Studies">Islamic Religious Studies</option>
+          </optgroup>
+          <optgroup label="💼 Vocational &amp; Technical">
+            <option value="Technical Drawing">Technical Drawing</option>
+            <option value="Woodwork">Woodwork</option>
+            <option value="Metal Work">Metal Work</option>
+            <option value="Auto Mechanics">Auto Mechanics</option>
+            <option value="Electrical Installation">Electrical Installation</option>
+            <option value="Building Construction">Building Construction</option>
+            <option value="Data Processing">Data Processing</option>
+            <option value="Food &amp; Nutrition">Food &amp; Nutrition</option>
+            <option value="Catering Craft Practice">Catering Craft Practice</option>
+            <option value="Tourism">Tourism</option>
+          </optgroup>
+          <optgroup label="📊 Commerce &amp; Business">
+            <option value="Commerce">Commerce</option>
+            <option value="Accounting">Accounting</option>
+            <option value="Business Studies">Business Studies</option>
+            <option value="Marketing">Marketing</option>
+            <option value="Typewriting">Typewriting</option>
+            <option value="Office Practice">Office Practice</option>
+          </optgroup>
+        </select>
+        <span class="filter-dropdown-arrow">▾</span>
+      </div>
+      <!-- Active subject badge shown after selection -->
+      <div id="subject-badge" class="filter-active-badge" style="display:none">
+        <span id="subject-badge-label"></span>
+        <button id="subject-badge-clear" title="Remove subject filter">✕</button>
+      </div>
+    </div>
+
+    <!-- CLASS LEVEL — kept as checkboxes (only 6 options) -->
+    <div class="filter-group">
+      <div class="filter-group-label">Class Level</div>
+      <div class="filter-check-row">
+        <label class="filter-chip"><input type="checkbox" data-group="class" value="JSS1"> JSS1</label>
+        <label class="filter-chip"><input type="checkbox" data-group="class" value="JSS2"> JSS2</label>
+        <label class="filter-chip"><input type="checkbox" data-group="class" value="JSS3"> JSS3</label>
+        <label class="filter-chip"><input type="checkbox" data-group="class" value="SS1"> SS1</label>
+        <label class="filter-chip"><input type="checkbox" data-group="class" value="SS2"> SS2</label>
+        <label class="filter-chip"><input type="checkbox" data-group="class" value="SS3"> SS3</label>
+      </div>
+    </div>
+
+    <!-- TERM DROPDOWN -->
+    <div class="filter-group">
+      <div class="filter-group-label">Term</div>
+      <div class="filter-dropdown-wrap">
+        <select id="term-select" class="filter-dropdown">
+          <option value="">— All Terms —</option>
+          <option value="First Term">First Term</option>
+          <option value="Second Term">Second Term</option>
+          <option value="Third Term">Third Term</option>
+        </select>
+        <span class="filter-dropdown-arrow">▾</span>
+      </div>
+    </div>
+
+    <!-- RESOURCE TYPE DROPDOWN -->
+    <div class="filter-group">
+      <div class="filter-group-label">Resource Type</div>
+      <div class="filter-dropdown-wrap">
+        <select id="type-select" class="filter-dropdown">
+          <option value="">— All Types —</option>
+          <option value="Lesson Note">Lesson Note</option>
+          <option value="Scheme of Work">Scheme of Work</option>
+          <option value="Past Questions">Past Questions</option>
+          <option value="Activity">Activity</option>
+        </select>
+        <span class="filter-dropdown-arrow">▾</span>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- RESULTS -->
+  <main>
+    <div class="results-header">
+      <div class="results-count" id="results-count">Loading…</div>
+      <select id="sort-select" class="sort-select">
+        <option value="downloads">Most Downloaded</option>
+        <option value="newest">Newest First</option>
+        <option value="alpha">A – Z</option>
+      </select>
+    </div>
+    <div class="results-grid" id="results-grid">
+      <!-- Populated by browse.js -->
+    </div>
+  </main>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <a href="../index.html" class="footer-logo" style="display:flex;justify-content:center;margin-bottom:8px;cursor:pointer;text-decoration:none"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 110" width="220" height="46" role="img">
+  <title>NaijaLearn</title>
+  <style>@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&amp;family=DM+Sans:wght@500&amp;display=swap');</style>
+  <g transform="translate(20,15)">
+    <rect x="4" y="10" width="34" height="52" rx="5" fill="#3D7A6B"/>
+    <rect x="36" y="10" width="34" height="52" rx="5" fill="#2d6457"/>
+    <rect x="33" y="8" width="10" height="56" rx="4" fill="#1A4A3A"/>
+    <line x1="12" y1="24" x2="30" y2="24" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="33" x2="30" y2="33" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="42" x2="24" y2="42" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="51" x2="28" y2="51" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <circle cx="58" cy="26" r="9" fill="#C8882A"/>
+    <circle cx="58" cy="26" r="4.5" fill="#FAFAF7"/>
+    <line x1="58" y1="34" x2="52" y2="54" stroke="#C8882A" stroke-width="3" stroke-linecap="round"/>
+    <path d="M4 62 Q38 53 38 62 Q38 53 72 62" fill="none" stroke="#5BBDA8" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <text x="114" y="58" font-family="'Playfair Display',Georgia,serif" font-size="46" font-weight="700" letter-spacing="-1"><tspan fill="#FAFAF7">Naija</tspan><tspan fill="#5BBDA8">Learn</tspan></text>
+  <text x="115" y="80" font-family="'DM Sans',Arial,sans-serif" font-size="11" font-weight="500" letter-spacing="2.4" fill="#6B7F8E">EDUCATIONAL RESOURCE LIBRARY</text>
+</svg></a>
+  <div class="footer-tagline">Nigeria's educational resource library — for teachers, parents, and students.</div>
+  <div class="footer-links">
+    <a href="../index.html">Home</a>
+    <a href="browse.html">Browse</a>
+    <a href="upload.html" title="Share lesson notes, past questions &amp; schemes of work with Nigerian students">Upload</a>
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="terms.html">Terms</a>
+  </div>
+  <div class="footer-copy">© 2026 NaijaLearn. Built with ❤️ for Nigerian education.</div>
+</footer>
+
+
+<script>
+  // Toast helper for this page
+  function showToast(msg, type) {
+    let container = document.querySelector('.toast-container');
+    if (!container) { container = document.createElement('div'); container.className = 'toast-container'; document.body.appendChild(container); }
+    const icons = { success:'✓', error:'✕', info:'ℹ' };
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `<span>${icons[type]||'✓'}</span> ${msg}`;
+    container.appendChild(toast);
+    setTimeout(() => { toast.style.opacity='0'; toast.style.transition='opacity .3s'; setTimeout(()=>toast.remove(),300); }, 3500);
+  }
+</script>
+
+<script>
+  var sb = supabase.createClient(
+    'https://elawsqcbiuierkeziywz.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsYXdzcWNiaXVpZXJrZXppeXd6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MDA5NjEsImV4cCI6MjA5NDE3Njk2MX0.2h9hN3zRLPeLVFKeXtwqxv_dWvg6XXFzHXaheK6ZviI'
+  );
+
+  // ── Update nav based on auth session ──
+  // Handled by nav-auth.js (loaded in <head>)
+
+  /* ── Design H: arc + serif subject name ── */
+  var SUBJECT_STYLE = {
+    /* ── Sciences & Mathematics ── */
+    'Mathematics':          { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', text:'#1A4A3A', icon:'ti-math-function' },
+    'Further Mathematics':  { bg:'#E3F0FB', arc:'#1A6FAD', dot:'#8B3DBA', text:'#0C3F6B', icon:'ti-sum' },
+    'Biology':              { bg:'#EAF6E8', arc:'#2E7D32', dot:'#E65100', text:'#1B4D1E', icon:'ti-dna' },
+    'Chemistry':            { bg:'#FFF3E0', arc:'#E65100', dot:'#1A6FAD', text:'#6B2700', icon:'ti-flask' },
+    'Physics':              { bg:'#EDE7F6', arc:'#5E35B1', dot:'#00897B', text:'#311B6B', icon:'ti-atom' },
+    'Agricultural Science': { bg:'#F1F8E9', arc:'#558B2F', dot:'#F9A825', text:'#2D4A16', icon:'ti-plant' },
+    'Computer Studies':     { bg:'#E8EAF6', arc:'#3949AB', dot:'#00ACC1', text:'#1A237E', icon:'ti-device-laptop' },
+    'Health Science':       { bg:'#FCE4EC', arc:'#C2185B', dot:'#00897B', text:'#6A0033', icon:'ti-heart-rate-monitor' },
+    'Home Economics':       { bg:'#FFF8E1', arc:'#F9A825', dot:'#D81B60', text:'#6B4100', icon:'ti-home-heart' },
+    'Physical Education':   { bg:'#E0F7FA', arc:'#00838F', dot:'#E53935', text:'#004D55', icon:'ti-run' },
+
+    /* ── Languages & Arts ── */
+    'English Language':     { bg:'#FBF3E8', arc:'#C8882A', dot:'#3D7A6B', text:'#6B3A08', icon:'ti-book-2' },
+    'Literature in English':{ bg:'#F3E5F5', arc:'#7B1FA2', dot:'#F57F17', text:'#4A0072', icon:'ti-book' },
+    'Yoruba Language':      { bg:'#FBE9E7', arc:'#BF360C', dot:'#F9A825', text:'#6B1A00', icon:'ti-language' },
+    'French':               { bg:'#E8EAF6', arc:'#283593', dot:'#C62828', text:'#0D1566', icon:'ti-flag' },
+    'Arabic':               { bg:'#F9FBE7', arc:'#827717', dot:'#00695C', text:'#3D3700', icon:'ti-writing' },
+    'Fine Arts':            { bg:'#FCE4EC', arc:'#AD1457', dot:'#F57F17', text:'#6A0028', icon:'ti-palette' },
+    'Music':                { bg:'#E8F5E9', arc:'#2E7D32', dot:'#7B1FA2', text:'#1B4D1E', icon:'ti-music' },
+
+    /* ── Social Sciences & Humanities ── */
+    'Economics':            { bg:'#E3F2FD', arc:'#1565C0', dot:'#2E7D32', text:'#0D3B7A', icon:'ti-chart-line' },
+    'Geography':            { bg:'#E0F2F1', arc:'#00695C', dot:'#1565C0', text:'#003D33', icon:'ti-world' },
+    'History':              { bg:'#FFF3E0', arc:'#BF360C', dot:'#5E35B1', text:'#6B1A00', icon:'ti-books' },
+    'Government':           { bg:'#E8EDF5', arc:'#1E3A5F', dot:'#4A90D9', text:'#0D1F3A', icon:'ti-building-bank' },
+    'Civic Education':      { bg:'#E8F4FB', arc:'#0277BD', dot:'#EF6C00', text:'#01426A', icon:'ti-building-community' },
+    'Social Studies':       { bg:'#FFF9C4', arc:'#F57F17', dot:'#1565C0', text:'#6B3A00', icon:'ti-users' },
+    'Christian Religious Studies': { bg:'#FFF8E1', arc:'#F9A825', dot:'#6A1B9A', text:'#5C3500', icon:'ti-cross' },
+    'Islamic Religious Studies':   { bg:'#E8F5EE', arc:'#1B7A4A', dot:'#F9A825', text:'#0A3D22', icon:'ti-moon' },
+
+    /* ── Vocational & Technical ── */
+    'Technical Drawing':    { bg:'#E3F0FB', arc:'#0B2E4A', dot:'#3D9BE9', text:'#051928', icon:'ti-ruler-2' },
+    'Woodwork':             { bg:'#FBF0E8', arc:'#6D3B1A', dot:'#3D7A6B', text:'#3A1A06', icon:'ti-tools' },
+    'Metal Work':           { bg:'#ECEFF1', arc:'#455A64', dot:'#C8882A', text:'#1C2A31', icon:'ti-settings-2' },
+    'Auto Mechanics':       { bg:'#F3F3F3', arc:'#424242', dot:'#E53935', text:'#1A1A1A', icon:'ti-engine' },
+    'Electrical Installation': { bg:'#FFFDE7', arc:'#F9A825', dot:'#1565C0', text:'#5C4000', icon:'ti-plug' },
+    'Building Construction':{ bg:'#EFEBE9', arc:'#5D4037', dot:'#558B2F', text:'#2D1B0E', icon:'ti-building' },
+    'Data Processing':      { bg:'#E8EAF6', arc:'#3949AB', dot:'#00ACC1', text:'#1A237E', icon:'ti-cpu' },
+    'Food & Nutrition':     { bg:'#FBE9E7', arc:'#D84315', dot:'#2E7D32', text:'#6B1500', icon:'ti-salad' },
+    'Catering Craft Practice': { bg:'#FFF8E1', arc:'#FF8F00', dot:'#C62828', text:'#5C3A00', icon:'ti-bowl-spoon' },
+    'Tourism':              { bg:'#E0F7FA', arc:'#006064', dot:'#FF8F00', text:'#003033', icon:'ti-plane' },
+
+    /* ── Commerce & Business ── */
+    'Commerce':             { bg:'#E8F5E9', arc:'#1B5E20', dot:'#C8882A', text:'#0A2E0F', icon:'ti-briefcase' },
+    'Accounting':           { bg:'#E8F5EE', arc:'#0D4F3C', dot:'#2ECC7A', text:'#062B20', icon:'ti-calculator' },
+    'Business Studies':     { bg:'#E3F2FD', arc:'#0D47A1', dot:'#FF8F00', text:'#061D47', icon:'ti-chart-bar' },
+    'Marketing':            { bg:'#FCE4EC', arc:'#880E4F', dot:'#1565C0', text:'#40002A', icon:'ti-speakerphone' },
+    'Typewriting':          { bg:'#F3E5F5', arc:'#6A1B9A', dot:'#EF6C00', text:'#3B0062', icon:'ti-keyboard' },
+    'Office Practice':      { bg:'#E8EAF6', arc:'#283593', dot:'#00695C', text:'#0D1566', icon:'ti-briefcase-2' }
+  };
+  var DEFAULT_STYLE = { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', text:'#1A4A3A', icon:'ti-file-text' };
+
+  function subjectThumb(subject, type, verified) {
+    var s = SUBJECT_STYLE[subject] || DEFAULT_STYLE;
+    return '<div class="res-thumb" style="background:'+s.bg+';position:relative;overflow:hidden">'
+      + '<svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 200 130" preserveAspectRatio="xMidYMid slice">'
+      + '<circle cx="190" cy="130" r="85" fill="none" stroke="'+s.arc+'" stroke-width="22" opacity=".12"/>'
+      + '<circle cx="190" cy="130" r="57" fill="none" stroke="'+s.arc+'" stroke-width="14" opacity=".10"/>'
+      + '<circle cx="190" cy="130" r="28" fill="'+s.arc+'" opacity=".08"/>'
+      + '<circle cx="26" cy="20" r="14" fill="'+s.dot+'" opacity=".18"/>'
+      + '</svg>'
+      + '<div style="position:absolute;left:14px;top:50%;transform:translateY(-50%)">'
+      + '<div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:'+s.arc+';opacity:.75;margin-bottom:4px">Subject</div>'
+      + '<div style="font-family:\'Playfair Display\',Georgia,serif;font-size:16px;font-weight:700;color:'+s.text+';line-height:1.15;max-width:110px">'+subject+'</div>'
+      + '</div>'
+      + '<div style="position:absolute;right:12px;bottom:10px;opacity:.18">'
+      + '<i class="ti '+s.icon+'" style="font-size:46px;color:'+s.arc+'"></i>'
+      + '</div>'
+      + '<div class="res-badge">'+type+'</div>'
+      + (verified ? '<div class="res-verified">✓ Verified</div>' : '')
+      + '</div>';
+  }
+
+  var allResources = [];
+  var activeFilters = { subject:[], class:[], term:[], type:[], q:'' };
+  var currentSort = 'downloads';
+
+  function initials(name) {
+    return (name||'??').split(' ').slice(0,2).map(function(n){return n[0]||'';}).join('').toUpperCase();
+  }
+
+  function setGrid(html) { var g=document.getElementById('results-grid'); if(g) g.innerHTML=html; }
+  function setCount(n,total) { var c=document.getElementById('results-count'); if(c) c.innerHTML='Showing <strong>'+n+'</strong> of <strong>'+total+'</strong> resources'; }
+
+  var BROWSE_PAGE_SIZE = 12;
+  var _browseFiltered = [];
+  var _browseShown = 0;
+
+  function renderBrowseCard(r) {
+    var avatarImg = (r.profiles && r.profiles.avatar_url)
+      ? '<img src="' + r.profiles.avatar_url + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.style.display=\'none\'">'
+      : '';
+    var avatarText = (!r.profiles || !r.profiles.avatar_url) ? initials(r.profiles && r.profiles.full_name) : '';
+    var uploaderName = (r.profiles && r.profiles.full_name) || 'Anonymous';
+    var isVerified = (r.profiles && r.profiles.verified) || r.verified;
+    var html = '<div class="res-card" onclick="window.location.href=\'resource.html?id=' + r.id + '\'">';
+    html += subjectThumb(r.subject, r.type, isVerified);
+    html += '<div class="res-body">';
+    html += '<div class="res-meta"><span class="meta-tag green">' + r.class_level + '</span><span class="meta-tag">' + r.term + '</span><span class="meta-tag">' + r.week + '</span></div>';
+    html += '<div class="res-title">' + r.title + '</div>';
+    html += '<div class="res-footer">';
+    html += '<div class="res-uploader"><div class="avatar-sm">' + avatarImg + avatarText + '</div>';
+    html += '<a href="profile.html?id=' + r.uploader_id + '" onclick="event.stopPropagation()" style="color:inherit;text-decoration:none;">' + uploaderName + '</a></div>';
+    html += '<div class="res-downloads"><span class="dl-icon">⬇</span>' + Number(r.downloads).toLocaleString() + '</div>';
+    html += '</div></div></div>';
+    return html;
+  }
+
+    function getShowMoreBtn() { return document.getElementById('browse-show-more-wrap'); }
+
+  window.showMoreBrowse = function() {
+    var grid = document.getElementById('results-grid');
+    var btn  = document.getElementById('browse-show-more');
+    var next = _browseFiltered.slice(_browseShown, _browseShown + BROWSE_PAGE_SIZE);
+    next.forEach(function(r) {
+      var wrapper = document.createElement('div');
+      wrapper.innerHTML = renderBrowseCard(r);
+      grid.insertBefore(wrapper.firstChild, document.getElementById('browse-show-more-wrap'));
+    });
+    _browseShown += next.length;
+    if (_browseShown >= _browseFiltered.length) {
+      var wrap = getShowMoreBtn();
+      if (wrap) wrap.style.display = 'none';
+    } else {
+      var rem = _browseFiltered.length - _browseShown;
+      btn.textContent = 'Show more (' + rem + ' remaining)';
+    }
+  };
+
+  function filterAndRender() {
+    var q = activeFilters.q.toLowerCase();
+    var filtered = allResources.filter(function(r) {
+      var qm = !q || r.title.toLowerCase().includes(q) || r.subject.toLowerCase().includes(q) || (r.description||'').toLowerCase().includes(q);
+      var sm = !activeFilters.subject.length || activeFilters.subject.includes(r.subject);
+      var cm = !activeFilters.class.length   || activeFilters.class.includes(r.class_level);
+      var tm = !activeFilters.term.length    || activeFilters.term.includes(r.term);
+      var ym = !activeFilters.type.length    || activeFilters.type.includes(r.type);
+      return qm && sm && cm && tm && ym;
+    });
+
+    filtered.sort(function(a,b) {
+      if (currentSort==='downloads') return b.downloads - a.downloads;
+      if (currentSort==='newest') return new Date(b.created_at) - new Date(a.created_at);
+      if (currentSort==='alpha') return a.title.localeCompare(b.title);
+      return 0;
+    });
+
+    setCount(filtered.length, allResources.length);
+
+    if (!filtered.length) {
+      setGrid('<div style="grid-column:1/-1;text-align:center;padding:60px 0;color:var(--muted)"><div style="font-size:40px;margin-bottom:12px">🔍</div><div style="font-size:16px;font-weight:600;color:var(--ink);margin-bottom:8px">No resources found</div><div style="font-size:14px">Try adjusting your filters or search term.</div></div>');
+      return;
+    }
+
+    _browseFiltered = filtered;
+    _browseShown = 0;
+
+    var firstCards = filtered.slice(0, BROWSE_PAGE_SIZE).map(renderBrowseCard).join('');
+    _browseShown = Math.min(BROWSE_PAGE_SIZE, filtered.length);
+    var hasMoreCards = filtered.length > BROWSE_PAGE_SIZE;
+    var remCards = filtered.length - _browseShown;
+
+    var showMoreHtml = '';
+    if (hasMoreCards) {
+      showMoreHtml = '<div id="browse-show-more-wrap" style="grid-column:1/-1;text-align:center;padding:20px 0 8px">'
+        + '<button id="browse-show-more" onclick="showMoreBrowse()"'
+        + ' style="background:none;border:1.5px solid var(--primary,#2563eb);color:var(--primary,#2563eb);'
+        + 'border-radius:8px;padding:10px 28px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:background 0.15s,color 0.15s;"'
+        + ' onmouseover="this.style.background=\'var(--primary,#2563eb)\';this.style.color=\'#fff\'"'
+        + ' onmouseout="this.style.background=\'none\';this.style.color=\'var(--primary,#2563eb)\'">'
+        + 'Show more (' + remCards + ' remaining)'
+        + '</button></div>';
+    }
+
+    setGrid(firstCards + showMoreHtml);
+  }
+
+  function loadResources() {
+    setGrid('<div style="grid-column:1/-1;text-align:center;padding:80px 0;color:var(--muted)"><div style="font-size:32px;margin-bottom:12px">⏳</div><div>Loading resources…</div></div>');
+    sb.from('resources')
+      .select('id,title,description,subject,class_level,term,week,type,file_url,uploader_id,downloads,verified,created_at,profiles(full_name,verified,avatar_url)')
+      .order('downloads', {ascending:false})
+      .limit(200)
+    .then(function(result) {
+      if (result.error) {
+        setGrid('<div style="grid-column:1/-1;text-align:center;padding:60px 0"><div style="font-size:36px;margin-bottom:12px">⚠️</div><div style="font-size:15px;color:var(--ink);margin-bottom:8px">Could not load resources</div><div style="font-size:13px;color:var(--muted)">'+result.error.message+'</div><button onclick="loadResources()" style="margin-top:20px;padding:10px 24px;background:var(--sage);color:#fff;border:none;border-radius:8px;cursor:pointer">Retry</button></div>');
+        return;
+      }
+      allResources = result.data || [];
+      filterAndRender();
+    });
+  }
+
+  window.openResource = function(id, encodedUrl) {
+    var url = decodeURIComponent(encodedUrl);
+    sb.rpc('increment_downloads', {resource_id: id}).then(function() {});
+    var r = allResources.find(function(x){return x.id===id;});
+    if (r) r.downloads = (r.downloads||0) + 1;
+    window.open(url, '_blank', 'noopener');
+  };
+
+  document.addEventListener('DOMContentLoaded', function() {
+    // URL params
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('q')) { activeFilters.q = params.get('q'); var sb2=document.getElementById('browse-search'); if(sb2) sb2.value=params.get('q'); }
+
+    // ── Subject dropdown ──
+    var subjectSel = document.getElementById('subject-select');
+    var badge      = document.getElementById('subject-badge');
+    var badgeLabel = document.getElementById('subject-badge-label');
+    var badgeClear = document.getElementById('subject-badge-clear');
+
+    function updateSubjectBadge(val) {
+      if (val) {
+        badgeLabel.textContent = val;
+        badge.style.display = 'flex';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    if (subjectSel) subjectSel.addEventListener('change', function() {
+      var v = subjectSel.value;
+      activeFilters.subject = v ? [v] : [];
+      updateSubjectBadge(v);
+      filterAndRender();
+    });
+
+    if (badgeClear) badgeClear.addEventListener('click', function() {
+      subjectSel.value = '';
+      activeFilters.subject = [];
+      updateSubjectBadge('');
+      filterAndRender();
+    });
+
+    // ── Term dropdown ──
+    var termSel = document.getElementById('term-select');
+    if (termSel) termSel.addEventListener('change', function() {
+      activeFilters.term = termSel.value ? [termSel.value] : [];
+      filterAndRender();
+    });
+
+    // ── Resource Type dropdown ──
+    var typeSel = document.getElementById('type-select');
+    if (typeSel) typeSel.addEventListener('change', function() {
+      activeFilters.type = typeSel.value ? [typeSel.value] : [];
+      filterAndRender();
+    });
+
+    // ── Class level chip checkboxes ──
+    document.querySelectorAll('.filter-chip input[type="checkbox"]').forEach(function(cb) {
+      cb.addEventListener('change', function() {
+        var g=cb.dataset.group, v=cb.value;
+        if (!activeFilters[g]) activeFilters[g]=[];
+        if (cb.checked) activeFilters[g].push(v);
+        else activeFilters[g]=activeFilters[g].filter(function(x){return x!==v;});
+        filterAndRender();
+      });
+    });
+
+    // Search
+    var searchBar = document.getElementById('browse-search');
+    if (searchBar) searchBar.addEventListener('input', function() { activeFilters.q=searchBar.value.trim(); filterAndRender(); });
+
+    // Sort
+    var sortSel2 = document.getElementById('sort-select');
+    if (sortSel2) sortSel2.addEventListener('change', function() { currentSort=sortSel2.value; filterAndRender(); });
+
+    // Clear all
+    var clearBtn = document.querySelector('.filter-clear');
+    if (clearBtn) clearBtn.addEventListener('click', function() {
+      activeFilters={subject:[],class:[],term:[],type:[],q:''};
+      if(searchBar) searchBar.value='';
+      if(subjectSel) subjectSel.value='';
+      if(termSel) termSel.value='';
+      if(typeSel) typeSel.value='';
+      updateSubjectBadge('');
+      document.querySelectorAll('.filter-chip input').forEach(function(cb){cb.checked=false;});
+      filterAndRender();
+    });
+
+    // ── Apply subject URL param now that all functions are defined ──
+    if (params.get('subject')) {
+      var subj = params.get('subject');
+      activeFilters.subject = [subj];
+      if (subjectSel) subjectSel.value = subj;
+      updateSubjectBadge(subj);
+    }
+
+    loadResources();
+  });
+</script>
+
+</body>
+</html>

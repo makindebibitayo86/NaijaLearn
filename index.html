@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="NaijaLearn — Nigeria's structured educational resource library for teachers, parents, and homeschoolers. Browse lesson notes by subject, class, term, and week.">
+  <title>NaijaLearn — Nigerian Educational Resource Library</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="js/nav-auth.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo" style="display:inline-flex;align-items:center;text-decoration:none"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 110" width="226" height="48" role="img">
+  <title>NaijaLearn</title>
+  <style>@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&amp;family=DM+Sans:wght@500&amp;display=swap');
+    .nl-n{fill:#0D1B2A}.nl-l{fill:#3D7A6B}.nl-t{fill:#6B7F8E}
+    [data-theme="dark"] .nl-n{fill:#FAFAF7}[data-theme="dark"] .nl-l{fill:#5BBDA8}
+  </style>
+  <g transform="translate(20,15)">
+    <rect x="4" y="10" width="34" height="52" rx="5" fill="#3D7A6B"/>
+    <rect x="36" y="10" width="34" height="52" rx="5" fill="#2d6457"/>
+    <rect x="33" y="8" width="10" height="56" rx="4" fill="#1A4A3A"/>
+    <line x1="12" y1="24" x2="30" y2="24" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="33" x2="30" y2="33" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="42" x2="24" y2="42" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="51" x2="28" y2="51" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <circle cx="58" cy="26" r="9" fill="#C8882A"/>
+    <circle cx="58" cy="26" r="4.5" fill="#FAFAF7"/>
+    <line x1="58" y1="34" x2="52" y2="54" stroke="#C8882A" stroke-width="3" stroke-linecap="round"/>
+    <path d="M4 62 Q38 53 38 62 Q38 53 72 62" fill="none" stroke="#5BBDA8" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <text x="114" y="58" font-family="'Playfair Display',Georgia,serif" font-size="46" font-weight="700" letter-spacing="-1"><tspan class="nl-n">Naija</tspan><tspan class="nl-l">Learn</tspan></text>
+  <text x="115" y="80" font-family="'DM Sans',Arial,sans-serif" font-size="11" font-weight="500" letter-spacing="2.4" class="nl-t">EDUCATIONAL RESOURCE LIBRARY</text>
+</svg></a>
+  <div class="nav-links">
+    <a href="pages/browse.html" class="nav-browse-tip" title="Search lesson notes, past questions &amp; schemes of work by subject, class, term or type">Browse</a>
+    <a href="pages/upload.html" title="Share lesson notes, past questions &amp; schemes of work with Nigerian students">Upload</a>
+    <a href="pages/signin.html" title="Sign in to your NaijaLearn account to upload, save and download resources" style="color:var(--sage)">Sign In</a>
+    <button class="btn-nav" title="Create a free account to access all resources" onclick="window.location.href='pages/signup.html'">Get Started Free</button>
+  </div>
+  <button class="nav-toggle">☰</button>
+</nav>
+
+<!-- HERO -->
+<div class="hero-wrapper">
+  <div class="hero">
+    <div>
+      <div class="hero-badge">Built for Nigerian Educators</div>
+      <h1>Quality lesson<br>notes, <em>finally</em><br>in one place.</h1>
+      <p class="hero-sub">The structured educational library for Nigerian teachers, parents, and homeschoolers — searchable by subject, class, term, and week.</p>
+      <div class="hero-ctas">
+        <button class="btn-primary" onclick="window.location.href='pages/browse.html'">Browse Resources →</button>
+        <button class="btn-ghost" onclick="window.location.href='pages/upload.html'">Upload as a Teacher</button>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item"><span class="stat-num">…</span><span class="stat-label">Resources</span></div>
+        <div class="stat-item"><span class="stat-num">…</span><span class="stat-label">Teachers</span></div>
+        <div class="stat-item"><span class="stat-num">…</span><span class="stat-label">Downloads</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="search-card">
+        <div class="search-label">Find a Lesson Note</div>
+        <div class="search-input-wrap">
+          <div class="search-icon">🔍</div>
+          <input class="search-input" type="text" placeholder="e.g. Photosynthesis, Quadratic Equations…" aria-label="Search resources">
+          <button class="btn-search">Search</button>
+        </div>
+        <div class="filter-row">
+          <select class="filter-select" aria-label="Class Level">
+            <option value="">Class Level</option>
+            <option>Primary 1</option><option>Primary 2</option><option>Primary 3</option>
+            <option>Primary 4</option><option>Primary 5</option><option>Primary 6</option>
+            <option>JSS1</option><option>JSS2</option><option>JSS3</option>
+            <option>SS1</option><option>SS2</option><option>SS3</option>
+          </select>
+          <select class="filter-select" aria-label="Term">
+            <option value="">Term</option>
+            <option>First Term</option><option>Second Term</option><option>Third Term</option>
+          </select>
+          <select class="filter-select" aria-label="Subject">
+            <option value="">Subject</option>
+            <option>Mathematics</option><option>English Language</option><option>Biology</option>
+            <option>Physics</option><option>Chemistry</option><option>Civic Education</option>
+            <option>Agricultural Science</option><option>Computer Studies</option>
+          </select>
+          <select class="filter-select" aria-label="Week">
+            <option value="">Week</option>
+            <option>Week 1</option><option>Week 2</option><option>Week 3</option>
+            <option>Week 4</option><option>Week 5</option><option>Week 6</option>
+            <option>Week 7</option><option>Week 8</option><option>Week 9</option>
+            <option>Week 10</option>
+          </select>
+        </div>
+        <div class="search-tags">
+          <span class="stag">Mathematics</span>
+          <span class="stag">Biology SS2</span>
+          <span class="stag">JSS1 English</span>
+          <span class="stag">Civic Education</span>
+          <span class="stag">Week 4 Physics</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- SUBJECTS — counts updated live from Supabase -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-title">Browse by Subject</div>
+    <a class="section-link" href="pages/browse.html">See all subjects →</a>
+  </div>
+  <div class="subjects-grid" id="subjects-grid">
+    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Mathematics'"><div class="subj-icon" style="background:#E8F4F0"><i class="ti ti-math-function" style="font-size:20px;color:#3D7A6B"></i></div><div class="subj-info"><span class="subj-name">Mathematics</span><span class="subj-count" data-subject="Mathematics">—</span></div></div>
+    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=English Language'"><div class="subj-icon" style="background:#FBF3E8"><i class="ti ti-book-2" style="font-size:20px;color:#C8882A"></i></div><div class="subj-info"><span class="subj-name">English Language</span><span class="subj-count" data-subject="English Language">—</span></div></div>
+    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Biology'"><div class="subj-icon" style="background:#E8F4F0"><i class="ti ti-dna" style="font-size:20px;color:#3D7A6B"></i></div><div class="subj-info"><span class="subj-name">Biology</span><span class="subj-count" data-subject="Biology">—</span></div></div>
+    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Physics'"><div class="subj-icon" style="background:#FBF3E8"><i class="ti ti-atom" style="font-size:20px;color:#C8882A"></i></div><div class="subj-info"><span class="subj-name">Physics</span><span class="subj-count" data-subject="Physics">—</span></div></div>
+    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Chemistry'"><div class="subj-icon" style="background:#E8F4F0"><i class="ti ti-flask" style="font-size:20px;color:#3D7A6B"></i></div><div class="subj-info"><span class="subj-name">Chemistry</span><span class="subj-count" data-subject="Chemistry">—</span></div></div>
+    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Civic Education'"><div class="subj-icon" style="background:#FBF3E8"><i class="ti ti-building-community" style="font-size:20px;color:#C8882A"></i></div><div class="subj-info"><span class="subj-name">Civic Education</span><span class="subj-count" data-subject="Civic Education">—</span></div></div>
+    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Agricultural Science'"><div class="subj-icon" style="background:#E8F4F0"><i class="ti ti-plant" style="font-size:20px;color:#3D7A6B"></i></div><div class="subj-info"><span class="subj-name">Agricultural Science</span><span class="subj-count" data-subject="Agricultural Science">—</span></div></div>
+    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Computer Studies'"><div class="subj-icon" style="background:#FBF3E8"><i class="ti ti-device-laptop" style="font-size:20px;color:#C8882A"></i></div><div class="subj-info"><span class="subj-name">Computer Studies</span><span class="subj-count" data-subject="Computer Studies">—</span></div></div>
+  </div>
+</div>
+
+<!-- TRENDING RESOURCES — populated live from Supabase -->
+<div class="section" style="padding-top:0">
+  <div class="section-header">
+    <div class="section-title">🔥 Trending This Week</div>
+    <a class="section-link" href="pages/browse.html">View all →</a>
+  </div>
+  <div class="resources-grid" id="trending-grid">
+    <!-- skeleton cards while loading -->
+    <div class="res-card" style="opacity:.4;pointer-events:none">
+      <div class="res-thumb" style="background:#eee"></div>
+      <div class="res-body"><div style="height:12px;background:#eee;border-radius:6px;margin-bottom:10px"></div><div style="height:36px;background:#f5f5f5;border-radius:6px"></div></div>
+    </div>
+    <div class="res-card" style="opacity:.4;pointer-events:none">
+      <div class="res-thumb" style="background:#eee"></div>
+      <div class="res-body"><div style="height:12px;background:#eee;border-radius:6px;margin-bottom:10px"></div><div style="height:36px;background:#f5f5f5;border-radius:6px"></div></div>
+    </div>
+    <div class="res-card" style="opacity:.4;pointer-events:none">
+      <div class="res-thumb" style="background:#eee"></div>
+      <div class="res-body"><div style="height:12px;background:#eee;border-radius:6px;margin-bottom:10px"></div><div style="height:36px;background:#f5f5f5;border-radius:6px"></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- HOW IT WORKS -->
+<div class="how-section">
+  <div class="how-inner">
+    <div class="how-title">Built around how you teach</div>
+    <div class="how-sub">Whether you're a teacher sharing resources or a parent teaching at home.</div>
+    <div class="how-tabs">
+      <button class="how-tab active" onclick="switchTab('teacher',this)">For Teachers</button>
+      <button class="how-tab" onclick="switchTab('parent',this)">For Homeschool Parents</button>
+    </div>
+    <div id="teacher-steps" class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">1</div>
+        <div class="step-icon">📋</div>
+        <div class="step-title">Search before you write</div>
+        <div class="step-desc">Search thousands of existing lesson notes by subject, class, term, and week. Never start from a blank page again.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">2</div>
+        <div class="step-icon">⬆</div>
+        <div class="step-title">Upload your materials</div>
+        <div class="step-desc">Upload your PDF, Word doc, or PowerPoint. Tag it by subject, class, term, and week — it becomes searchable instantly.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">3</div>
+        <div class="step-icon">🤝</div>
+        <div class="step-title">Build your reputation</div>
+        <div class="step-desc">Get verified, collect reviews, and track how many teachers your resources have helped across Nigeria.</div>
+      </div>
+    </div>
+    <div id="parent-steps" class="steps-grid" style="display:none">
+      <div class="step-card">
+        <div class="step-num">1</div>
+        <div class="step-icon">🎯</div>
+        <div class="step-title">Browse by curriculum</div>
+        <div class="step-desc">Navigate the Nigerian curriculum structure — Primary, JSS, SS — by subject, term, and week. Everything is organized the way schools teach it.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">2</div>
+        <div class="step-icon">⬇</div>
+        <div class="step-title">Download lesson notes</div>
+        <div class="step-desc">Access verified lesson notes written by real Nigerian teachers. Download PDFs for offline use anytime.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">3</div>
+        <div class="step-icon">📅</div>
+        <div class="step-title">Follow weekly structure</div>
+        <div class="step-desc">Teach week by week following the same curriculum your child's peers use. Save favorites and track your progress.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HOMESCHOOL BANNER -->
+<div class="home-banner-wrapper">
+  <div class="home-banner">
+    <div class="banner-content">
+      <div class="banner-tag">FOR HOMESCHOOL PARENTS</div>
+      <div class="banner-title">Everything you need to teach your child — structured, verified, and curriculum-aligned.</div>
+      <div class="banner-desc">Browse week by week. Follow the Nigerian curriculum from Primary 1 through SS3. No guesswork, no scattered PDFs.</div>
+      <button class="btn-white" onclick="window.location.href='pages/browse.html'">Start Homeschooling →</button>
+    </div>
+  </div>
+</div>
+
+<!-- TESTIMONIALS -->
+<div class="section" style="padding-top:0">
+  <div class="section-title" style="margin-bottom:4px">What teachers are saying</div>
+  <div style="color:var(--muted);font-size:14px;margin-bottom:0">From classrooms across Nigeria.</div>
+  <div class="testi-grid">
+    <div class="testi-card">
+      <div class="stars">★★★★★</div>
+      <div class="testi-quote">"I used to spend Sunday evenings writing lesson notes from scratch. Now I search, find, adapt, and I'm done in 30 minutes. This has given me my weekends back."</div>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background:#E8F4F0;color:#3D7A6B">AC</div>
+        <div><div class="testi-name">Adaeze Chukwu</div><div class="testi-role">Secondary School Teacher, Enugu</div></div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <div class="stars">★★★★★</div>
+      <div class="testi-quote">"As a homeschooling mum, finding curriculum-aligned materials for my JSS2 son was a nightmare. NaijaLearn changed everything. The structure is exactly how Nigerian schools teach."</div>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background:#FBF3E8;color:#C8882A">RB</div>
+        <div><div class="testi-name">Remi Babatunde</div><div class="testi-role">Homeschool Parent, Lagos</div></div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <div class="stars">★★★★★</div>
+      <div class="testi-quote">"I uploaded my Biology scheme of work and got 800 downloads in a week. Knowing other teachers are using my materials is deeply rewarding."</div>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background:#EDF6FF;color:#185FA5">IM</div>
+        <div><div class="testi-name">Ibrahim Musa</div><div class="testi-role">Biology Teacher, Kano</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta-section">
+  <div class="cta-inner">
+    <div class="cta-title">Join <em>8,300+</em> Nigerian teachers already saving time.</div>
+    <div class="cta-sub">Create a free account. Browse thousands of lesson notes. Upload your own and help educators across Nigeria.</div>
+    <div class="cta-btns">
+      <button class="btn-sage" onclick="window.location.href='pages/signup.html'">Create Free Account</button>
+      <button class="btn-outline-w" onclick="window.location.href='pages/browse.html'">Browse Resources First</button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <a href="index.html" class="footer-logo" style="display:flex;justify-content:center;margin-bottom:8px;cursor:pointer;text-decoration:none"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 110" width="220" height="46" role="img">
+  <title>NaijaLearn</title>
+  <style>@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&amp;family=DM+Sans:wght@500&amp;display=swap');</style>
+  <g transform="translate(20,15)">
+    <rect x="4" y="10" width="34" height="52" rx="5" fill="#3D7A6B"/>
+    <rect x="36" y="10" width="34" height="52" rx="5" fill="#2d6457"/>
+    <rect x="33" y="8" width="10" height="56" rx="4" fill="#1A4A3A"/>
+    <line x1="12" y1="24" x2="30" y2="24" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="33" x2="30" y2="33" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="42" x2="24" y2="42" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <line x1="12" y1="51" x2="28" y2="51" stroke="#E8F4F0" stroke-width="2" stroke-linecap="round" opacity=".5"/>
+    <circle cx="58" cy="26" r="9" fill="#C8882A"/>
+    <circle cx="58" cy="26" r="4.5" fill="#FAFAF7"/>
+    <line x1="58" y1="34" x2="52" y2="54" stroke="#C8882A" stroke-width="3" stroke-linecap="round"/>
+    <path d="M4 62 Q38 53 38 62 Q38 53 72 62" fill="none" stroke="#5BBDA8" stroke-width="3" stroke-linecap="round"/>
+  </g>
+  <text x="114" y="58" font-family="'Playfair Display',Georgia,serif" font-size="46" font-weight="700" letter-spacing="-1"><tspan fill="#FAFAF7">Naija</tspan><tspan fill="#5BBDA8">Learn</tspan></text>
+  <text x="115" y="80" font-family="'DM Sans',Arial,sans-serif" font-size="11" font-weight="500" letter-spacing="2.4" fill="#6B7F8E">EDUCATIONAL RESOURCE LIBRARY</text>
+</svg></a>
+  <div class="footer-tagline">Nigeria's educational resource library — for teachers, parents, and students.</div>
+  <div class="footer-links">
+    <a href="pages/about.html">About</a>
+    <a href="pages/browse.html">Browse</a>
+    <a href="pages/upload.html" title="Share lesson notes, past questions &amp; schemes of work with Nigerian students">Upload</a>
+    <a href="pages/browse.html">Subjects</a>
+    <a href="pages/privacy.html">Privacy Policy</a>
+    <a href="pages/terms.html">Terms</a>
+    <a href="pages/contact.html">Contact</a>
+  </div>
+  <div class="footer-copy">© 2026 NaijaLearn. Built with ❤️ for Nigerian education.</div>
+</footer>
+
+
+
+<script>
+/* ============================================
+   NAIJLEARN — Main JavaScript
+   ============================================ */
+
+document.addEventListener('DOMContentLoaded', () => {
+
+  // ─── HOW IT WORKS TABS ───
+  window.switchTab = function(tab, el) {
+    document.querySelectorAll('.how-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    const teacherSteps = document.getElementById('teacher-steps');
+    const parentSteps  = document.getElementById('parent-steps');
+    if (teacherSteps) teacherSteps.style.display = tab === 'teacher' ? 'grid' : 'none';
+    if (parentSteps)  parentSteps.style.display  = tab === 'parent'  ? 'grid' : 'none';
+  };
+
+  // ─── QUICK SEARCH TAGS ───
+  document.querySelectorAll('.stag').forEach(tag => {
+    tag.addEventListener('click', () => {
+      const searchInput = document.querySelector('.search-input');
+      if (searchInput) {
+        searchInput.value = tag.textContent;
+        searchInput.focus();
+      }
+    });
+  });
+
+  // ─── SEARCH FORM ───
+  const searchBtn = document.querySelector('.btn-search');
+  if (searchBtn) {
+    searchBtn.addEventListener('click', () => {
+      const q = document.querySelector('.search-input')?.value?.trim();
+      if (q) {
+        window.location.href = `pages/browse.html?q=${encodeURIComponent(q)}`;
+      } else {
+        showToast('Please enter a search term.', 'info');
+      }
+    });
+  }
+
+  // Allow pressing Enter in the search input
+  const searchInput = document.querySelector('.search-input');
+  if (searchInput) {
+    searchInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        const q = searchInput.value.trim();
+        if (q) {
+          window.location.href = `pages/browse.html?q=${encodeURIComponent(q)}`;
+        }
+      }
+    });
+  }
+
+  // ─── SUBJECT PILLS ───
+  document.querySelectorAll('.subject-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      const subjectName = pill.querySelector('.subj-name')?.textContent;
+      if (subjectName) {
+        window.location.href = `pages/browse.html?subject=${encodeURIComponent(subjectName)}`;
+      }
+    });
+  });
+
+
+  // ─── HERO BUTTONS ───
+  const btnBrowse = document.querySelector('.btn-primary');
+  if (btnBrowse && btnBrowse.textContent.includes('Browse')) {
+    btnBrowse.addEventListener('click', () => {
+      window.location.href = 'pages/browse.html';
+    });
+  }
+
+  const btnUpload = document.querySelector('.btn-ghost');
+  if (btnUpload && btnUpload.textContent.includes('Upload')) {
+    btnUpload.addEventListener('click', () => {
+      window.location.href = 'pages/upload.html';
+    });
+  }
+
+  // ─── CTA BUTTONS ───
+  const btnCreateAcc = document.querySelector('.btn-sage');
+  if (btnCreateAcc) {
+    btnCreateAcc.addEventListener('click', () => {
+      window.location.href = 'pages/signup.html';
+    });
+  }
+
+  const btnBrowseFirst = document.querySelector('.btn-outline-w');
+  if (btnBrowseFirst) {
+    btnBrowseFirst.addEventListener('click', () => {
+      window.location.href = 'pages/browse.html';
+    });
+  }
+
+  // ─── TOAST SYSTEM ───
+  window.showToast = function(message, type) {
+    let container = document.querySelector('.toast-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.className = 'toast-container';
+      document.body.appendChild(container);
+    }
+
+    const icons = { success: '✓', error: '✕', info: 'ℹ' };
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `<span>${icons[type] || '✓'}</span> ${message}`;
+    container.appendChild(toast);
+
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transition = 'opacity .3s';
+      setTimeout(() => toast.remove(), 300);
+    }, 3500);
+  };
+
+  // ─── LIVE STATS FROM SUPABASE ───
+  function animateCount(el, end) {
+    const dur   = 1600;
+    const start = performance.now();
+    function tick(now) {
+      const progress = Math.min((now - start) / dur, 1);
+      const eased    = 1 - Math.pow(1 - progress, 3);
+      el.textContent = Math.floor(eased * end).toLocaleString() + '+';
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function loadStats(sb) {
+    Promise.all([
+      sb.from('resources').select('id', { count: 'exact', head: true }),
+      sb.from('profiles').select('id', { count: 'exact', head: true }),
+      sb.from('resources').select('downloads'),
+    ]).then(function([resourcesRes, teachersRes, downloadsRes]) {
+      const totalDownloads = (downloadsRes.data || [])
+        .reduce((sum, r) => sum + (Number(r.downloads) || 0), 0);
+      const values = [resourcesRes.count || 0, teachersRes.count || 0, totalDownloads];
+      document.querySelectorAll('.stat-item').forEach((item, i) => {
+        const numEl = item.querySelector('.stat-num');
+        if (numEl) animateCount(numEl, values[i]);
+      });
+      const ctaEm = document.querySelector('.cta-title em');
+      if (ctaEm) ctaEm.textContent = (teachersRes.count || 0).toLocaleString() + '+';
+    });
+  }
+
+  // Wait for _nlSb to be ready (set by nav-auth.js)
+  (function waitForSb() {
+    if (window._nlSb) { loadStats(window._nlSb); }
+    else { setTimeout(waitForSb, 80); }
+  })();
+
+  // ─── SCROLL FADE IN ───
+  const fadeEls = document.querySelectorAll('.res-card, .subject-pill, .step-card, .testi-card');
+  const fadeObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+        fadeObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  fadeEls.forEach((el, i) => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(16px)';
+    el.style.transition = `opacity .4s ease ${i * 60}ms, transform .4s ease ${i * 60}ms`;
+    fadeObserver.observe(el);
+  });
+
+});
+
+</script>
+
+
+
+<script>
+/* ── Live homepage data — trending cards + subject counts ── */
+(function () {
+  var SUBJECT_STYLE = {
+    'Mathematics':        { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', text:'#1A4A3A', icon:'ti-math-function' },
+    'English Language':   { bg:'#FBF3E8', arc:'#C8882A', dot:'#3D7A6B', text:'#6B3A08', icon:'ti-book-2' },
+    'Biology':            { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', text:'#1A4A3A', icon:'ti-dna' },
+    'Physics':            { bg:'#FBF3E8', arc:'#C8882A', dot:'#3D7A6B', text:'#6B3A08', icon:'ti-atom' },
+    'Chemistry':          { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', text:'#1A4A3A', icon:'ti-flask' },
+    'Civic Education':    { bg:'#FBF3E8', arc:'#C8882A', dot:'#3D7A6B', text:'#6B3A08', icon:'ti-building-community' },
+    'Agricultural Science':     { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', text:'#1A4A3A', icon:'ti-plant' },
+    'Computer Studies':   { bg:'#FBF3E8', arc:'#C8882A', dot:'#3D7A6B', text:'#6B3A08', icon:'ti-device-laptop' },
+    'Economics':          { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', text:'#1A4A3A', icon:'ti-chart-line' },
+    'Geography':          { bg:'#FBF3E8', arc:'#C8882A', dot:'#3D7A6B', text:'#6B3A08', icon:'ti-world' },
+    'History':            { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', text:'#1A4A3A', icon:'ti-books' },
+    'Further Mathematics':{ bg:'#FBF3E8', arc:'#C8882A', dot:'#3D7A6B', text:'#6B3A08', icon:'ti-sum' }
+  };
+  var DEFAULT_STYLE = { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', text:'#1A4A3A', icon:'ti-file-text' };
+
+  function subjectThumb(subject, type, verified) {
+    var s = SUBJECT_STYLE[subject] || DEFAULT_STYLE;
+    return '<div class="res-thumb" style="background:'+s.bg+';position:relative;overflow:hidden">'
+      + '<svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 200 130" preserveAspectRatio="xMidYMid slice">'
+      + '<circle cx="190" cy="130" r="85" fill="none" stroke="'+s.arc+'" stroke-width="22" opacity=".12"/>'
+      + '<circle cx="190" cy="130" r="57" fill="none" stroke="'+s.arc+'" stroke-width="14" opacity=".10"/>'
+      + '<circle cx="190" cy="130" r="28" fill="'+s.arc+'" opacity=".08"/>'
+      + '<circle cx="26" cy="20" r="14" fill="'+s.dot+'" opacity=".18"/>'
+      + '</svg>'
+      + '<div style="position:absolute;left:14px;top:50%;transform:translateY(-50%)">'
+      + '<div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:'+s.arc+';opacity:.75;margin-bottom:4px">Subject</div>'
+      + '<div style="font-family:\'Playfair Display\',Georgia,serif;font-size:16px;font-weight:700;color:'+s.text+';line-height:1.15;max-width:110px">'+subject+'</div>'
+      + '</div>'
+      + '<div style="position:absolute;right:12px;bottom:10px;opacity:.18">'
+      + '<i class="ti '+s.icon+'" style="font-size:46px;color:'+s.arc+'"></i>'
+      + '</div>'
+      + '<div class="res-badge">'+type+'</div>'
+      + (verified ? '<div class="res-verified">✓ Verified</div>' : '')
+      + '</div>';
+  }
+
+  function initials(name) {
+    return (name || '??').split(' ').slice(0,2).map(function(n){ return n[0] || ''; }).join('').toUpperCase();
+  }
+
+  function whenReady(fn) {
+    if (window._nlSb) { fn(window._nlSb); return; }
+    setTimeout(function(){ whenReady(fn); }, 80);
+  }
+
+  whenReady(function(sb) {
+
+    // ── 1. Trending cards (top 6 by downloads) ──
+    sb.from('resources')
+      .select('id,title,subject,class_level,term,week,type,verified,downloads,uploader_id,profiles(full_name,avatar_url)')
+      .order('downloads', { ascending: false })
+      .limit(6)
+      .then(function(result) {
+        var grid = document.getElementById('trending-grid');
+        if (!grid) return;
+
+        var resources = result.data || [];
+
+        if (!resources.length) {
+          grid.innerHTML =
+            '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted)">' +
+            '<div style="font-size:40px;margin-bottom:12px">📂</div>' +
+            '<div style="font-size:16px;font-weight:600;color:var(--ink);margin-bottom:8px">No resources yet</div>' +
+            '<div style="font-size:14px">Be the first to <a href="pages/upload.html" style="color:var(--sage);font-weight:600">upload a resource</a>!</div>' +
+            '</div>';
+          return;
+        }
+
+        grid.innerHTML = resources.map(function(r) {
+          var uploader  = (r.profiles && r.profiles.full_name) || 'Anonymous';
+          var avatarUrl = (r.profiles && r.profiles.avatar_url) || '';
+          var avatarHtml = avatarUrl
+            ? '<img src="' + avatarUrl + '" alt="' + uploader + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'"><span style="display:none;width:100%;height:100%;align-items:center;justify-content:center">' + initials(uploader) + '</span>'
+            : initials(uploader);
+          return '<div class="res-card" onclick="window.location.href=\'pages/resource.html?id=' + r.id + '\'" style="cursor:pointer">' +
+            subjectThumb(r.subject, r.type, r.verified) +
+            '<div class="res-body">' +
+            '<div class="res-meta"><span class="meta-tag green">' + r.class_level + '</span><span class="meta-tag">' + r.term + '</span><span class="meta-tag">' + r.week + '</span></div>' +
+            '<div class="res-title">' + r.title + '</div>' +
+            '<div class="res-footer">' +
+            '<div class="res-uploader"><div class="avatar-sm">' + avatarHtml + '</div><a href="pages/profile.html?id=' + r.uploader_id + '" onclick="event.stopPropagation()" style="color:inherit;text-decoration:none;">' + uploader + '</a></div>' +
+            '<div class="res-downloads"><span class="dl-icon">⬇</span>' + Number(r.downloads).toLocaleString() + '</div>' +
+            '</div></div></div>';
+        }).join('');
+      });
+
+    // ── 2. Subject counts (real numbers) ──
+    sb.from('resources')
+      .select('subject')
+      .then(function(result) {
+        if (!result.data) return;
+        var counts = {};
+        result.data.forEach(function(row) {
+          counts[row.subject] = (counts[row.subject] || 0) + 1;
+        });
+        document.querySelectorAll('.subj-count[data-subject]').forEach(function(el) {
+          var n = counts[el.dataset.subject] || 0;
+          el.textContent = n === 1 ? '1 resource' : n.toLocaleString() + ' resources';
+        });
+      });
+
+  });
+})();
+</script>
+
+</body>
+</html>
