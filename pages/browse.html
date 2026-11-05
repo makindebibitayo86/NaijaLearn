@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="../css/styles.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="../js/nav-auth.js"></script>
+<script src="../js/typing-placeholder.js" defer></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
   <style>
     /* ── Dark mode fix: filter & sort dropdowns ── */
@@ -70,13 +71,13 @@
 
 <!-- PAGE HEADER -->
 <div class="browse-header">
-  <div style="max-width:1200px;margin:0 auto">
+  <div>
     <div class="browse-title">Browse Resources</div>
     <div class="browse-sub">Lesson notes, schemes of work, and past questions — all tagged to the Nigerian curriculum.</div>
     <div style="margin-top:20px;display:flex;gap:10px;align-items:center">
       <div class="search-input-wrap" style="max-width:480px;margin:0;flex:1">
         <div class="search-icon">🔍</div>
-        <input id="browse-search" class="search-input" type="text" placeholder="Search by topic, subject, or class…">
+        <input id="browse-search" class="search-input" type="text" placeholder="Search by topic, subject, or class…" data-typing data-prefix="Search " data-topics="Photosynthesis|Primary 4 Mathematics|JSS2 Basic Science|Essay Writing|SS3 Past Questions|Civic Education">
       </div>
     </div>
   </div>
@@ -175,23 +176,41 @@
     <!-- CLASS LEVEL — checkboxes (Nursery → SS3) -->
     <div class="filter-group">
       <div class="filter-group-label">Class Level</div>
-      <div class="filter-check-row">
-        <label class="filter-chip"><input type="checkbox" data-group="class" value="Pre-Nursery"> Pre-Nursery</label>
-        <label class="filter-chip"><input type="checkbox" data-group="class" value="Nursery 1"> Nursery 1</label>
-        <label class="filter-chip"><input type="checkbox" data-group="class" value="Nursery 2"> Nursery 2</label>
-        <label class="filter-chip"><input type="checkbox" data-group="class" value="Nursery 3"> Nursery 3</label>
-        <label class="filter-chip"><input type="checkbox" data-group="class" value="Primary 1"> Primary 1</label>
-        <label class="filter-chip"><input type="checkbox" data-group="class" value="Primary 2"> Primary 2</label>
-        <label class="filter-chip"><input type="checkbox" data-group="class" value="Primary 3"> Primary 3</label>
-        <label class="filter-chip"><input type="checkbox" data-group="class" value="Primary 4"> Primary 4</label>
-        <label class="filter-chip"><input type="checkbox" data-group="class" value="Primary 5"> Primary 5</label>
-        <label class="filter-chip"><input type="checkbox" data-group="class" value="Primary 6"> Primary 6</label>
-        <label class="filter-chip"><input type="checkbox" data-group="class" value="JSS1"> JSS1</label>
-        <label class="filter-chip"><input type="checkbox" data-group="class" value="JSS2"> JSS2</label>
-        <label class="filter-chip"><input type="checkbox" data-group="class" value="JSS3"> JSS3</label>
-        <label class="filter-chip"><input type="checkbox" data-group="class" value="SS1"> SS1</label>
-        <label class="filter-chip"><input type="checkbox" data-group="class" value="SS2"> SS2</label>
-        <label class="filter-chip"><input type="checkbox" data-group="class" value="SS3"> SS3</label>
+      <div class="filter-subgroup">
+        <div class="filter-subgroup-label">Nursery</div>
+        <div class="filter-check-row">
+          <label class="filter-chip"><input type="checkbox" data-group="class" value="Pre-Nursery"> Pre-Nursery</label>
+          <label class="filter-chip"><input type="checkbox" data-group="class" value="Nursery 1"> Nursery 1</label>
+          <label class="filter-chip"><input type="checkbox" data-group="class" value="Nursery 2"> Nursery 2</label>
+          <label class="filter-chip"><input type="checkbox" data-group="class" value="Nursery 3"> Nursery 3</label>
+        </div>
+      </div>
+      <div class="filter-subgroup">
+        <div class="filter-subgroup-label">Primary</div>
+        <div class="filter-check-row">
+          <label class="filter-chip"><input type="checkbox" data-group="class" value="Primary 1"> Primary 1</label>
+          <label class="filter-chip"><input type="checkbox" data-group="class" value="Primary 2"> Primary 2</label>
+          <label class="filter-chip"><input type="checkbox" data-group="class" value="Primary 3"> Primary 3</label>
+          <label class="filter-chip"><input type="checkbox" data-group="class" value="Primary 4"> Primary 4</label>
+          <label class="filter-chip"><input type="checkbox" data-group="class" value="Primary 5"> Primary 5</label>
+          <label class="filter-chip"><input type="checkbox" data-group="class" value="Primary 6"> Primary 6</label>
+        </div>
+      </div>
+      <div class="filter-subgroup">
+        <div class="filter-subgroup-label">Junior Secondary</div>
+        <div class="filter-check-row">
+          <label class="filter-chip"><input type="checkbox" data-group="class" value="JSS1"> JSS1</label>
+          <label class="filter-chip"><input type="checkbox" data-group="class" value="JSS2"> JSS2</label>
+          <label class="filter-chip"><input type="checkbox" data-group="class" value="JSS3"> JSS3</label>
+        </div>
+      </div>
+      <div class="filter-subgroup">
+        <div class="filter-subgroup-label">Senior Secondary</div>
+        <div class="filter-check-row">
+          <label class="filter-chip"><input type="checkbox" data-group="class" value="SS1"> SS1</label>
+          <label class="filter-chip"><input type="checkbox" data-group="class" value="SS2"> SS2</label>
+          <label class="filter-chip"><input type="checkbox" data-group="class" value="SS3"> SS3</label>
+        </div>
       </div>
     </div>
 

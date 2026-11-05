@@ -10,7 +10,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="../js/nav-auth.js"></script>
   <style>
-    .profile-page{max-width:1080px;margin:0 auto;padding:36px 20px 80px}
+    .profile-page{max-width:var(--page-max);margin:0 auto;padding:36px var(--gutter) 80px}
     .back-link{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);text-decoration:none;margin-bottom:24px;transition:color .2s}
     .back-link:hover{color:var(--sage)}
 
@@ -140,7 +140,7 @@
 
     /* Responsive */
     @media(max-width:860px){.profile-grid{grid-template-columns:1fr}.profile-hero{flex-direction:column;align-items:flex-start}.hero-avatar-wrap{display:none}}
-    @media(max-width:520px){.profile-page{padding:20px 14px 60px}.profile-hero{padding:24px 20px}.stats-row{gap:10px}.stat-num{font-size:22px}.panel-body,.panel-header{padding:14px 16px}}
+    @media(max-width:520px){.profile-page{padding:20px var(--gutter) 60px}.profile-hero{padding:24px 20px}.stats-row{gap:10px}.stat-num{font-size:22px}.panel-body,.panel-header{padding:14px 16px}}
   </style>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
 </head>

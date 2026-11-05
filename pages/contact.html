@@ -14,7 +14,7 @@
   <style>
     .static-hero {
       background: linear-gradient(135deg, #1A4A3A 0%, #0D1B2A 100%);
-      padding: 80px 48px 72px;
+      padding: 80px var(--edge-x) 72px;
       text-align: center;
       color: #fff;
     }
@@ -40,9 +40,9 @@
     .static-hero h1 em { color: #5BBDA8; font-style: normal; }
     .static-hero p { font-size: 18px; color: rgba(255,255,255,.75); max-width: 500px; margin: 0 auto; line-height: 1.6; }
     .contact-body {
-      max-width: 900px;
+      max-width: var(--page-max);
       margin: 0 auto;
-      padding: 72px 32px;
+      padding: 72px var(--gutter);
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 48px;
@@ -175,9 +175,9 @@
     .form-success h3 { font-size: 20px; font-weight: 600; color: var(--ink); margin-bottom: 8px; }
     .form-success p { font-size: 14px; color: var(--muted); }
     .faq-section {
-      max-width: 780px;
+      max-width: var(--page-max);
       margin: 0 auto;
-      padding: 0 32px 72px;
+      padding: 0 var(--gutter) 72px;
     }
     .faq-section h2 {
       font-family: 'Playfair Display', serif;
@@ -220,10 +220,10 @@
     }
     .faq-a.open { display: block; }
     @media (max-width: 768px) {
-      .static-hero { padding: 60px 24px; }
-      .contact-body { grid-template-columns: 1fr; padding: 48px 20px; gap: 32px; }
+      .static-hero { padding: 60px var(--edge-x); }
+      .contact-body { grid-template-columns: 1fr; padding: 48px var(--gutter); gap: 32px; }
       .form-two-col { grid-template-columns: 1fr; }
-      .faq-section { padding: 0 20px 56px; }
+      .faq-section { padding: 0 var(--gutter) 56px; }
       .contact-form-wrap { padding: 20px 16px; }
     }
     [data-theme="dark"] .form-row input,

@@ -14,7 +14,7 @@
   <style>
     .static-hero {
       background: linear-gradient(135deg, #1A3A4A 0%, #0D1B2A 100%);
-      padding: 80px 48px 72px;
+      padding: 80px var(--edge-x) 72px;
       text-align: center;
       color: #fff;
     }
@@ -39,9 +39,9 @@
     }
     .static-hero p { font-size: 16px; color: rgba(255,255,255,.65); }
     .static-body {
-      max-width: 780px;
+      max-width: var(--page-max);
       margin: 0 auto;
-      padding: 72px 32px;
+      padding: 72px var(--gutter);
     }
     .policy-toc {
       background: var(--white);
@@ -52,6 +52,8 @@
     }
     .policy-toc h3 { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 14px; }
     .policy-toc ol { padding-left: 20px; margin: 0; }
+    /* keep long legal text at a comfortable reading width inside the full-width frame */
+    .policy-section p, .policy-section li { max-width: 80ch; }
     .policy-toc li { margin-bottom: 8px; }
     .policy-toc a { color: var(--sage); font-size: 14px; }
     .policy-section { margin-bottom: 56px; scroll-margin-top: 90px; }
@@ -91,9 +93,44 @@
       color: var(--muted);
       margin-bottom: 48px;
     }
+    /* ── Scroll spy ── */
+    .policy-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 80ch) 240px;
+      column-gap: 56px;
+      justify-content: start;
+      align-items: start;
+    }
+    .spy-nav { position: sticky; top: 100px; }
+    .spy-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+    .spy-list { list-style: none; margin: 0; padding: 0; border-left: 2px solid var(--border); }
+    .spy-list a {
+      display: block;
+      padding: 7px 0 7px 14px;
+      margin-left: -2px;
+      border-left: 2px solid transparent;
+      font-size: 13px;
+      line-height: 1.4;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color .15s, border-color .15s;
+    }
+    .spy-list a:hover { color: var(--ink); }
+    .spy-list a.active { color: var(--sage); border-left-color: var(--sage); font-weight: 600; }
+    @media (max-width: 1100px) {
+      .policy-layout { grid-template-columns: minmax(0, 1fr); }
+      .spy-nav { display: none; }
+    }
     @media (max-width: 768px) {
-      .static-hero { padding: 60px 24px; }
-      .static-body { padding: 48px 20px; }
+      .static-hero { padding: 60px var(--edge-x); }
+      .static-body { padding: 48px var(--gutter); }
     }
   </style>
 </head>
@@ -162,6 +199,8 @@
     </ol>
   </div>
 
+  <div class="policy-layout">
+  <div class="policy-articles">
   <div class="policy-section" id="acceptance">
     <h2>1. Acceptance of terms</h2>
     <p>By accessing or using NaijaLearn (the "Platform"), you agree to be bound by these Terms of Service. If you do not agree, please do not use the platform.</p>
@@ -236,6 +275,22 @@
     <p>We may update these terms from time to time. When we do, we will update the effective date at the top of this page and notify users through the platform. Continued use of NaijaLearn after changes means you accept the updated terms.</p>
     <p>Questions? <a href="contact.html" style="color:var(--sage)">Contact us</a>.</p>
   </div>
+  </div>
+  <aside class="spy-nav" aria-label="On this page">
+      <div class="spy-title">On this page</div>
+      <ol class="spy-list">
+        <li><a href="#acceptance" data-spy="acceptance">1. Acceptance of terms</a></li>
+        <li><a href="#accounts" data-spy="accounts">2. Accounts</a></li>
+        <li><a href="#content" data-spy="content">3. Content and uploads</a></li>
+        <li><a href="#intellectual-property" data-spy="intellectual-property">4. Intellectual property</a></li>
+        <li><a href="#prohibited" data-spy="prohibited">5. Prohibited conduct</a></li>
+        <li><a href="#termination" data-spy="termination">6. Termination</a></li>
+        <li><a href="#disclaimers" data-spy="disclaimers">7. Disclaimers</a></li>
+        <li><a href="#governing-law" data-spy="governing-law">8. Governing law</a></li>
+        <li><a href="#changes" data-spy="changes">9. Changes to these terms</a></li>
+      </ol>
+    </aside>
+  </div>
 </div>
 
 <!-- FOOTER -->
@@ -270,5 +325,33 @@
   </div>
   <div class="footer-copy">© 2026 NaijaLearn. Built with ❤️ for Nigerian education.</div>
 </footer>
+<script>
+(function () {
+  var links = Array.prototype.slice.call(document.querySelectorAll('.spy-list a'));
+  var sections = links.map(function (a) { return document.getElementById(a.getAttribute('data-spy')); });
+  if (!links.length) return;
+  var ticking = false;
+
+  function update() {
+    ticking = false;
+    var line = 130, current = 0;
+    for (var i = 0; i < sections.length; i++) {
+      if (sections[i].getBoundingClientRect().top <= line) current = i;
+    }
+    if (window.innerHeight + window.pageYOffset >= document.documentElement.scrollHeight - 4) current = sections.length - 1;
+    links.forEach(function (a, i) {
+      var on = i === current;
+      a.classList.toggle('active', on);
+      if (on) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
+    });
+  }
+  function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(update); } }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  window.addEventListener('load', update);
+  update();
+})();
+</script>
 </body>
 </html>

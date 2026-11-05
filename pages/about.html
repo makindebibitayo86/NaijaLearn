@@ -14,7 +14,7 @@
   <style>
     .static-hero {
       background: linear-gradient(135deg, #0D1B2A 0%, #1A4A3A 100%);
-      padding: 80px 48px 72px;
+      padding: 80px var(--edge-x) 72px;
       text-align: center;
       color: #fff;
     }
@@ -47,9 +47,9 @@
       line-height: 1.7;
     }
     .static-body {
-      max-width: 860px;
+      max-width: var(--page-max);
       margin: 0 auto;
-      padding: 72px 32px;
+      padding: 72px var(--gutter);
     }
     .section-label {
       font-size: 11px;
@@ -174,8 +174,8 @@
     }
     .stat-box .lbl { font-size: 13px; color: var(--muted); margin-top: 4px; }
     @media (max-width: 768px) {
-      .static-hero { padding: 60px 24px; }
-      .static-body { padding: 48px 20px; }
+      .static-hero { padding: 60px var(--edge-x); }
+      .static-body { padding: 48px var(--gutter); }
     }
   </style>
 </head>

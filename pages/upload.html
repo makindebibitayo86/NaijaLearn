@@ -11,6 +11,28 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="../js/nav-auth.js"></script>
+
+<style>
+  /* ── Upload progress / confirmation ── */
+  .up-progress { margin: 0 0 14px; }
+  .up-track { height: 6px; border-radius: 99px; background: var(--sage-l); overflow: hidden; }
+  .up-bar { height: 100%; width: 40%; border-radius: 99px; background: var(--sage); animation: up-slide 1.3s ease-in-out infinite; }
+  .up-progress.done .up-bar  { animation: none; width: 100%; transition: width .45s ease; }
+  .up-progress.error .up-bar { animation: none; width: 100%; background: #E05656; }
+  @keyframes up-slide { 0% { margin-left: -40%; } 100% { margin-left: 100%; } }
+  .up-text { margin-top: 10px; font-size: 14px; font-weight: 500; color: var(--ink); text-align: center; min-height: 40px; line-height: 1.5; }
+  .up-text.swap { animation: up-fade .3s ease; }
+  .up-text a { color: var(--sage); font-weight: 600; text-decoration: underline; }
+  .up-text .up-count { display: block; font-size: 13px; color: var(--muted); font-weight: 500; }
+  .up-progress.error .up-text { color: #C0392B; }
+  [data-theme="dark"] .up-progress.error .up-text { color: #FF7A70; }
+  @keyframes up-fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+  .btn-spinner { display: inline-block; width: 14px; height: 14px; margin-right: 9px; vertical-align: -2px; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; animation: up-spin .7s linear infinite; }
+  @keyframes up-spin { to { transform: rotate(360deg); } }
+  #upload-btn:disabled { cursor: default; }
+  #upload-btn.is-busy { opacity: .92; }
+  #upload-btn.is-done, #upload-btn.is-done:hover { background: var(--sage-d); }
+</style>
 </head>
 <body>
 
@@ -214,7 +236,12 @@
       <div id="file-info" style="margin-top:12px"></div>
     </div>
 
-    <button type="submit" class="btn-full primary" style="margin-bottom:60px">Upload Resource</button>
+    <div id="upload-progress" class="up-progress" style="display:none" aria-live="polite">
+      <div class="up-track"><div class="up-bar"></div></div>
+      <div class="up-text" id="up-text"></div>
+    </div>
+
+    <button type="submit" id="upload-btn" class="btn-full primary" style="margin-bottom:60px">Upload Resource</button>
   </form>
 
 </div>
@@ -293,6 +320,7 @@
     }
     bar.style.display = 'block';
     bar.textContent = msg;
+    try { bar.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
     var styles = {
       error:   { bg: '#FEF0F0', color: '#C0392B', border: '#F5C6C6' },
       success: { bg: '#E8F4F0', color: '#1D6B56', border: '#B8DDD5' },
@@ -329,6 +357,13 @@
 
   window.clearFile = function() { selectedFile = null; if (fileInput) fileInput.value=''; if (fileInfo) fileInfo.innerHTML=''; };
 
+  var uploading = false;
+
+  function hideStatus() {
+    var bar = document.getElementById('upload-status');
+    if (bar) bar.style.display = 'none';
+  }
+
   // Form submit
   document.getElementById('upload-form').addEventListener('submit', function(e) {
     e.preventDefault();
@@ -350,70 +385,155 @@
     // week always has a value (defaults to 'General')
     if (!selectedFile) return showStatus('Please attach a file (PDF, Word, or PowerPoint).', 'error');
 
-    btn.textContent = 'Uploading…';
+    if (btn.disabled) return;
+    hideStatus();
+
+    var uploadedPath = null;   // so we can clean up the file if saving the details fails
+    var longTimer = null;
+    var progressBox = document.getElementById('upload-progress');
+    var progressText = document.getElementById('up-text');
+    var stageStartedAt = 0;
+
+    function setText(html, asText) {
+      if (asText) progressText.textContent = html; else progressText.innerHTML = html;
+      progressText.classList.remove('swap'); void progressText.offsetWidth; progressText.classList.add('swap');
+    }
+    function setStage(btnLabel, longText) {
+      stageStartedAt = Date.now();
+      btn.innerHTML = '<span class="btn-spinner"></span>' + btnLabel;
+      setText(longText, true);
+    }
+    // keep each stage on screen long enough to be read, even on a fast connection
+    function holdStage() {
+      var wait = Math.max(0, 700 - (Date.now() - stageStartedAt));
+      return new Promise(function (resolve) { setTimeout(resolve, wait); });
+    }
+
+    uploading = true;
     btn.disabled = true;
-    showStatus('Uploading file, please wait…', 'info');
+    btn.classList.add('is-busy');
+    progressBox.className = 'up-progress';
+    progressBox.style.display = 'block';
+    setStage('Checking details…', 'Checking your details…');
 
-    sb.auth.getSession().then(function(sessionResult) {
-      var session = sessionResult.data && sessionResult.data.session;
-      if (!session) {
-        showStatus('Session expired. Please sign in again.', 'error');
-        btn.textContent = 'Upload Resource'; btn.disabled = false;
-        return;
-      }
+    holdStage()
+      .then(function () { return sb.auth.getSession(); })
+      .then(function (sessionResult) {
+        var session = sessionResult.data && sessionResult.data.session;
+        if (!session) throw new Error('Session expired. Please sign in again.');
 
-      var uploaderId = session.user.id;
-      var safeName = selectedFile.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-      var storagePath = uploaderId + '/' + Date.now() + '_' + safeName;
+        var uploaderId = session.user.id;
+        var safeName = selectedFile.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+        var storagePath = uploaderId + '/' + Date.now() + '_' + safeName;
 
-      sb.storage.from('resources').upload(storagePath, selectedFile, { cacheControl: '3600', upsert: false })
-      .then(function(storageResult) {
-        if (storageResult.error) throw storageResult.error;
+        setStage('Uploading file…', 'Uploading your file — please keep this page open.');
+        longTimer = setTimeout(function () {
+          setText('Still uploading — larger files take a little longer. Almost there…', true);
+        }, 8000);
 
-        var publicUrlResult = sb.storage.from('resources').getPublicUrl(storagePath);
-        var fileUrl = publicUrlResult.data.publicUrl;
-
-        return sb.from('resources').insert({
-          title: title,
-          description: desc || null,
-          subject: subject,
-          class_level: classLvl,
-          term: term,
-          week: week,
-          type: type,
-          file_url: fileUrl,
-          file_name: selectedFile.name,
-          file_size: selectedFile.size,
-          uploader_id: uploaderId
-        });
-      })
-      .then(function(dbResult) {
-        if (dbResult.error) throw dbResult.error;
-        // Get the newly inserted row's id
-        return sb.from('resources')
-          .select('id')
-          .eq('uploader_id', uploaderId)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .then(function(idResult) {
-            showStatus('✓ Resource uploaded successfully! Redirecting…', 'success');
-            var newId = idResult.data && idResult.data[0] && idResult.data[0].id;
-            setTimeout(function() {
-              if (newId) {
-                window.location.href = 'resource.html?id=' + newId;
-              } else {
-                window.location.href = 'browse.html';
-              }
-            }, 1400);
+        return sb.storage.from('resources')
+          .upload(storagePath, selectedFile, { cacheControl: '3600', upsert: false })
+          .then(function (storageResult) {
+            clearTimeout(longTimer);
+            if (storageResult.error) throw storageResult.error;
+            uploadedPath = storagePath;
+            return holdStage();
+          })
+          .then(function () {
+            var fileUrl = sb.storage.from('resources').getPublicUrl(storagePath).data.publicUrl;
+            setStage('Saving details…', 'File uploaded. Saving the resource details…');
+            return sb.from('resources').insert({
+              title: title,
+              description: desc || null,
+              subject: subject,
+              class_level: classLvl,
+              term: term,
+              week: week,
+              type: type,
+              file_url: fileUrl,
+              file_name: selectedFile.name,
+              file_size: selectedFile.size,
+              uploader_id: uploaderId
+            }).select('id').single();
           });
       })
-      .catch(function(err) {
+      .then(function (dbResult) {
+        if (dbResult.error) throw dbResult.error;
+        uploadedPath = null;   // row saved — keep the file
+        var newId = dbResult.data && dbResult.data.id;
+        return holdStage()
+          .then(function () {
+            setStage('Finishing up…', 'Finishing up…');
+            return holdStage();
+          })
+          .then(function () { showSuccess(title, newId); });
+      })
+      .catch(function (err) {
+        clearTimeout(longTimer);
         console.error('Upload error:', err);
-        showStatus('Error: ' + (err.message || 'Upload failed. Please try again.'), 'error');
-        btn.textContent = 'Upload Resource';
+        // don't leave an orphaned file behind if the details could not be saved
+        if (uploadedPath) { sb.storage.from('resources').remove([uploadedPath]).then(function () {}); }
+        progressBox.className = 'up-progress error';
+        setText('✕ ' + (err.message || 'Upload failed. Please try again.'), true);
+        btn.classList.remove('is-busy');
+        btn.textContent = 'Try Again';
         btn.disabled = false;
+        uploading = false;
+        try { progressBox.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
       });
-    });
+
+    // ── Success: confirmation, then clear the whole form after 5 seconds ──
+    function showSuccess(resTitle, newId) {
+      progressBox.className = 'up-progress done';
+      btn.classList.remove('is-busy');
+      btn.classList.add('is-done');
+      btn.innerHTML = '✓ Uploaded successfully';
+
+      progressText.innerHTML = '';
+      var line = document.createElement('div');
+      var strong = document.createElement('strong');
+      strong.textContent = '“' + resTitle + '”';
+      line.appendChild(strong);
+      line.appendChild(document.createTextNode(' is now live.'));
+      if (newId) {
+        line.appendChild(document.createTextNode(' '));
+        var a = document.createElement('a');
+        a.href = 'resource.html?id=' + newId;
+        a.textContent = 'View resource →';
+        line.appendChild(a);
+      }
+      var count = document.createElement('span');
+      count.className = 'up-count';
+      progressText.appendChild(line);
+      progressText.appendChild(count);
+      progressText.classList.remove('swap'); void progressText.offsetWidth; progressText.classList.add('swap');
+      showToast('Resource uploaded successfully!', 'success');
+
+      var secs = 5;
+      count.textContent = 'Clearing the form in ' + secs + 's…';
+      var timer = setInterval(function () {
+        secs--;
+        if (secs > 0) { count.textContent = 'Clearing the form in ' + secs + 's…'; return; }
+        clearInterval(timer);
+        resetUploadForm();
+      }, 1000);
+    }
+
+    function resetUploadForm() {
+      var form = document.getElementById('upload-form');
+      form.reset();                       // title, description, subject, type, class, term, week
+      clearFile();                        // attached file + file preview
+      hideStatus();
+      progressBox.style.display = 'none';
+      progressBox.className = 'up-progress';
+      progressText.textContent = '';
+      btn.classList.remove('is-done', 'is-busy');
+      btn.textContent = 'Upload Resource';
+      btn.disabled = false;
+      uploading = false;
+      try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { window.scrollTo(0, 0); }
+      showToast('Form cleared — ready for your next upload.', 'info');
+    }
   });
 </script>
 

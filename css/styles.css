@@ -26,6 +26,15 @@
   --white:    #FFFFFF;
   --border:   #E4E8EB;
   --r:        12px;
+
+  /* ── Site-wide page frame (every page except admin) ──
+     --page-max : widest the page frame gets (outer edge, gutters included)
+     --gutter   : space between the screen edge / container edge and content
+     --edge-x   : horizontal padding for FULL-WIDTH bars (nav, footer, bands)
+                  so their content lines up with the centred container.      */
+  --page-max: 1200px;
+  --gutter:   48px;
+  --edge-x:   max(var(--gutter), calc((100% - var(--page-max)) / 2 + var(--gutter)));
   --shadow-sm:  0 2px 8px rgba(0,0,0,.06);
   --shadow-md:  0 8px 40px rgba(61,122,107,.12), 0 2px 8px rgba(0,0,0,.04);
   --shadow-lg:  0 12px 40px rgba(61,122,107,.14);
@@ -62,12 +71,12 @@ img {
 .divider {
   height: 1px;
   background: var(--border);
-  margin: 0 48px;
+  margin: 0 var(--edge-x);
 }
 
 .section {
-  padding: 56px 48px;
-  max-width: 1200px;
+  padding: 56px var(--gutter);
+  max-width: var(--page-max);
   margin: 0 auto;
 }
 
@@ -189,7 +198,7 @@ nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 18px 48px;
+  padding: 18px var(--edge-x);
   background: var(--white);
   border-bottom: 1px solid var(--border);
   position: sticky;
@@ -305,15 +314,15 @@ nav {
 }
 
 /* ─── HERO ─── */
-.hero-wrapper { max-width: 1296px; margin: 0 auto; }
+.hero-wrapper { max-width: var(--page-max); margin: 0 auto; }
 
 .hero {
-  padding: 72px 48px 60px;
+  padding: 72px var(--gutter) 60px;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 60px;
   align-items: center;
-  max-width: 1200px;
+  max-width: var(--page-max);
   margin: 0 auto;
 }
 
@@ -419,7 +428,7 @@ h1 em { font-style: normal; color: var(--sage); }
   border: none;
   background: transparent;
   flex: 1;
-  padding: 14px 0;
+  padding: 14px 0 14px 7px;
   font-size: 15px;
   font-family: inherit;
   color: var(--ink);
@@ -657,11 +666,10 @@ h1 em { font-style: normal; color: var(--sage); }
 .how-section {
   background: var(--white);
   border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  padding: 64px 48px;
+  padding: 64px var(--edge-x);
 }
 
-.how-inner { max-width: 1200px; margin: 0 auto; }
+.how-inner { max-width: none; margin: 0 auto; }
 
 .how-title {
   font-family: 'Playfair Display', serif;
@@ -778,9 +786,21 @@ h1 em { font-style: normal; color: var(--sage); }
 
 /* ─── HOMESCHOOL BANNER ─── */
 .home-banner-wrapper {
-  max-width: 1296px;
-  margin: 0 auto;
-  padding: 0 0 56px;
+  position: relative;
+  max-width: none;
+  margin: 0;
+  padding: 0 var(--edge-x) 56px;
+}
+/* continues the "How it works" band (and its bottom line) to the banner's mid-height */
+.home-banner-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc((100% - 56px) / 2);
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
 }
 
 .home-banner {
@@ -790,9 +810,10 @@ h1 em { font-style: normal; color: var(--sage); }
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 0 48px;
-  max-width: 1200px;
+  margin: 0;
+  max-width: none;
   position: relative;
+  z-index: 1;
   overflow: hidden;
 }
 .home-banner::before {
@@ -838,7 +859,7 @@ h1 em { font-style: normal; color: var(--sage); }
 /* ─── CTA SECTION ─── */
 .cta-section {
   background: var(--ink);
-  padding: 72px 48px;
+  padding: 72px var(--edge-x);
   text-align: center;
 }
 
@@ -871,7 +892,7 @@ h1 em { font-style: normal; color: var(--sage); }
 /* ─── FOOTER ─── */
 footer {
   background: #0A151F;
-  padding: 48px;
+  padding: 48px var(--edge-x);
   color: rgba(255,255,255,.5);
   font-size: 13px;
   text-align: center;
@@ -907,7 +928,7 @@ footer {
 .browse-header {
   background: var(--white);
   border-bottom: 1px solid var(--border);
-  padding: 32px 48px;
+  padding: 32px var(--edge-x);
 }
 
 .browse-title {
@@ -924,9 +945,9 @@ footer {
   display: grid;
   grid-template-columns: 260px 1fr;
   gap: 32px;
-  max-width: 1200px;
+  max-width: var(--page-max);
   margin: 0 auto;
-  padding: 40px 48px;
+  padding: 40px var(--gutter);
   align-items: start;
 }
 
@@ -1047,6 +1068,16 @@ footer {
   flex-wrap: wrap;
   gap: 6px;
 }
+/* Class level groups */
+.filter-subgroup { margin-bottom: 14px; }
+.filter-subgroup:last-child { margin-bottom: 0; }
+.filter-subgroup-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  opacity: .8;
+  margin-bottom: 6px;
+}
 .filter-chip {
   display: inline-flex;
   align-items: center;
@@ -1102,7 +1133,7 @@ footer {
 .upload-wrapper {
   max-width: 700px;
   margin: 48px auto;
-  padding: 0 48px;
+  padding: 0 var(--gutter);
 }
 
 .upload-page-title {
@@ -1304,6 +1335,7 @@ footer {
 
 /* ─── RESPONSIVE ─── */
 @media (max-width: 1024px) {
+  :root { --gutter: 32px; }
   .subjects-grid { grid-template-columns: repeat(3, 1fr); }
   .resources-grid, .results-grid { grid-template-columns: repeat(2, 1fr); }
   .testi-grid { grid-template-columns: repeat(2, 1fr); }
@@ -1311,36 +1343,37 @@ footer {
 }
 
 @media (max-width: 768px) {
-  nav { padding: 16px 20px; }
+  :root { --gutter: 20px; }
+  nav { padding-top: 16px; padding-bottom: 16px; }
   .nav-links { display: none; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: var(--white); border-bottom: 1px solid var(--border); padding: 20px; gap: 16px; }
   .nav-links.open { display: flex; }
   .nav-toggle { display: block; }
 
-  .hero { grid-template-columns: 1fr; padding: 40px 20px; gap: 32px; }
+  .hero { grid-template-columns: 1fr; padding: 40px var(--gutter); gap: 32px; }
   h1 { font-size: 36px; }
 
-  .section { padding: 36px 20px; }
-  .divider { margin: 0 20px; }
+  .section { padding: 36px var(--gutter); }
+  .divider { margin: 0 var(--edge-x); }
 
   .subjects-grid { grid-template-columns: repeat(2, 1fr); }
   .resources-grid, .results-grid { grid-template-columns: 1fr; }
   .testi-grid { grid-template-columns: 1fr; }
   .steps-grid { grid-template-columns: 1fr; }
 
-  .home-banner { padding: 36px 28px; margin: 0 20px; }
+  .home-banner { padding: 36px 28px; margin: 0; }
   .home-banner::before { display: none; }
   .banner-title { font-size: 24px; }
 
-  .how-section { padding: 48px 20px; }
-  .cta-section { padding: 48px 20px; }
+  .how-section { padding: 48px var(--edge-x); }
+  .cta-section { padding: 48px var(--edge-x); }
   .cta-title { font-size: 28px; }
 
-  footer { padding: 36px 20px; }
+  footer { padding: 36px var(--edge-x); }
 
-  .browse-layout { grid-template-columns: 1fr; padding: 24px 20px; }
+  .browse-layout { grid-template-columns: 1fr; padding: 24px var(--gutter); }
   .filter-panel { position: static; }
 
-  .upload-wrapper { padding: 0 20px; margin: 32px auto; }
+  .upload-wrapper { padding: 0 var(--gutter); margin: 32px auto; }
   .upload-card { padding: 24px; }
   .form-row { grid-template-columns: 1fr; }
 
