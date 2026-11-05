@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="NaijaLearn — Nigeria's structured educational resource library for teachers, parents, and homeschoolers. Browse lesson notes by subject, class, term, and week.">
-  <title>NaijaLearn — Nigerian Educational Resource Library</title>
+  <title>ZAinab — Nigerian Educational Resource Library</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
@@ -75,6 +75,7 @@
         <div class="filter-row">
           <select class="filter-select" aria-label="Class Level">
             <option value="">Class Level</option>
+            <option>Pre-Nursery</option><option>Nursery 1</option><option>Nursery 2</option><option>Nursery 3</option>
             <option>Primary 1</option><option>Primary 2</option><option>Primary 3</option>
             <option>Primary 4</option><option>Primary 5</option><option>Primary 6</option>
             <option>JSS1</option><option>JSS2</option><option>JSS3</option>
@@ -86,6 +87,7 @@
           </select>
           <select class="filter-select" aria-label="Subject">
             <option value="">Subject</option>
+            <option>All Subjects</option>
             <option>Mathematics</option><option>English Language</option><option>Biology</option>
             <option>Physics</option><option>Chemistry</option><option>Civic Education</option>
             <option>Agricultural Science</option><option>Computer Studies</option>
@@ -482,6 +484,17 @@ document.addEventListener('DOMContentLoaded', () => {
 /* ── Live homepage data — trending cards + subject counts ── */
 (function () {
   var SUBJECT_STYLE = {
+    /* ── General & Early Years ── */
+    'All Subjects':         { bg:'#EEF2F7', arc:'#34495E', dot:'#C8882A', text:'#1C2A39', icon:'ti-layout-grid' },
+    'Number Work':          { bg:'#FFF3E0', arc:'#EF6C00', dot:'#1A6FAD', text:'#6B3000', icon:'ti-123' },
+    'Letter Work':          { bg:'#E3F2FD', arc:'#1565C0', dot:'#F9A825', text:'#0D3B7A', icon:'ti-abc' },
+    'Phonics':              { bg:'#F3E5F5', arc:'#8E24AA', dot:'#00897B', text:'#4A0072', icon:'ti-ear' },
+    'Rhymes & Songs':       { bg:'#FCE4EC', arc:'#D81B60', dot:'#F9A825', text:'#6A0033', icon:'ti-music' },
+    'Handwriting':          { bg:'#FFF8E1', arc:'#F9A825', dot:'#3949AB', text:'#6B4100', icon:'ti-writing' },
+    'Colouring & Drawing':  { bg:'#E8F5E9', arc:'#43A047', dot:'#E53935', text:'#1B4D1E', icon:'ti-palette' },
+    'Social Habits':        { bg:'#E0F7FA', arc:'#00838F', dot:'#EF6C00', text:'#004D55', icon:'ti-users' },
+    'Health Habits':        { bg:'#E8F5EE', arc:'#1B7A4A', dot:'#C2185B', text:'#0A3D22', icon:'ti-heart' },
+
     'Mathematics':        { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', text:'#1A4A3A', icon:'ti-math-function' },
     'English Language':   { bg:'#FBF3E8', arc:'#C8882A', dot:'#3D7A6B', text:'#6B3A08', icon:'ti-book-2' },
     'Biology':            { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', text:'#1A4A3A', icon:'ti-dna' },

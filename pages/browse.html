@@ -97,7 +97,20 @@
       <div class="filter-group-label">Subject</div>
       <div class="filter-dropdown-wrap">
         <select id="subject-select" class="filter-dropdown">
-          <option value="">— All Subjects —</option>
+          <option value="">— Any Subject —</option>
+          <optgroup label="🌐 General">
+            <option value="All Subjects">All Subjects</option>
+          </optgroup>
+          <optgroup label="🧸 Early Years / Nursery">
+            <option value="Number Work">Number Work</option>
+            <option value="Letter Work">Letter Work</option>
+            <option value="Phonics">Phonics</option>
+            <option value="Rhymes & Songs">Rhymes &amp; Songs</option>
+            <option value="Handwriting">Handwriting</option>
+            <option value="Colouring & Drawing">Colouring &amp; Drawing</option>
+            <option value="Social Habits">Social Habits</option>
+            <option value="Health Habits">Health Habits</option>
+          </optgroup>
           <optgroup label="🔢 Sciences &amp; Mathematics">
             <option value="Mathematics">Mathematics</option>
             <option value="Further Mathematics">Further Mathematics</option>
@@ -159,10 +172,20 @@
       </div>
     </div>
 
-    <!-- CLASS LEVEL — kept as checkboxes (only 6 options) -->
+    <!-- CLASS LEVEL — checkboxes (Nursery → SS3) -->
     <div class="filter-group">
       <div class="filter-group-label">Class Level</div>
       <div class="filter-check-row">
+        <label class="filter-chip"><input type="checkbox" data-group="class" value="Pre-Nursery"> Pre-Nursery</label>
+        <label class="filter-chip"><input type="checkbox" data-group="class" value="Nursery 1"> Nursery 1</label>
+        <label class="filter-chip"><input type="checkbox" data-group="class" value="Nursery 2"> Nursery 2</label>
+        <label class="filter-chip"><input type="checkbox" data-group="class" value="Nursery 3"> Nursery 3</label>
+        <label class="filter-chip"><input type="checkbox" data-group="class" value="Primary 1"> Primary 1</label>
+        <label class="filter-chip"><input type="checkbox" data-group="class" value="Primary 2"> Primary 2</label>
+        <label class="filter-chip"><input type="checkbox" data-group="class" value="Primary 3"> Primary 3</label>
+        <label class="filter-chip"><input type="checkbox" data-group="class" value="Primary 4"> Primary 4</label>
+        <label class="filter-chip"><input type="checkbox" data-group="class" value="Primary 5"> Primary 5</label>
+        <label class="filter-chip"><input type="checkbox" data-group="class" value="Primary 6"> Primary 6</label>
         <label class="filter-chip"><input type="checkbox" data-group="class" value="JSS1"> JSS1</label>
         <label class="filter-chip"><input type="checkbox" data-group="class" value="JSS2"> JSS2</label>
         <label class="filter-chip"><input type="checkbox" data-group="class" value="JSS3"> JSS3</label>
@@ -278,6 +301,17 @@
 
   /* ── Design H: arc + serif subject name ── */
   var SUBJECT_STYLE = {
+    /* ── General & Early Years ── */
+    'All Subjects':         { bg:'#EEF2F7', arc:'#34495E', dot:'#C8882A', text:'#1C2A39', icon:'ti-layout-grid' },
+    'Number Work':          { bg:'#FFF3E0', arc:'#EF6C00', dot:'#1A6FAD', text:'#6B3000', icon:'ti-123' },
+    'Letter Work':          { bg:'#E3F2FD', arc:'#1565C0', dot:'#F9A825', text:'#0D3B7A', icon:'ti-abc' },
+    'Phonics':              { bg:'#F3E5F5', arc:'#8E24AA', dot:'#00897B', text:'#4A0072', icon:'ti-ear' },
+    'Rhymes & Songs':       { bg:'#FCE4EC', arc:'#D81B60', dot:'#F9A825', text:'#6A0033', icon:'ti-music' },
+    'Handwriting':          { bg:'#FFF8E1', arc:'#F9A825', dot:'#3949AB', text:'#6B4100', icon:'ti-writing' },
+    'Colouring & Drawing':  { bg:'#E8F5E9', arc:'#43A047', dot:'#E53935', text:'#1B4D1E', icon:'ti-palette' },
+    'Social Habits':        { bg:'#E0F7FA', arc:'#00838F', dot:'#EF6C00', text:'#004D55', icon:'ti-users' },
+    'Health Habits':        { bg:'#E8F5EE', arc:'#1B7A4A', dot:'#C2185B', text:'#0A3D22', icon:'ti-heart' },
+
     /* ── Sciences & Mathematics ── */
     'Mathematics':          { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', text:'#1A4A3A', icon:'ti-math-function' },
     'Further Mathematics':  { bg:'#E3F0FB', arc:'#1A6FAD', dot:'#8B3DBA', text:'#0C3F6B', icon:'ti-sum' },

@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="../css/styles.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="../js/nav-auth.js"></script>
+  <script src="../js/edit-resource.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
 
   <style>
@@ -1048,6 +1049,17 @@
 
   /* ─── Subject style map ─── */
   var SUBJECT_STYLE = {
+    /* ── General & Early Years ── */
+    'All Subjects':         { bg:'#EEF2F7', arc:'#34495E', dot:'#C8882A', text:'#1C2A39', icon:'ti-layout-grid' },
+    'Number Work':          { bg:'#FFF3E0', arc:'#EF6C00', dot:'#1A6FAD', text:'#6B3000', icon:'ti-123' },
+    'Letter Work':          { bg:'#E3F2FD', arc:'#1565C0', dot:'#F9A825', text:'#0D3B7A', icon:'ti-abc' },
+    'Phonics':              { bg:'#F3E5F5', arc:'#8E24AA', dot:'#00897B', text:'#4A0072', icon:'ti-ear' },
+    'Rhymes & Songs':       { bg:'#FCE4EC', arc:'#D81B60', dot:'#F9A825', text:'#6A0033', icon:'ti-music' },
+    'Handwriting':          { bg:'#FFF8E1', arc:'#F9A825', dot:'#3949AB', text:'#6B4100', icon:'ti-writing' },
+    'Colouring & Drawing':  { bg:'#E8F5E9', arc:'#43A047', dot:'#E53935', text:'#1B4D1E', icon:'ti-palette' },
+    'Social Habits':        { bg:'#E0F7FA', arc:'#00838F', dot:'#EF6C00', text:'#004D55', icon:'ti-users' },
+    'Health Habits':        { bg:'#E8F5EE', arc:'#1B7A4A', dot:'#C2185B', text:'#0A3D22', icon:'ti-heart' },
+
     'Mathematics':        { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', text:'#1A4A3A', icon:'ti-math-function' },
     'English Language':   { bg:'#FBF3E8', arc:'#C8882A', dot:'#3D7A6B', text:'#6B3A08', icon:'ti-book-2' },
     'Biology':            { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', text:'#1A4A3A', icon:'ti-dna' },
@@ -1276,7 +1288,7 @@
       var verBadge = r.verified
         ? '<span class="verified-badge"><i class="ti ti-check" style="font-size:10px"></i> Verified</span>'
         : '';
-      return '<div class="res-item" onclick="window.location.href=\'resource.html?id='+r.id+'\'" style="position:relative">'
+      return '<div class="res-item" data-rid="'+r.id+'" onclick="window.location.href=\'resource.html?id='+r.id+'\'" style="position:relative">'
         + subjectThumb(r.subject)
         + '<div class="res-item-body">'
         + '<div class="res-item-title">'+esc(r.title)+'</div>'
@@ -1289,10 +1301,30 @@
         + '<div class="res-item-stat"><i class="ti ti-download" style="font-size:12px"></i> '+Number(r.downloads||0).toLocaleString()+'</div>'
         + '<div class="res-item-actions" onclick="event.stopPropagation()">'
         + '<button class="icon-btn" title="View" onclick="window.location.href=\'resource.html?id='+r.id+'\'"><i class="ti ti-eye" style="font-size:13px"></i></button>'
+        + '<button class="icon-btn" title="Edit details" onclick="openEditUpload('+r.id+')"><i class="ti ti-pencil" style="font-size:13px"></i></button>'
         + '<button class="icon-btn danger" title="Delete" onclick="openDeleteModal('+r.id+',\''+esc(r.title).replace(/\'/g,"\\'")+'\',\''+encodeURIComponent(r.file_url||'')+'\')" ><i class="ti ti-trash" style="font-size:13px"></i></button>'
         + '</div>'
         + '</div>';
     }
+
+    /* -- Edit an upload (details only) -- */
+    window.openEditUpload = function(id) {
+      var r = (window._allUploads || []).find(function(x) { return x.id === id; });
+      if (!r) return;
+      openEditResource(r, {
+        sb: window._nlSb,
+        onSaved: function(updated) {
+          Object.assign(r, updated);
+          var row = document.querySelector('.res-item[data-rid="' + id + '"]');
+          if (row) {
+            var tmp = document.createElement('div');
+            tmp.innerHTML = renderUploadItem(r);
+            row.replaceWith(tmp.firstChild);
+          }
+          toast('Resource updated.', 'success');
+        }
+      });
+    };
 
     window.showMoreUploads = function() {
       var list  = document.getElementById('uploads-res-list');
@@ -1500,7 +1532,7 @@
           .eq('id', session.user.id)
           .single(),
         sb.from('resources')
-          .select('id,title,subject,class_level,term,week,type,verified,downloads,created_at,file_url,file_name')
+          .select('id,title,description,subject,class_level,term,week,type,verified,downloads,created_at,file_url,file_name')
           .eq('uploader_id', session.user.id)
           .order('created_at', { ascending: false }),
         sb.from('saved_resources')
