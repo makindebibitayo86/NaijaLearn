@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+  <meta name="theme-color" content="#ffffff">
   <title>Profile — NaijaLearn</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -425,10 +426,14 @@
       var all  = window._allProfileRes;
       var shown = window._profileResShown;
       var next  = all.slice(shown, shown + PROFILE_PAGE_SIZE);
-      next.forEach(function(r) {
+      next.forEach(function(r, i) {
         var wrapper = document.createElement('div');
         wrapper.innerHTML = renderProfileItem(r);
-        list.appendChild(wrapper.firstChild);
+        var item = wrapper.firstChild;
+        item.classList.add('nl-reveal');
+        item.style.setProperty('--i', Math.min(i, 8));
+        list.appendChild(item);
+        if (i === 0 && window.nlRollTo) window.nlRollTo(item);
       });
       window._profileResShown += next.length;
       if (window._profileResShown >= all.length) {
@@ -450,12 +455,7 @@
 
     var profileShowMoreBtn = profileHasMore
       ? '<div style="text-align:center;padding:14px 0 4px">'
-        + '<button id="profile-show-more" onclick="showMoreProfileRes()" style="'
-        + 'background:none;border:1.5px solid var(--primary,#2563eb);color:var(--primary,#2563eb);'
-        + 'border-radius:8px;padding:8px 22px;font-size:0.9rem;font-weight:600;cursor:pointer;'
-        + 'transition:background 0.15s,color 0.15s;" '
-        + 'onmouseover="this.style.background=\'var(--primary,#2563eb)\';this.style.color=\'#fff\'" '
-        + 'onmouseout="this.style.background=\'none\';this.style.color=\'var(--primary,#2563eb)\'">'
+        + '<button id="profile-show-more" class="btn-show-more" onclick="showMoreProfileRes()">'
         + 'Show more (' + profileRemaining + ' remaining)'
         + '</button></div>'
       : '';

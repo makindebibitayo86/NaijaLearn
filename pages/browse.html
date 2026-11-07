@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+  <meta name="theme-color" content="#ffffff">
   <meta name="description" content="Browse lesson notes, schemes of work, and past questions by subject, class, term, and week.">
   <title>Browse Resources — NaijaLearn</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,6 +12,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="../js/nav-auth.js"></script>
 <script src="../js/typing-placeholder.js" defer></script>
+<script src="../js/smart-search.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
   <style>
     /* ── Dark mode fix: filter & sort dropdowns ── */
@@ -228,6 +230,23 @@
       </div>
     </div>
 
+    <!-- WEEK DROPDOWN -->
+    <div class="filter-group">
+      <div class="filter-group-label">Week</div>
+      <div class="filter-dropdown-wrap">
+        <select id="week-select" class="filter-dropdown">
+          <option value="">— All Weeks —</option>
+          <option value="Week 1">Week 1</option><option value="Week 2">Week 2</option>
+          <option value="Week 3">Week 3</option><option value="Week 4">Week 4</option>
+          <option value="Week 5">Week 5</option><option value="Week 6">Week 6</option>
+          <option value="Week 7">Week 7</option><option value="Week 8">Week 8</option>
+          <option value="Week 9">Week 9</option><option value="Week 10">Week 10</option>
+          <option value="Exam Prep">Exam Prep</option><option value="Full Term">Full Term</option>
+        </select>
+        <span class="filter-dropdown-arrow">▾</span>
+      </div>
+    </div>
+
     <!-- RESOURCE TYPE DROPDOWN -->
     <div class="filter-group">
       <div class="filter-group-label">Resource Type</div>
@@ -255,6 +274,7 @@
         <option value="alpha">A – Z</option>
       </select>
     </div>
+    <div id="smart-note" style="display:none;font-size:13px;color:var(--muted);margin:0 0 14px"></div>
     <div class="results-grid" id="results-grid">
       <!-- Populated by browse.js -->
     </div>
@@ -384,21 +404,23 @@
   };
   var DEFAULT_STYLE = { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', text:'#1A4A3A', icon:'ti-file-text' };
 
+  /* Colours are handed to CSS as --l-* (light palette). The stylesheet derives the card's colours from them
+     (see ".subj-thumb" in styles.css), so dark mode gets a matching dark banner instead of the light one. */
   function subjectThumb(subject, type, verified) {
     var s = SUBJECT_STYLE[subject] || DEFAULT_STYLE;
-    return '<div class="res-thumb" style="background:'+s.bg+';position:relative;overflow:hidden">'
+    return '<div class="res-thumb subj-thumb" style="--l-bg:'+s.bg+';--l-arc:'+s.arc+';--l-dot:'+s.dot+';--l-text:'+s.text+';position:relative;overflow:hidden">'
       + '<svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 200 130" preserveAspectRatio="xMidYMid slice">'
-      + '<circle cx="190" cy="130" r="85" fill="none" stroke="'+s.arc+'" stroke-width="22" opacity=".12"/>'
-      + '<circle cx="190" cy="130" r="57" fill="none" stroke="'+s.arc+'" stroke-width="14" opacity=".10"/>'
-      + '<circle cx="190" cy="130" r="28" fill="'+s.arc+'" opacity=".08"/>'
-      + '<circle cx="26" cy="20" r="14" fill="'+s.dot+'" opacity=".18"/>'
+      + '<circle class="ring ring-3 thumb-arc-stroke" cx="190" cy="130" r="85" fill="none" stroke-width="22"/>'
+      + '<circle class="ring ring-2 thumb-arc-stroke" cx="190" cy="130" r="57" fill="none" stroke-width="14"/>'
+      + '<circle class="ring ring-1 thumb-arc-fill" cx="190" cy="130" r="28"/>'
+      + '<circle class="thumb-dot" cx="26" cy="20" r="14"/>'
       + '</svg>'
       + '<div style="position:absolute;left:14px;top:50%;transform:translateY(-50%)">'
-      + '<div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:'+s.arc+';opacity:.75;margin-bottom:4px">Subject</div>'
-      + '<div style="font-family:\'Playfair Display\',Georgia,serif;font-size:16px;font-weight:700;color:'+s.text+';line-height:1.15;max-width:110px">'+subject+'</div>'
+      + '<div class="thumb-eyebrow" style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">Subject</div>'
+      + '<div class="thumb-name" style="font-family:\'Playfair Display\',Georgia,serif;font-size:16px;font-weight:700;line-height:1.15;max-width:110px">'+subject+'</div>'
       + '</div>'
-      + '<div style="position:absolute;right:12px;bottom:10px;opacity:.18">'
-      + '<i class="ti '+s.icon+'" style="font-size:46px;color:'+s.arc+'"></i>'
+      + '<div class="res-icon" style="position:absolute;right:12px;bottom:10px">'
+      + '<i class="ti '+s.icon+'" style="font-size:46px"></i>'
       + '</div>'
       + '<div class="res-badge">'+type+'</div>'
       + (verified ? '<div class="res-verified">✓ Verified</div>' : '')
@@ -406,7 +428,8 @@
   }
 
   var allResources = [];
-  var activeFilters = { subject:[], class:[], term:[], type:[], q:'' };
+  var activeFilters = { subject:[], class:[], term:[], week:[], type:[], q:'', keywords:[] };
+  var autoGroups = {};   // filter groups currently switched on by the search box
   var currentSort = 'downloads';
 
   function initials(name) {
@@ -446,10 +469,14 @@
     var grid = document.getElementById('results-grid');
     var btn  = document.getElementById('browse-show-more');
     var next = _browseFiltered.slice(_browseShown, _browseShown + BROWSE_PAGE_SIZE);
-    next.forEach(function(r) {
+    next.forEach(function(r, i) {
       var wrapper = document.createElement('div');
       wrapper.innerHTML = renderBrowseCard(r);
-      grid.insertBefore(wrapper.firstChild, document.getElementById('browse-show-more-wrap'));
+      var card = wrapper.firstChild;
+      card.classList.add('nl-reveal');              // short rise-and-fade, staggered
+      card.style.setProperty('--i', Math.min(i, 8)); // cap the stagger so a long page never feels slow
+      grid.insertBefore(card, document.getElementById('browse-show-more-wrap'));
+      if (i === 0 && window.nlRollTo) window.nlRollTo(card);   // glide down to the new rows
     });
     _browseShown += next.length;
     if (_browseShown >= _browseFiltered.length) {
@@ -462,15 +489,37 @@
   };
 
   function filterAndRender() {
-    var q = activeFilters.q.toLowerCase();
-    var filtered = allResources.filter(function(r) {
-      var qm = !q || r.title.toLowerCase().includes(q) || r.subject.toLowerCase().includes(q) || (r.description||'').toLowerCase().includes(q);
-      var sm = !activeFilters.subject.length || activeFilters.subject.includes(r.subject);
-      var cm = !activeFilters.class.length   || activeFilters.class.includes(r.class_level);
-      var tm = !activeFilters.term.length    || activeFilters.term.includes(r.term);
-      var ym = !activeFilters.type.length    || activeFilters.type.includes(r.type);
-      return qm && sm && cm && tm && ym;
-    });
+    function run(useKeywords) {
+      return allResources.filter(function(r) {
+        var hay = (r.title+' '+r.subject+' '+(r.description||'')+' '+r.type).toLowerCase();
+        var qm = !useKeywords || activeFilters.keywords.every(function(k) {
+          return hay.includes(k) || (k.length > 3 && k.slice(-1) === 's' && hay.includes(k.slice(0, -1)));
+        });
+        var sm = !activeFilters.subject.length || activeFilters.subject.includes(r.subject);
+        var cm = !activeFilters.class.length   || activeFilters.class.includes(r.class_level);
+        var tm = !activeFilters.term.length    || activeFilters.term.includes(r.term);
+        var wm = !activeFilters.week.length    || activeFilters.week.includes(r.week);
+        var ym = !activeFilters.type.length    || activeFilters.type.includes(r.type);
+        return qm && sm && cm && tm && wm && ym;
+      });
+    }
+    var filtered = run(true);
+    var note = document.getElementById('smart-note');
+    var relaxed = false;
+    // Keywords found nothing, but the detected filters might — show those instead
+    if (!filtered.length && activeFilters.keywords.length) {
+      var loose = run(false);
+      if (loose.length) { filtered = loose; relaxed = true; }
+    }
+    if (note) {
+      var bits = [];
+      if (relaxed) bits.push('No exact match for “' + activeFilters.keywords.join(' ').replace(/</g,'&lt;') + '” — showing everything that fits the filters instead.');
+      else if (Object.keys(autoGroups).length) {
+        bits.push('Filters set from your search: ' + Object.keys(autoGroups).map(function(g){ return autoGroups[g]; }).join(' · '));
+      }
+      note.innerHTML = bits.join('');
+      note.style.display = bits.length ? 'block' : 'none';
+    }
 
     filtered.sort(function(a,b) {
       if (currentSort==='downloads') return b.downloads - a.downloads;
@@ -497,16 +546,49 @@
     var showMoreHtml = '';
     if (hasMoreCards) {
       showMoreHtml = '<div id="browse-show-more-wrap" style="grid-column:1/-1;text-align:center;padding:20px 0 8px">'
-        + '<button id="browse-show-more" onclick="showMoreBrowse()"'
-        + ' style="background:none;border:1.5px solid var(--primary,#2563eb);color:var(--primary,#2563eb);'
-        + 'border-radius:8px;padding:10px 28px;font-size:0.9rem;font-weight:600;cursor:pointer;transition:background 0.15s,color 0.15s;"'
-        + ' onmouseover="this.style.background=\'var(--primary,#2563eb)\';this.style.color=\'#fff\'"'
-        + ' onmouseout="this.style.background=\'none\';this.style.color=\'var(--primary,#2563eb)\'">'
+        + '<button id="browse-show-more" class="btn-show-more" onclick="showMoreBrowse()">'
         + 'Show more (' + remCards + ' remaining)'
         + '</button></div>';
     }
 
     setGrid(firstCards + showMoreHtml);
+  }
+
+  // ── Smart search: read the search text, switch on matching filters ──
+  function applySmartSearch(text) {
+    var res = window.NLSmartSearch ? window.NLSmartSearch.parse(text) : { classes:[], keywords: text ? text.toLowerCase().split(/\s+/) : [], matched:[] };
+    var subjectSel = document.getElementById('subject-select');
+    var termSel = document.getElementById('term-select');
+    var weekSel = document.getElementById('week-select');
+    var typeSel = document.getElementById('type-select');
+
+    // Groups the previous search had switched on but this one doesn't → clear them
+    var found = {
+      subject: res.subject ? [res.subject] : [],
+      class:   res.classes || [],
+      term:    res.term ? [res.term] : [],
+      week:    res.week ? [res.week] : [],
+      type:    res.type ? [res.type] : []
+    };
+    Object.keys(found).forEach(function(g) {
+      if (found[g].length) {
+        activeFilters[g] = found[g].slice();
+        autoGroups[g] = found[g].join(', ');
+      } else if (autoGroups[g]) {
+        activeFilters[g] = [];
+        delete autoGroups[g];
+      }
+    });
+    activeFilters.keywords = res.keywords || [];
+
+    // Reflect the filters in the sidebar controls
+    function sync(sel, g) { if (sel) sel.value = activeFilters[g][0] || ''; }
+    sync(subjectSel, 'subject'); sync(termSel, 'term'); sync(weekSel, 'week'); sync(typeSel, 'type');
+    document.querySelectorAll('.filter-chip input[type="checkbox"]').forEach(function(cb) {
+      cb.checked = activeFilters.class.indexOf(cb.value) >= 0;
+    });
+    var badge = document.getElementById('subject-badge'), label = document.getElementById('subject-badge-label');
+    if (badge && label) { label.textContent = activeFilters.subject[0] || ''; badge.style.display = activeFilters.subject.length ? 'flex' : 'none'; }
   }
 
   function loadResources() {
@@ -536,7 +618,8 @@
   document.addEventListener('DOMContentLoaded', function() {
     // URL params
     var params = new URLSearchParams(window.location.search);
-    if (params.get('q')) { activeFilters.q = params.get('q'); var sb2=document.getElementById('browse-search'); if(sb2) sb2.value=params.get('q'); }
+    var urlQ = params.get('q') || '';
+    if (urlQ) { activeFilters.q = urlQ; var sb2=document.getElementById('browse-search'); if(sb2) sb2.value=urlQ; }
 
     // ── Subject dropdown ──
     var subjectSel = document.getElementById('subject-select');
@@ -555,6 +638,7 @@
 
     if (subjectSel) subjectSel.addEventListener('change', function() {
       var v = subjectSel.value;
+      delete autoGroups.subject;
       activeFilters.subject = v ? [v] : [];
       updateSubjectBadge(v);
       filterAndRender();
@@ -562,6 +646,7 @@
 
     if (badgeClear) badgeClear.addEventListener('click', function() {
       subjectSel.value = '';
+      delete autoGroups.subject;
       activeFilters.subject = [];
       updateSubjectBadge('');
       filterAndRender();
@@ -570,13 +655,23 @@
     // ── Term dropdown ──
     var termSel = document.getElementById('term-select');
     if (termSel) termSel.addEventListener('change', function() {
+      delete autoGroups.term;
       activeFilters.term = termSel.value ? [termSel.value] : [];
+      filterAndRender();
+    });
+
+    // ── Week dropdown ──
+    var weekSel = document.getElementById('week-select');
+    if (weekSel) weekSel.addEventListener('change', function() {
+      delete autoGroups.week;
+      activeFilters.week = weekSel.value ? [weekSel.value] : [];
       filterAndRender();
     });
 
     // ── Resource Type dropdown ──
     var typeSel = document.getElementById('type-select');
     if (typeSel) typeSel.addEventListener('change', function() {
+      delete autoGroups.type;
       activeFilters.type = typeSel.value ? [typeSel.value] : [];
       filterAndRender();
     });
@@ -585,6 +680,7 @@
     document.querySelectorAll('.filter-chip input[type="checkbox"]').forEach(function(cb) {
       cb.addEventListener('change', function() {
         var g=cb.dataset.group, v=cb.value;
+        delete autoGroups[g];
         if (!activeFilters[g]) activeFilters[g]=[];
         if (cb.checked) activeFilters[g].push(v);
         else activeFilters[g]=activeFilters[g].filter(function(x){return x!==v;});
@@ -594,7 +690,7 @@
 
     // Search
     var searchBar = document.getElementById('browse-search');
-    if (searchBar) searchBar.addEventListener('input', function() { activeFilters.q=searchBar.value.trim(); filterAndRender(); });
+    if (searchBar) searchBar.addEventListener('input', function() { activeFilters.q=searchBar.value.trim(); applySmartSearch(activeFilters.q); filterAndRender(); });
 
     // Sort
     var sortSel2 = document.getElementById('sort-select');
@@ -603,15 +699,20 @@
     // Clear all
     var clearBtn = document.querySelector('.filter-clear');
     if (clearBtn) clearBtn.addEventListener('click', function() {
-      activeFilters={subject:[],class:[],term:[],type:[],q:''};
+      activeFilters={subject:[],class:[],term:[],week:[],type:[],q:'',keywords:[]};
+      autoGroups={};
       if(searchBar) searchBar.value='';
       if(subjectSel) subjectSel.value='';
       if(termSel) termSel.value='';
+      if(weekSel) weekSel.value='';
       if(typeSel) typeSel.value='';
       updateSubjectBadge('');
       document.querySelectorAll('.filter-chip input').forEach(function(cb){cb.checked=false;});
       filterAndRender();
     });
+
+    // ── Search text from the home page / URL → switch on matching filters ──
+    if (urlQ) applySmartSearch(urlQ);
 
     // ── Apply subject URL param now that all functions are defined ──
     if (params.get('subject')) {

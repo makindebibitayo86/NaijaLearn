@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+  <meta name="theme-color" content="#ffffff">
   <title>Dashboard — NaijaLearn</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -944,7 +945,8 @@
       background: var(--white);
       border-color: var(--border);
     }
-    [data-theme="dark"] .profile-body { background: var(--white); }
+    /* profile-body must stay see-through, otherwise it paints over the lower part of the banner */
+    [data-theme="dark"] .profile-body { background: transparent; }
     [data-theme="dark"] .quick-links-panel {
       background: var(--white);
       border-color: var(--border);
@@ -988,6 +990,39 @@
       .panel-body { padding: 13px 15px; }
       .panel-header { padding: 13px 15px; }
       .hero-actions { flex-direction: row; flex-wrap: wrap; }
+    }
+  
+    /* ══════════════════════════════════════════
+       PAGE-LOAD ENTRANCE — one orchestrated rise, plays once
+       (opacity + transform only, ease-out, 40–60ms stagger)
+    ══════════════════════════════════════════ */
+    @keyframes dash-rise {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: none; }
+    }
+    .dash-hero,
+    .stats-row .stat-card,
+    .col-main > .panel,
+    .sidebar > * {
+      animation: dash-rise 320ms var(--ease-out) backwards;
+    }
+    .stats-row .stat-card:nth-child(1) { animation-delay:  40ms; }
+    .stats-row .stat-card:nth-child(2) { animation-delay:  90ms; }
+    .stats-row .stat-card:nth-child(3) { animation-delay: 140ms; }
+    .stats-row .stat-card:nth-child(4) { animation-delay: 190ms; }
+    .col-main > .panel:nth-child(1)    { animation-delay: 240ms; }
+    .col-main > .panel:nth-child(2)    { animation-delay: 300ms; }
+    .sidebar > :nth-child(1)           { animation-delay: 120ms; }
+    .sidebar > :nth-child(2)           { animation-delay: 180ms; }
+    .sidebar > :nth-child(3)           { animation-delay: 240ms; }
+    .sidebar > :nth-child(4)           { animation-delay: 300ms; }
+
+    @media (prefers-reduced-motion: reduce) {
+      @keyframes dash-rise { from { opacity: 0; } to { opacity: 1; } }
+      .dash-hero, .stats-row .stat-card, .col-main > .panel, .sidebar > * {
+        animation-duration: 200ms;
+        animation-delay: 0ms !important;
+      }
     }
   </style>
 </head>
@@ -1401,12 +1436,9 @@
     var vst = profile.verification_status || 'none';
     var verifySection;
     if (profile.verified || vst === 'approved') {
-      verifySection =
-        '<div class="verify-widget vw-approved">'
-        + '<div class="vw-pill approved"><i class="ti ti-check" style="font-size:10px"></i> Verified Teacher</div>'
-        + '<h4 class="c-sage">You\'re Verified!</h4>'
-        + '<p class="no-mb">Your resources carry the verified badge and rank higher in search results.</p>'
-        + '</div>';
+      /* Already verified: the profile card above shows the Verified status,
+         so no extra card is needed here. */
+      verifySection = '';
     } else if (vst === 'pending') {
       verifySection =
         '<div class="verify-widget vw-pending">'

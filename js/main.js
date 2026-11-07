@@ -226,7 +226,7 @@ window.showToast = function(message, type = 'success') {
   fadeEls.forEach((el, i) => {
     el.style.opacity = '0';
     el.style.transform = 'translateY(16px)';
-    el.style.transition = `opacity .4s ease ${i * 60}ms, transform .4s ease ${i * 60}ms`;
+    el.style.transition = `opacity .4s ease ${(i % 8) * 60}ms, transform .4s ease ${(i % 8) * 60}ms`;
     fadeObserver.observe(el);
   });
 

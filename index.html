@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+  <meta name="theme-color" content="#ffffff">
   <meta name="description" content="NaijaLearn — Nigeria's structured educational resource library for teachers, parents, and homeschoolers. Browse lesson notes by subject, class, term, and week.">
   <title>NaijaLearn — Nigerian Educational Resource Library</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -107,6 +108,9 @@
           <span class="stag">JSS1 English</span>
           <span class="stag">Civic Education</span>
           <span class="stag">Week 4 Physics</span>
+          <span class="stag">Chemistry</span>
+          <span class="stag">Economics</span>
+          <span class="stag">Government</span>
         </div>
       </div>
     </div>
@@ -122,21 +126,50 @@
     <a class="section-link" href="pages/browse.html">See all subjects →</a>
   </div>
   <div class="subjects-grid" id="subjects-grid">
-    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Mathematics'"><div class="subj-icon" style="background:#E8F4F0"><i class="ti ti-math-function" style="font-size:20px;color:#3D7A6B"></i></div><div class="subj-info"><span class="subj-name">Mathematics</span><span class="subj-count" data-subject="Mathematics">—</span></div></div>
-    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=English Language'"><div class="subj-icon" style="background:#FBF3E8"><i class="ti ti-book-2" style="font-size:20px;color:#C8882A"></i></div><div class="subj-info"><span class="subj-name">English Language</span><span class="subj-count" data-subject="English Language">—</span></div></div>
-    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Biology'"><div class="subj-icon" style="background:#E8F4F0"><i class="ti ti-dna" style="font-size:20px;color:#3D7A6B"></i></div><div class="subj-info"><span class="subj-name">Biology</span><span class="subj-count" data-subject="Biology">—</span></div></div>
-    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Physics'"><div class="subj-icon" style="background:#FBF3E8"><i class="ti ti-atom" style="font-size:20px;color:#C8882A"></i></div><div class="subj-info"><span class="subj-name">Physics</span><span class="subj-count" data-subject="Physics">—</span></div></div>
-    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Chemistry'"><div class="subj-icon" style="background:#E8F4F0"><i class="ti ti-flask" style="font-size:20px;color:#3D7A6B"></i></div><div class="subj-info"><span class="subj-name">Chemistry</span><span class="subj-count" data-subject="Chemistry">—</span></div></div>
-    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Civic Education'"><div class="subj-icon" style="background:#FBF3E8"><i class="ti ti-building-community" style="font-size:20px;color:#C8882A"></i></div><div class="subj-info"><span class="subj-name">Civic Education</span><span class="subj-count" data-subject="Civic Education">—</span></div></div>
-    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Agricultural Science'"><div class="subj-icon" style="background:#E8F4F0"><i class="ti ti-plant" style="font-size:20px;color:#3D7A6B"></i></div><div class="subj-info"><span class="subj-name">Agricultural Science</span><span class="subj-count" data-subject="Agricultural Science">—</span></div></div>
-    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Computer Studies'"><div class="subj-icon" style="background:#FBF3E8"><i class="ti ti-device-laptop" style="font-size:20px;color:#C8882A"></i></div><div class="subj-info"><span class="subj-name">Computer Studies</span><span class="subj-count" data-subject="Computer Studies">—</span></div></div>
+    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Mathematics'"><div class="subj-icon" data-tone="sage"><i class="ti ti-math-function" style="font-size:20px"></i></div><div class="subj-info"><span class="subj-name">Mathematics</span><span class="subj-count" data-subject="Mathematics">—</span></div></div>
+    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=English Language'"><div class="subj-icon" data-tone="gold"><i class="ti ti-book-2" style="font-size:20px"></i></div><div class="subj-info"><span class="subj-name">English Language</span><span class="subj-count" data-subject="English Language">—</span></div></div>
+    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Biology'"><div class="subj-icon" data-tone="sage"><i class="ti ti-dna" style="font-size:20px"></i></div><div class="subj-info"><span class="subj-name">Biology</span><span class="subj-count" data-subject="Biology">—</span></div></div>
+    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Physics'"><div class="subj-icon" data-tone="gold"><i class="ti ti-atom" style="font-size:20px"></i></div><div class="subj-info"><span class="subj-name">Physics</span><span class="subj-count" data-subject="Physics">—</span></div></div>
+    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Chemistry'"><div class="subj-icon" data-tone="sage"><i class="ti ti-flask" style="font-size:20px"></i></div><div class="subj-info"><span class="subj-name">Chemistry</span><span class="subj-count" data-subject="Chemistry">—</span></div></div>
+    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Civic Education'"><div class="subj-icon" data-tone="gold"><i class="ti ti-building-community" style="font-size:20px"></i></div><div class="subj-info"><span class="subj-name">Civic Education</span><span class="subj-count" data-subject="Civic Education">—</span></div></div>
+    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Agricultural Science'"><div class="subj-icon" data-tone="sage"><i class="ti ti-plant" style="font-size:20px"></i></div><div class="subj-info"><span class="subj-name">Agricultural Science</span><span class="subj-count" data-subject="Agricultural Science">—</span></div></div>
+    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Computer Studies'"><div class="subj-icon" data-tone="gold"><i class="ti ti-device-laptop" style="font-size:20px"></i></div><div class="subj-info"><span class="subj-name">Computer Studies</span><span class="subj-count" data-subject="Computer Studies">—</span></div></div>
+    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Further Mathematics'"><div class="subj-icon" data-tone="sage"><i class="ti ti-sum" style="font-size:20px"></i></div><div class="subj-info"><span class="subj-name">Further Mathematics</span><span class="subj-count" data-subject="Further Mathematics">—</span></div></div>
+    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Literature in English'"><div class="subj-icon" data-tone="gold"><i class="ti ti-book" style="font-size:20px"></i></div><div class="subj-info"><span class="subj-name">Literature in English</span><span class="subj-count" data-subject="Literature in English">—</span></div></div>
+    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Economics'"><div class="subj-icon" data-tone="sage"><i class="ti ti-chart-line" style="font-size:20px"></i></div><div class="subj-info"><span class="subj-name">Economics</span><span class="subj-count" data-subject="Economics">—</span></div></div>
+    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Government'"><div class="subj-icon" data-tone="gold"><i class="ti ti-building-bank" style="font-size:20px"></i></div><div class="subj-info"><span class="subj-name">Government</span><span class="subj-count" data-subject="Government">—</span></div></div>
+    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Geography'"><div class="subj-icon" data-tone="sage"><i class="ti ti-world" style="font-size:20px"></i></div><div class="subj-info"><span class="subj-name">Geography</span><span class="subj-count" data-subject="Geography">—</span></div></div>
+    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=History'"><div class="subj-icon" data-tone="gold"><i class="ti ti-history" style="font-size:20px"></i></div><div class="subj-info"><span class="subj-name">History</span><span class="subj-count" data-subject="History">—</span></div></div>
+    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Social Studies'"><div class="subj-icon" data-tone="sage"><i class="ti ti-users-group" style="font-size:20px"></i></div><div class="subj-info"><span class="subj-name">Social Studies</span><span class="subj-count" data-subject="Social Studies">—</span></div></div>
+    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Commerce'"><div class="subj-icon" data-tone="gold"><i class="ti ti-basket" style="font-size:20px"></i></div><div class="subj-info"><span class="subj-name">Commerce</span><span class="subj-count" data-subject="Commerce">—</span></div></div>
+    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Accounting'"><div class="subj-icon" data-tone="sage"><i class="ti ti-calculator" style="font-size:20px"></i></div><div class="subj-info"><span class="subj-name">Accounting</span><span class="subj-count" data-subject="Accounting">—</span></div></div>
+    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Yoruba Language'"><div class="subj-icon" data-tone="gold"><i class="ti ti-language" style="font-size:20px"></i></div><div class="subj-info"><span class="subj-name">Yoruba Language</span><span class="subj-count" data-subject="Yoruba Language">—</span></div></div>
+    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=French'"><div class="subj-icon" data-tone="sage"><i class="ti ti-message-language" style="font-size:20px"></i></div><div class="subj-info"><span class="subj-name">French</span><span class="subj-count" data-subject="French">—</span></div></div>
+    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Christian Religious Studies'"><div class="subj-icon" data-tone="gold"><i class="ti ti-cross" style="font-size:20px"></i></div><div class="subj-info"><span class="subj-name">Christian Religious Studies</span><span class="subj-count" data-subject="Christian Religious Studies">—</span></div></div>
+    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Islamic Religious Studies'"><div class="subj-icon" data-tone="sage"><i class="ti ti-moon-stars" style="font-size:20px"></i></div><div class="subj-info"><span class="subj-name">Islamic Religious Studies</span><span class="subj-count" data-subject="Islamic Religious Studies">—</span></div></div>
+    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Fine Arts'"><div class="subj-icon" data-tone="gold"><i class="ti ti-palette" style="font-size:20px"></i></div><div class="subj-info"><span class="subj-name">Fine Arts</span><span class="subj-count" data-subject="Fine Arts">—</span></div></div>
+    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Music'"><div class="subj-icon" data-tone="sage"><i class="ti ti-music" style="font-size:20px"></i></div><div class="subj-info"><span class="subj-name">Music</span><span class="subj-count" data-subject="Music">—</span></div></div>
+    <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Physical Education'"><div class="subj-icon" data-tone="gold"><i class="ti ti-run" style="font-size:20px"></i></div><div class="subj-info"><span class="subj-name">Physical Education</span><span class="subj-count" data-subject="Physical Education">—</span></div></div>
   </div>
 </div>
 
 <!-- TRENDING RESOURCES — populated live from Supabase -->
+<div class="trending-band">
 <div class="section" style="padding-top:0">
   <div class="section-header">
-    <div class="section-title">🔥 Trending This Week</div>
+    <div class="section-title"><span class="flame" aria-hidden="true"><svg viewBox="0 0 64 80" xmlns="http://www.w3.org/2000/svg" focusable="false">
+        <defs>
+          <linearGradient id="flameOuterG" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#E8421A"/><stop offset=".55" stop-color="#FF7A18"/><stop offset="1" stop-color="#FFB02E"/></linearGradient>
+          <linearGradient id="flameMidG" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#FF9A1F"/><stop offset="1" stop-color="#FFD84D"/></linearGradient>
+          <linearGradient id="flameCoreG" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#FFF3B0"/><stop offset="1" stop-color="#FFFBE0"/></linearGradient>
+        </defs>
+        <path class="f-outer" fill="url(#flameOuterG)" d="M32 2C34 15 51 24 51 46C51 62 43 77 32 77C21 77 13 62 13 46C13 36 19 30 23 21C25 27 27 30 30 31C32 22 28 12 32 2Z"/>
+        <path class="f-mid" fill="url(#flameMidG)" d="M32 26C33 34 43 40 43 54C43 66 38 75 32 75C26 75 21 66 21 54C21 48 25 44 27 38C28 41 30 43 31 43C33 38 30 32 32 26Z"/>
+        <path class="f-core" fill="url(#flameCoreG)" d="M32 49C33 54 38 57 38 64C38 71 35 75 32 75C29 75 26 71 26 64C26 58 30 56 32 49Z"/>
+        <circle class="f-spark s1" cx="20" cy="22" r="2.2" fill="#FFB02E"/>
+        <circle class="f-spark s2" cx="45" cy="26" r="1.8" fill="#FF7A18"/>
+        <circle class="f-spark s3" cx="33" cy="10" r="1.6" fill="#FFD84D"/>
+      </svg></span>Trending This Week</div>
     <a class="section-link" href="pages/browse.html">View all →</a>
   </div>
   <div class="resources-grid" id="trending-grid">
@@ -155,8 +188,7 @@
     </div>
   </div>
 </div>
-
-<div class="divider"></div>
+</div>
 
 <!-- HOW IT WORKS -->
 <div class="how-section">
@@ -176,7 +208,7 @@
       </div>
       <div class="step-card">
         <div class="step-num">2</div>
-        <div class="step-icon">⬆</div>
+        <div class="step-icon">⬆️</div>
         <div class="step-title">Upload your materials</div>
         <div class="step-desc">Upload your PDF, Word doc, or PowerPoint. Tag it by subject, class, term, and week — it becomes searchable instantly.</div>
       </div>
@@ -196,7 +228,7 @@
       </div>
       <div class="step-card">
         <div class="step-num">2</div>
-        <div class="step-icon">⬇</div>
+        <div class="step-icon">⬇️</div>
         <div class="step-title">Download lesson notes</div>
         <div class="step-desc">Access verified lesson notes written by real Nigerian teachers. Download PDFs for offline use anytime.</div>
       </div>
@@ -215,7 +247,7 @@
   <div class="home-banner">
     <div class="banner-content">
       <div class="banner-tag">FOR HOMESCHOOL PARENTS</div>
-      <div class="banner-title">Everything you need to teach your child — structured, verified, and curriculum-aligned.</div>
+      <div class="banner-title"><span class="banner-line">Everything you need to teach your child</span> — structured, verified, and curriculum-aligned.</div>
       <div class="banner-desc">Browse week by week. Follow the Nigerian curriculum from Primary 1 through SS3. No guesswork, no scattered PDFs.</div>
       <button class="btn-white" onclick="window.location.href='pages/browse.html'">Start Homeschooling →</button>
     </div>
@@ -223,36 +255,196 @@
 </div>
 
 <!-- TESTIMONIALS -->
-<div class="section" style="padding-top:0">
-  <div class="section-title" style="margin-bottom:4px">What teachers are saying</div>
+<div class="section" id="testimonials" style="padding-top:0;display:none">
+  <div class="section-title" style="margin-bottom:4px">What our users are saying</div>
   <div style="color:var(--muted);font-size:14px;margin-bottom:0">From classrooms across Nigeria.</div>
-  <div class="testi-grid">
-    <div class="testi-card">
-      <div class="stars">★★★★★</div>
-      <div class="testi-quote">"I used to spend Sunday evenings writing lesson notes from scratch. Now I search, find, adapt, and I'm done in 30 minutes. This has given me my weekends back."</div>
-      <div class="testi-author">
-        <div class="testi-avatar" style="background:#E8F4F0;color:#3D7A6B">AC</div>
-        <div><div class="testi-name">Adaeze Chukwu</div><div class="testi-role">Secondary School Teacher, Enugu</div></div>
-      </div>
-    </div>
-    <div class="testi-card">
-      <div class="stars">★★★★★</div>
-      <div class="testi-quote">"As a homeschooling mum, finding curriculum-aligned materials for my JSS2 son was a nightmare. NaijaLearn changed everything. The structure is exactly how Nigerian schools teach."</div>
-      <div class="testi-author">
-        <div class="testi-avatar" style="background:#FBF3E8;color:#C8882A">RB</div>
-        <div><div class="testi-name">Remi Babatunde</div><div class="testi-role">Homeschool Parent, Lagos</div></div>
-      </div>
-    </div>
-    <div class="testi-card">
-      <div class="stars">★★★★★</div>
-      <div class="testi-quote">"I uploaded my Biology scheme of work and got 800 downloads in a week. Knowing other teachers are using my materials is deeply rewarding."</div>
-      <div class="testi-author">
-        <div class="testi-avatar" style="background:#EDF6FF;color:#185FA5">IM</div>
-        <div><div class="testi-name">Ibrahim Musa</div><div class="testi-role">Biology Teacher, Kano</div></div>
-      </div>
-    </div>
+  <div class="testi-carousel">
+    <button class="testi-nav testi-prev" type="button" aria-label="Previous reviews">&#8249;</button>
+    <div class="testi-viewport"><div class="testi-grid" id="testi-track"></div></div>
+    <button class="testi-nav testi-next" type="button" aria-label="Next reviews">&#8250;</button>
+    <div class="testi-dots" id="testi-dots"></div>
   </div>
 </div>
+
+<script>
+/* ── Testimonials: real reviews from NaijaLearn users (any rating) in a looping carousel; hidden if there are none ── */
+(function () {
+  var ROLES = { teacher:'Teacher', parent:'Parent', student:'Student', other:'Member', admin:'NaijaLearn team' };
+  var BGS   = ['#E8F4F0','#FBF3E8','#EDF6FF','#F3EEF9','#FEF0F0','#EAF6E8'];
+  var SKINS = ['#8D5A3B','#7A4B31','#A06A45','#6A4029','#B5794F','#946042'];
+  var CLOTH = ['#3D7A6B','#C8882A','#2F5D8A','#B5533C','#5E35B1','#1A4A3A'];
+  var HAIR  = '#1F1A17';
+
+  function esc(v) {
+    return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+  }
+  function hash(str) {   // FNV-1a + final mix, so near-identical ids still get different looks
+    var h = 2166136261;
+    for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+    h ^= h >>> 15; h = Math.imul(h, 2246822507); h ^= h >>> 13; h = Math.imul(h, 3266489909); h ^= h >>> 16;
+    return h >>> 0;
+  }
+  /* Illustrated placeholder avatar (not a photo of anyone) — same person always gets the same one */
+  function avatarSvg(seed) {
+    var h = hash(String(seed)), bg = BGS[h % 6], skin = SKINS[(h >>> 3) % 6], cl = CLOTH[(h >>> 6) % 6], style = (h >>> 9) % 5;
+    var back = '', front = '';
+    if (style === 1) back = '<circle cx="22" cy="14.5" r="11" fill="' + HAIR + '"/>';
+    var hairCap = '<path d="M13.5 17C13.5 10 17 8.5 22 8.5S30.5 10 30.5 17C28 13.5 16 13.5 13.5 17Z" fill="' + HAIR + '"/>';
+    if (style === 0) front = hairCap;
+    if (style === 1) front = '<path d="M14 15C16 10.5 28 10.5 30 15C27 13 17 13 14 15Z" fill="' + HAIR + '"/>';
+    if (style === 2) front = '<path d="M12.5 16C12 8 17 5.5 22 5.5S32 8 31.5 16C28 12.5 16 12.5 12.5 16Z" fill="' + CLOTH[(h >>> 12) % 6] + '"/><circle cx="27.5" cy="7.5" r="4" fill="' + CLOTH[(h >>> 12) % 6] + '"/>';
+    if (style === 3) front = hairCap + '<path d="M13.6 17L12 30M30.4 17L32 30" stroke="' + HAIR + '" stroke-width="2.4" stroke-linecap="round"/>';
+    if (style === 4) front = hairCap + '<path d="M13 13.5C14 8 30 8 31 13.5Z" fill="' + CLOTH[(h >>> 12) % 6] + '"/><rect x="12" y="13" width="20" height="2.2" rx="1.1" fill="' + CLOTH[(h >>> 12) % 6] + '"/>';
+    return '<svg viewBox="0 0 44 44" aria-hidden="true"><rect width="44" height="44" fill="' + bg + '"/>'
+      + back
+      + '<path d="M6 44C6 33 14 29 22 29S38 33 38 44Z" fill="' + cl + '"/>'
+      + '<rect x="19" y="24" width="6" height="6" fill="' + skin + '"/>'
+      + '<circle cx="22" cy="18" r="8.5" fill="' + skin + '"/>'
+      + front
+      + '<circle cx="19" cy="19" r=".9" fill="#2A1C14"/><circle cx="25" cy="19" r=".9" fill="#2A1C14"/>'
+      + '<path d="M19.5 22.4Q22 24.3 24.5 22.4" stroke="#2A1C14" stroke-width=".9" fill="none" stroke-linecap="round"/></svg>';
+  }
+
+  /* One card design for every review */
+  function card(r) {
+    var p = r.profiles || {}, res = r.resources || {};
+    var name = p.full_name || 'NaijaLearn member';
+    var rating = Math.max(1, Math.min(5, r.rating | 0));
+    var stars = '★★★★★'.slice(0, rating) + '☆☆☆☆☆'.slice(0, 5 - rating);
+    var role = [ROLES[p.role] || 'Member', p.location].filter(Boolean).join(' · ');
+    var mat = [res.title, [res.class_level, res.subject].filter(Boolean).join(' ')].filter(Boolean).join(' · ');
+    var href = r.resource_id != null ? 'pages/resource.html?id=' + encodeURIComponent(r.resource_id) : 'pages/browse.html';
+    var photo = p.avatar_url
+      ? '<img class="testi-photo" src="' + esc(p.avatar_url) + '" alt="Photo of ' + esc(name) + '" width="88" height="88" loading="lazy" onerror="this.remove()">'
+      : '';
+    return '<article class="testi-card">'
+      + '<div class="testi-top"><div class="stars" role="img" aria-label="' + rating + ' out of 5 stars">' + stars + '</div><span class="testi-mark" aria-hidden="true">“</span></div>'
+      + '<div class="testi-body"><p class="testi-quote">' + esc(r.body.trim()) + '</p>'
+      + '<a class="testi-more" href="' + href + '">View on the material →</a></div>'
+      + '<div class="testi-author"><div class="testi-avatar">' + avatarSvg(r.reviewer_id || name) + photo + '</div>'
+      + '<div class="testi-who"><div class="testi-name">' + esc(name) + '</div>'
+      + '<div class="testi-role">' + esc(role) + '</div>'
+      + (mat ? '<div class="testi-mat" title="' + esc(mat) + '">📖 ' + esc(mat) + '</div>' : '')
+      + '</div></div></article>';
+  }
+
+  /* ── Looping carousel: clones of the first/last cards sit at each end, so it never runs out ── */
+  var section = document.getElementById('testimonials');
+  var track = document.getElementById('testi-track'), dotsEl = document.getElementById('testi-dots');
+  var prev = document.querySelector('.testi-prev'), next = document.querySelector('.testi-next');
+  if (!section || !track) return;
+  var GAP = 20, items = [], v = 3, n = 0, p = 0, loop = false, busy = false, settleTimer = null;
+
+  function perView() { var w = window.innerWidth; return w > 1024 ? 3 : (w > 768 ? 2 : 1); }
+  function step() { var c = track.children[0]; return c ? c.getBoundingClientRect().width + GAP : 0; }   // fractional width: no drift after many slides
+  function idx() { return n ? (((p - v) % n) + n) % n : 0; }
+  function setPos(animate) {
+    track.style.transition = animate ? '' : 'none';
+    track.style.transform = loop ? 'translateX(' + (-p * step()) + 'px)' : '';
+    if (!animate) { void track.offsetWidth; track.style.transition = ''; }
+  }
+  function updateDots() {
+    if (!loop) { dotsEl.innerHTML = ''; return; }
+    if (n > 9) { dotsEl.innerHTML = '<span>' + (idx() + 1) + ' / ' + n + '</span>'; return; }
+    if (dotsEl.children.length !== n || dotsEl.querySelector('span')) {
+      dotsEl.innerHTML = '';
+      for (var i = 0; i < n; i++) {
+        (function (i) {
+          var d = document.createElement('button');
+          d.type = 'button'; d.className = 'testi-dot'; d.setAttribute('aria-label', 'Go to review ' + (i + 1));
+          d.addEventListener('click', function () { goTo(i); });
+          dotsEl.appendChild(d);
+        })(i);
+      }
+    }
+    Array.prototype.forEach.call(dotsEl.children, function (d, i) { d.classList.toggle('active', i === idx()); });
+  }
+  function render(keepIdx) {
+    v = perView(); n = items.length; loop = n > v;
+    var list = loop ? items.slice(n - v).concat(items, items.slice(0, v)) : items;
+    track.innerHTML = list.join('');
+    track.classList.toggle('static', !loop);
+    if (loop) {
+      Array.prototype.forEach.call(track.children, function (c, i) {
+        if (i < v || i >= v + n) {                         // clones: hidden from screen readers and tab order
+          c.setAttribute('aria-hidden', 'true');
+          Array.prototype.forEach.call(c.querySelectorAll('a'), function (a) { a.tabIndex = -1; });
+        }
+      });
+    }
+    p = loop ? v + (keepIdx || 0) : 0;
+    prev.style.display = next.style.display = loop ? '' : 'none';
+    busy = false;
+    setPos(false);
+    updateDots();
+  }
+  function settle() {
+    clearTimeout(settleTimer);
+    if (p >= v + n) { p -= n; setPos(false); }
+    else if (p < v) { p += n; setPos(false); }
+    busy = false;
+  }
+  function slideTo(newP) {
+    if (!loop || busy) return;
+    busy = true; p = newP; setPos(true); updateDots();
+    clearTimeout(settleTimer); settleTimer = setTimeout(settle, 650);   // fallback if transitionend never fires
+  }
+  function move(dir) { slideTo(p + dir); }
+  function goTo(i) { slideTo(v + i); }
+  track.addEventListener('transitionend', function (e) { if (e.target === track) settle(); });
+  prev.addEventListener('click', function () { move(-1); });
+  next.addEventListener('click', function () { move(1); });
+
+  // swipe on touch screens
+  var tx = null;
+  track.addEventListener('touchstart', function (e) { tx = e.touches[0].clientX; paused = true; }, { passive: true });
+  track.addEventListener('touchend', function (e) {
+    if (tx == null) return;
+    var dx = e.changedTouches[0].clientX - tx; tx = null; paused = false;
+    if (Math.abs(dx) > 45) move(dx < 0 ? 1 : -1);
+  });
+  var rT;
+  window.addEventListener('resize', function () {
+    clearTimeout(rT);
+    rT = setTimeout(function () { if (!items.length) return; if (perView() !== v) render(idx()); else { setPos(false); } }, 150);
+  });
+
+  // gentle auto-advance; pauses on hover/focus/touch, off for reduced-motion users
+  var paused = false, still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var box = document.querySelector('.testi-carousel');
+  ['mouseenter', 'focusin'].forEach(function (ev) { box.addEventListener(ev, function () { paused = true; }); });
+  ['mouseleave', 'focusout'].forEach(function (ev) { box.addEventListener(ev, function () { paused = false; }); });
+  if (!still) setInterval(function () { if (!paused && !document.hidden) move(1); }, 6000);
+
+  /* ── Load real reviews ── */
+  function whenReady(fn, tries) {
+    if (window._nlSb) return fn(window._nlSb);
+    if ((tries || 0) > 60) return;           // give up quietly after ~5s
+    setTimeout(function () { whenReady(fn, (tries || 0) + 1); }, 80);
+  }
+  whenReady(function (sb) {
+    sb.from('reviews')
+      .select('id,rating,body,created_at,reviewer_id,resource_id,profiles(full_name,avatar_url,role,location),resources(title,subject,class_level)')
+      .not('body', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(80)
+      .then(function (result) {
+        if (result.error || !result.data) return;
+        var seen = {}, picked = [];
+        result.data.forEach(function (r) {
+          var len = (r.body || '').trim().length;
+          if (len < 15 || seen[r.reviewer_id] || picked.length >= 12) return;
+          seen[r.reviewer_id] = true;            // one review per person
+          picked.push(r);
+        });
+        if (!picked.length) return;              // no real reviews yet → section stays hidden
+        items = picked.map(card);
+        section.style.display = '';
+        render(0);
+      });
+  });
+})();
+</script>
 
 <!-- CTA -->
 <div class="cta-section">
@@ -310,13 +502,85 @@
 document.addEventListener('DOMContentLoaded', () => {
 
   // ─── HOW IT WORKS TABS ───
+  // The selector is a clipped copy of the tab row (white labels on a deep-green fill).
+  // Moving it = transitioning four clip insets. The leading edge moves first and fast,
+  // the trailing edge follows a beat later, so the pill stretches and then settles like a drop of oil.
+  // They are CSS transitions on registered custom properties, so a mid-flight tap retargets smoothly.
+  const tabsBox = document.querySelector('.how-tabs');
+  const tabEls = tabsBox ? Array.from(tabsBox.querySelectorAll('.how-tab')) : [];
+  let fillEl = null, squashTimer = null;
+  const reduceMotion = () => window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function setFill(el, dirRight, instant) {
+    if (!fillEl) return;
+    const w = tabsBox.clientWidth, h = tabsBox.clientHeight;
+    const set = (k, v) => fillEl.style.setProperty(k, v + 'px');
+    if (instant) fillEl.style.transition = 'none';
+    fillEl.classList.toggle('to-left', dirRight === false);
+    set('--cl', el.offsetLeft);
+    set('--cr', w - el.offsetLeft - el.offsetWidth);
+    set('--ct', el.offsetTop);
+    set('--cb', h - el.offsetTop - el.offsetHeight);
+    if (instant) { void fillEl.offsetWidth; fillEl.style.transition = ''; }
+  }
+  function moveFill(el, dirRight) {
+    setFill(el, dirRight, false);
+    if (reduceMotion()) return;
+    // thin out while stretched, then relax (the "squash")
+    fillEl.style.setProperty('--cv', '3px');
+    clearTimeout(squashTimer);
+    squashTimer = setTimeout(() => fillEl.style.setProperty('--cv', '0px'), 120);
+  }
+  if (tabsBox && tabEls.length) {
+    const wrap = document.createElement('div');
+    wrap.className = 'how-fill-wrap';
+    wrap.setAttribute('aria-hidden', 'true');
+    fillEl = document.createElement('div');
+    fillEl.className = 'how-fill';
+    tabEls.forEach(t => {
+      const lbl = document.createElement('span');
+      lbl.className = 'how-tab how-fill-label';
+      lbl.textContent = t.textContent;
+      fillEl.appendChild(lbl);
+    });
+    wrap.appendChild(fillEl);
+    tabsBox.appendChild(wrap);
+    tabsBox.classList.add('has-fill');
+    const place = () => { const a = tabsBox.querySelector('.how-tab.active'); if (a) setFill(a, undefined, true); };
+    place();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(place);
+    if (window.ResizeObserver) new ResizeObserver(place).observe(tabsBox); else window.addEventListener('resize', place);
+  }
+
+  // Cards of the newly shown panel enter with a short, direction-aware stagger (transitions, not keyframes).
+  function enterCards(grid, dir) {
+    const cards = Array.from(grid.querySelectorAll('.step-card'));
+    cards.forEach((c, i) => {
+      c.style.transition = ''; c.style.opacity = ''; c.style.transform = '';
+      c.style.setProperty('--i', i);
+      c.style.setProperty('--dir', dir);
+      c.classList.add('enter-from');
+    });
+    void grid.offsetWidth;                                   // commit the "from" state
+    requestAnimationFrame(() => {
+      cards.forEach(c => { c.classList.add('enter-run'); c.classList.remove('enter-from'); });
+      setTimeout(() => cards.forEach(c => c.classList.remove('enter-run')), 280 + cards.length * 50 + 60);
+    });
+  }
+
   window.switchTab = function(tab, el) {
-    document.querySelectorAll('.how-tab').forEach(t => t.classList.remove('active'));
+    const prev = tabEls.findIndex(t => t.classList.contains('active'));
+    const next = tabEls.indexOf(el);
+    if (prev === next) return;
+    tabEls.forEach(t => t.classList.remove('active'));
     el.classList.add('active');
+    if (fillEl) moveFill(el, next > prev);
     const teacherSteps = document.getElementById('teacher-steps');
     const parentSteps  = document.getElementById('parent-steps');
     if (teacherSteps) teacherSteps.style.display = tab === 'teacher' ? 'grid' : 'none';
     if (parentSteps)  parentSteps.style.display  = tab === 'parent'  ? 'grid' : 'none';
+    const shown = tab === 'teacher' ? teacherSteps : parentSteps;
+    if (shown) enterCards(shown, next > prev ? 1 : -1);
   };
 
   // ─── QUICK SEARCH TAGS ───
@@ -324,7 +588,7 @@ document.addEventListener('DOMContentLoaded', () => {
     tag.addEventListener('click', () => {
       const searchInput = document.querySelector('.search-input');
       if (searchInput) {
-        searchInput.value = tag.textContent;
+        searchInput.value = tag.textContent.trim();
         searchInput.focus();
       }
     });
@@ -336,7 +600,8 @@ document.addEventListener('DOMContentLoaded', () => {
     searchBtn.addEventListener('click', () => {
       const q = document.querySelector('.search-input')?.value?.trim();
       if (q) {
-        window.location.href = `pages/browse.html?q=${encodeURIComponent(q)}`;
+        // wait one beat so the button's release is visible before the page changes
+        setTimeout(() => { window.location.href = `pages/browse.html?q=${encodeURIComponent(q)}`; }, 150);
       } else {
         showToast('Please enter a search term.', 'info');
       }
@@ -357,6 +622,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ─── SUBJECT PILLS ───
+  // Capture-phase: hold navigation 150ms so the card's release animation is seen.
+  const subjGrid = document.getElementById('subjects-grid');
+  if (subjGrid) {
+    subjGrid.addEventListener('click', e => {
+      const pill = e.target.closest('.subject-pill');
+      if (!pill) return;
+      e.stopPropagation();
+      const name = pill.querySelector('.subj-name')?.textContent;
+      if (name) setTimeout(() => { window.location.href = `pages/browse.html?subject=${encodeURIComponent(name)}`; }, 150);
+    }, true);
+  }
   document.querySelectorAll('.subject-pill').forEach(pill => {
     pill.addEventListener('click', () => {
       const subjectName = pill.querySelector('.subj-name')?.textContent;
@@ -461,9 +737,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const fadeObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        entry.target.style.opacity = '1';
-        entry.target.style.transform = 'translateY(0)';
-        fadeObserver.unobserve(entry.target);
+        var t = entry.target;
+        t.style.opacity = '1';
+        t.style.transform = 'translateY(0)';
+        fadeObserver.unobserve(t);
+        // hand control back to the stylesheet once revealed, so hover / press effects can move the card
+        setTimeout(function () { t.style.transform = ''; t.style.transition = ''; }, 900);
       }
     });
   }, { threshold: 0.1 });
@@ -471,7 +750,7 @@ document.addEventListener('DOMContentLoaded', () => {
   fadeEls.forEach((el, i) => {
     el.style.opacity = '0';
     el.style.transform = 'translateY(16px)';
-    el.style.transition = `opacity .4s ease ${i * 60}ms, transform .4s ease ${i * 60}ms`;
+    el.style.transition = `opacity .4s ease ${(i % 8) * 60}ms, transform .4s ease ${(i % 8) * 60}ms`;
     fadeObserver.observe(el);
   });
 
@@ -511,21 +790,23 @@ document.addEventListener('DOMContentLoaded', () => {
   };
   var DEFAULT_STYLE = { bg:'#E8F4F0', arc:'#3D7A6B', dot:'#C8882A', text:'#1A4A3A', icon:'ti-file-text' };
 
+  /* Colours are handed to CSS as --l-* (light palette). The stylesheet derives the card's colours from them
+     (see ".subj-thumb" in styles.css), so dark mode gets a matching dark banner instead of the light one. */
   function subjectThumb(subject, type, verified) {
     var s = SUBJECT_STYLE[subject] || DEFAULT_STYLE;
-    return '<div class="res-thumb" style="background:'+s.bg+';position:relative;overflow:hidden">'
+    return '<div class="res-thumb subj-thumb" style="--l-bg:'+s.bg+';--l-arc:'+s.arc+';--l-dot:'+s.dot+';--l-text:'+s.text+';position:relative;overflow:hidden">'
       + '<svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 200 130" preserveAspectRatio="xMidYMid slice">'
-      + '<circle cx="190" cy="130" r="85" fill="none" stroke="'+s.arc+'" stroke-width="22" opacity=".12"/>'
-      + '<circle cx="190" cy="130" r="57" fill="none" stroke="'+s.arc+'" stroke-width="14" opacity=".10"/>'
-      + '<circle cx="190" cy="130" r="28" fill="'+s.arc+'" opacity=".08"/>'
-      + '<circle cx="26" cy="20" r="14" fill="'+s.dot+'" opacity=".18"/>'
+      + '<circle class="ring ring-3 thumb-arc-stroke" cx="190" cy="130" r="85" fill="none" stroke-width="22"/>'
+      + '<circle class="ring ring-2 thumb-arc-stroke" cx="190" cy="130" r="57" fill="none" stroke-width="14"/>'
+      + '<circle class="ring ring-1 thumb-arc-fill" cx="190" cy="130" r="28"/>'
+      + '<circle class="thumb-dot" cx="26" cy="20" r="14"/>'
       + '</svg>'
       + '<div style="position:absolute;left:14px;top:50%;transform:translateY(-50%)">'
-      + '<div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:'+s.arc+';opacity:.75;margin-bottom:4px">Subject</div>'
-      + '<div style="font-family:\'Playfair Display\',Georgia,serif;font-size:16px;font-weight:700;color:'+s.text+';line-height:1.15;max-width:110px">'+subject+'</div>'
+      + '<div class="thumb-eyebrow" style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">Subject</div>'
+      + '<div class="thumb-name" style="font-family:\'Playfair Display\',Georgia,serif;font-size:16px;font-weight:700;line-height:1.15;max-width:110px">'+subject+'</div>'
       + '</div>'
-      + '<div style="position:absolute;right:12px;bottom:10px;opacity:.18">'
-      + '<i class="ti '+s.icon+'" style="font-size:46px;color:'+s.arc+'"></i>'
+      + '<div class="res-icon" style="position:absolute;right:12px;bottom:10px">'
+      + '<i class="ti '+s.icon+'" style="font-size:46px"></i>'
       + '</div>'
       + '<div class="res-badge">'+type+'</div>'
       + (verified ? '<div class="res-verified">✓ Verified</div>' : '')

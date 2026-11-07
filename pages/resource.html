@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+  <meta name="theme-color" content="#ffffff">
   <title>Resource — NaijaLearn</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -786,7 +787,7 @@
         related.map(function(rel) {
           var rs = SUBJECT_STYLE[rel.subject] || DEFAULT_STYLE;
           return '<a class="related-item" href="resource.html?id='+rel.id+'">'+
-            '<div class="related-icon" style="background:'+rs.bg+';border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti '+rs.icon+'" style="font-size:18px;color:'+rs.arc+'"></i></div>'+
+            '<div class="related-icon subj-chip" style="--l-bg:'+rs.bg+';--l-arc:'+rs.arc+';border-radius:8px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti '+rs.icon+'" style="font-size:18px"></i></div>'+
             '<div class="related-text">'+
             '<div class="related-title">'+rel.title+'</div>'+
             '<div class="related-sub">'+rel.class_level+' · '+rel.term+'</div>'+
@@ -801,19 +802,19 @@
 
     setContent(
       '<div class="resource-hero">'+
-      '  <div class="resource-banner" style="background:'+ss.bg+';position:relative;overflow:hidden;">'+
+      '  <div class="resource-banner subj-thumb" style="--l-bg:'+ss.bg+';--l-arc:'+ss.arc+';--l-dot:'+ss.dot+';--l-text:'+ss.text+';position:relative;overflow:hidden;">'+
       '    <svg style="position:absolute;inset:0;width:100%;height:100%" viewBox="0 0 780 130" preserveAspectRatio="xMidYMid slice">'+
-      '      <circle cx="760" cy="130" r="120" fill="none" stroke="'+ss.arc+'" stroke-width="28" opacity=".12"/>'+
-      '      <circle cx="760" cy="130" r="80" fill="none" stroke="'+ss.arc+'" stroke-width="18" opacity=".10"/>'+
-      '      <circle cx="760" cy="130" r="38" fill="'+ss.arc+'" opacity=".08"/>'+
-      '      <circle cx="38" cy="28" r="18" fill="'+ss.dot+'" opacity=".18"/>'+
+      '      <circle class="ring ring-3 thumb-arc-stroke" cx="760" cy="130" r="120" fill="none" stroke-width="28"/>'+
+      '      <circle class="ring ring-2 thumb-arc-stroke" cx="760" cy="130" r="80" fill="none" stroke-width="18"/>'+
+      '      <circle class="ring ring-1 thumb-arc-fill" cx="760" cy="130" r="38"/>'+
+      '      <circle class="thumb-dot" cx="38" cy="28" r="18"/>'+
       '    </svg>'+
       '    <div style="position:absolute;left:32px;top:50%;transform:translateY(-50%)">'+
-      '      <div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:'+ss.arc+';opacity:.75;margin-bottom:6px">Subject</div>'+
-      '      <div style="font-family:\'Playfair Display\',Georgia,serif;font-size:26px;font-weight:700;color:'+ss.text+';line-height:1.1">'+r.subject+'</div>'+
+      '      <div class="thumb-eyebrow" style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">Subject</div>'+
+      '      <div class="thumb-name" style="font-family:\'Playfair Display\',Georgia,serif;font-size:26px;font-weight:700;line-height:1.1">'+r.subject+'</div>'+
       '    </div>'+
-      '    <div style="position:absolute;right:28px;bottom:12px;opacity:.15">'+
-      '      <i class="ti '+ss.icon+'" style="font-size:72px;color:'+ss.arc+'"></i>'+
+      '    <div class="banner-icon" style="position:absolute;right:28px;bottom:12px">'+
+      '      <i class="ti '+ss.icon+'" style="font-size:72px"></i>'+
       '    </div>'+
       '  </div>'+
       '  <div class="resource-info">'+
@@ -1155,5 +1156,32 @@
   <div class="footer-copy">© 2026 NaijaLearn. Built with ❤️ for Nigerian education.</div>
 </footer>
 </div><!-- /suspension-blur-wrap -->
+<script>
+/* Banner "alive" cycle: the ring wave + corner icon play for 5s, rest for 5s, repeat.
+   The banner is built after the data loads, so watch for it to appear. */
+(function () {
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) return;
+  var CYCLE = 10000;
+  function live(el) {
+    if (el.__alive) return;
+    el.__alive = true;
+    function play() {
+      if (!document.body.contains(el)) { clearInterval(timer); return; }
+      el.classList.remove('is-alive');
+      void el.offsetWidth;                 // restart the animations from the top
+      el.classList.add('is-alive');        // each one runs 5s, then rests by itself
+    }
+    var timer = setInterval(play, CYCLE);
+    play();
+  }
+  function scan() {
+    var el = document.querySelector('.resource-banner');
+    if (el) live(el);
+  }
+  new MutationObserver(scan).observe(document.body, { childList: true, subtree: true });
+  scan();
+})();
+</script>
 </body>
 </html>

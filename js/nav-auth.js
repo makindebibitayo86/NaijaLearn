@@ -281,6 +281,8 @@
 
       function applyTheme(dark) {
         html.setAttribute('data-theme', dark ? 'dark' : 'light');
+        var tc = document.querySelector('meta[name="theme-color"]');
+        if (tc) tc.setAttribute('content', dark ? '#18262F' : '#FFFFFF');   // matches --white (the nav bar colour)
         var btn = document.getElementById('nl-theme-toggle');
         if (btn) btn.textContent = dark ? '\ud83c\udf19' : '\u2600\ufe0f';
         try { localStorage.setItem(STORAGE_KEY, dark ? 'dark' : 'light'); } catch (e) {}
@@ -326,4 +328,81 @@
   } else {
     boot();
   }
+})();
+
+/* ── Footer heart: wrap the ❤️ in a span so CSS can animate it ──
+   Runs on every page (all load this file). The admin page builds its footer
+   after load, so a MutationObserver re-checks when new content is added. */
+(function () {
+  var HEART = '❤️';
+
+  /* Put the "© 2026 NaijaLearn." sentence in its own span so CSS can space it
+     from "Built with ❤️ for Nigerian education." */
+  function splitSentences(el) {
+    var first = el.firstChild;
+    if (!first || first.nodeType !== 3) return;
+    var m = first.nodeValue.match(/^(\s*\u00A9[^.]*\.)\s+([\s\S]*)$/);
+    if (!m) return;
+    var span = document.createElement('span');
+    span.className = 'footer-copy-line';
+    span.textContent = m[1].trim();
+    el.insertBefore(span, first);
+    first.nodeValue = m[2];
+  }
+
+  function wrapHearts() {
+    var copies = document.querySelectorAll('.footer-copy');
+    for (var i = 0; i < copies.length; i++) {
+      splitSentences(copies[i]);
+      var node = copies[i].firstChild;
+      while (node) {
+        var next = node.nextSibling;
+        if (node.nodeType === 3 && node.nodeValue.indexOf(HEART) !== -1) {
+          var parts = node.nodeValue.split(HEART);
+          var frag = document.createDocumentFragment();
+          for (var j = 0; j < parts.length; j++) {
+            if (j > 0) {
+              var span = document.createElement('span');
+              span.className = 'footer-heart';
+              span.setAttribute('aria-hidden', 'true');
+              span.textContent = HEART;
+              frag.appendChild(span);
+            }
+            if (parts[j]) frag.appendChild(document.createTextNode(parts[j]));
+          }
+          copies[i].replaceChild(frag, node);
+        }
+        node = next;
+      }
+    }
+  }
+
+  function start() {
+    wrapHearts();
+    if (window.MutationObserver) {
+      var pending = false;
+      new MutationObserver(function () {
+        if (pending) return;
+        pending = true;
+        requestAnimationFrame(function () { pending = false; wrapHearts(); });
+      }).observe(document.body, { childList: true, subtree: true });
+    }
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+  else start();
+// ── "Show more" helper: glide the page so the first newly added row comes into view ──
+// Under the sticky nav with a little air above; capped so one click never flings the page.
+window.nlRollTo = function (el) {
+  if (!el) return;
+  requestAnimationFrame(function () {
+    var nav = document.querySelector('nav');
+    var offset = (nav ? nav.offsetHeight : 0) + 24;
+    var delta = el.getBoundingClientRect().top - offset;
+    if (delta <= 0) return;                                   // already in view
+    delta = Math.min(delta, window.innerHeight * 0.8);
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollBy({ top: delta, behavior: reduce ? 'auto' : 'smooth' });
+  });
+};
 })();

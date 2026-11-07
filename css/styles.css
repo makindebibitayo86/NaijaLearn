@@ -339,7 +339,37 @@ nav {
   font-weight: 600;
   margin-bottom: 20px;
 }
-.hero-badge::before { content: '🇳🇬'; font-size: 14px; }
+.hero-badge::before {
+  /* Drawn flag (green-white-green) — emoji flags don't render on Windows */
+  content: '';
+  display: inline-block;
+  width: 20px;
+  height: 14px;
+  flex-shrink: 0;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px rgba(13, 27, 42, .12);
+  background:
+    linear-gradient(100deg, transparent 35%, rgba(0, 0, 0, .20) 50%, transparent 65%) 0 0 / 250% 100% no-repeat,
+    linear-gradient(90deg, #008751 0 33.34%, #fff 33.34% 66.67%, #008751 66.67% 100%);
+  /* Waves from the pole (left edge): cloth tilts in perspective while a shadow ripples across */
+  transform-origin: 0% 50%;
+  animation:
+    flag-wave 2400ms ease-in-out infinite,
+    flag-ripple 2400ms linear infinite;
+}
+@keyframes flag-wave {
+  0%, 100% { transform: perspective(70px) rotateY(0)      skewY(0); }
+  25%      { transform: perspective(70px) rotateY(-16deg) skewY(-4deg); }
+  50%      { transform: perspective(70px) rotateY(0)      skewY(0); }
+  75%      { transform: perspective(70px) rotateY(16deg)  skewY(4deg); }
+}
+@keyframes flag-ripple {
+  from { background-position: 100% 0, 0 0; }
+  to   { background-position: -50% 0, 0 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-badge::before { animation: none; }
+}
 
 h1 {
   font-family: 'Playfair Display', serif;
@@ -739,38 +769,71 @@ h1 em { font-style: normal; color: var(--sage); }
 .step-title { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
 .step-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
 
-/* ─── TESTIMONIALS ─── */
+/* ─── TESTIMONIALS (looping carousel, one fixed-size card design) ─── */
+.testi-carousel { position: relative; padding: 0 56px; width: 100%; min-width: 0; box-sizing: border-box; }   /* side gutters hold the arrows, so they never sit on a card */
+.testi-viewport { width: 100%; min-width: 0; box-sizing: border-box; overflow: hidden; margin-top: 28px; padding: 4px 2px 10px; }
 .testi-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
   gap: 20px;
-  margin-top: 28px;
+  transition: transform .5s cubic-bezier(.4, .1, .2, 1);
+  will-change: transform;
 }
+.testi-grid.static { justify-content: center; transform: none !important; }   /* few reviews: centred, no sliding */
 
 .testi-card {
+  --card-w: calc((100% - 40px) / 3);
+  flex: 0 0 var(--card-w);
+  width: var(--card-w);
+  min-width: 0;
+  max-width: var(--card-w);
+  overflow: hidden;                /* long text is cut, never stretches the card */
+  height: 292px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
   background: var(--white);
   border: 1px solid var(--border);
   border-radius: 16px;
-  padding: 24px;
+  padding: 22px 24px 20px;
 }
+@media (max-width: 1024px) { .testi-card { --card-w: calc((100% - 20px) / 2); } }
+@media (max-width: 768px)  { .testi-card { --card-w: 100%; } .testi-carousel { padding: 0; } .testi-nav { display: none; } }
 
+.testi-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.stars { color: var(--gold); font-size: 13px; margin-bottom: 12px; }
+.testi-top .stars { margin: 0; }
+.testi-mark { font-family: 'Playfair Display', serif; font-size: 38px; line-height: .6; height: 18px; color: var(--sage); opacity: .4; }
+
+.testi-body { flex: 1; min-height: 0; min-width: 0; }
 .testi-quote {
   font-size: 14px;
   color: var(--ink2);
-  line-height: 1.7;
-  margin-bottom: 20px;
+  line-height: 1.65;
   font-style: italic;
+  margin: 0 0 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;           /* long reviews end in "…" */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
 }
+.testi-more { font-size: 12.5px; font-weight: 700; color: var(--sage); text-decoration: none; }
+.testi-more:hover, .testi-more:focus-visible { text-decoration: underline; }
 
 .testi-author {
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
 }
-
+.testi-who { min-width: 0; flex: 1 1 0; overflow: hidden; }
 .testi-avatar {
-  width: 38px;
-  height: 38px;
+  position: relative;
+  overflow: hidden;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -779,10 +842,42 @@ h1 em { font-style: normal; color: var(--sage); }
   font-weight: 700;
   flex-shrink: 0;
 }
-
+.testi-avatar svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.testi-name, .testi-role, .testi-mat { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .testi-name { font-size: 13px; font-weight: 700; color: var(--ink); }
 .testi-role { font-size: 12px; color: var(--muted); }
-.stars { color: var(--gold); font-size: 13px; margin-bottom: 12px; }
+.testi-mat  { font-size: 12px; color: var(--muted); }
+
+.testi-nav {
+  position: absolute;
+  top: calc(50% - 18px);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--white);
+  color: var(--ink);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(15, 59, 48, .15);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform .15s;
+}
+.testi-nav:hover { transform: scale(1.08); }
+.testi-prev { left: 0; }
+.testi-next { right: 0; }
+
+.testi-dots { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 14px; font-size: 13px; color: var(--muted); }
+.testi-dot {
+  width: 8px; height: 8px; padding: 0; border: 0; border-radius: 50%;
+  background: var(--border); cursor: pointer; transition: width .2s, background .2s;
+}
+.testi-dot.active { width: 22px; border-radius: 6px; background: var(--sage); }
+@media (prefers-reduced-motion: reduce) { .testi-grid { transition: none; } }
 
 /* ─── HOMESCHOOL BANNER ─── */
 .home-banner-wrapper {
@@ -816,14 +911,19 @@ h1 em { font-style: normal; color: var(--sage); }
   z-index: 1;
   overflow: hidden;
 }
+/* Stack of Nigerian school books (Nursery → SS3), drawn as SVG */
 .home-banner::before {
-  content: '📚';
+  content: '';
   position: absolute;
-  right: 40px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 120px;
-  opacity: .15;
+  top: 0;
+  right: 56px;
+  bottom: 0;
+  width: 30%;
+  max-width: 360px;
+  background: url('../assets/banner-books.svg') center right / contain no-repeat;
+  opacity: .5;                 /* lets the panel's green show through = tint */
+  filter: saturate(.8);
+  pointer-events: none;
 }
 
 .banner-content { max-width: 560px; }
@@ -848,6 +948,9 @@ h1 em { font-style: normal; color: var(--sage); }
   margin-bottom: 12px;
   line-height: 1.2;
 }
+
+.banner-line { display: block; white-space: nowrap; }
+@media (max-width: 640px) { .banner-line { white-space: normal; } }
 
 .banner-desc {
   font-size: 15px;
@@ -1089,7 +1192,8 @@ footer {
   border: 1.5px solid var(--border);
   border-radius: 20px;
   padding: 4px 11px;
-  transition: border-color .15s, background .15s;
+  transition: border-color .18s ease, background .18s ease, color .18s ease,
+              transform .18s ease, box-shadow .18s ease;
   user-select: none;
 }
 .filter-chip input[type="checkbox"] {
@@ -1099,6 +1203,34 @@ footer {
   background: #E8F4F0;
   border-color: var(--sage);
   color: #1A4A3A;
+}
+
+/* Hover: soft green tint, green border, tiny lift */
+.filter-chip:hover {
+  background: var(--sage-l);
+  border-color: var(--sage);
+  color: var(--sage-d);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(61, 122, 107, .18);
+}
+/* Hovering a chip that is already selected: slightly deeper green */
+.filter-chip:has(input:checked):hover {
+  background: var(--sage-m);
+  color: #1A4A3A;
+}
+/* Press feedback */
+.filter-chip:active {
+  transform: translateY(0) scale(.96);
+  box-shadow: none;
+}
+/* Keyboard users (Tab key) get a clear outline too */
+.filter-chip:has(input:focus-visible) {
+  outline: 2px solid var(--sage);
+  outline-offset: 2px;
+}
+@media (hover: none) {
+  /* No sticky hover effects on touch screens */
+  .filter-chip:hover { transform: none; box-shadow: none; }
 }
 
 .results-header {
@@ -1131,7 +1263,7 @@ footer {
 
 /* ─── UPLOAD PAGE SPECIFIC ─── */
 .upload-wrapper {
-  max-width: 700px;
+  max-width: var(--page-max);   /* same frame as the nav, so the logo and the form line up */
   margin: 48px auto;
   padding: 0 var(--gutter);
 }
@@ -1189,20 +1321,193 @@ footer {
   gap: 16px;
 }
 
+/* Two columns: the details form on the left, the file + submit on the right.
+   minmax(0, …) lets long text truncate instead of stretching a column. */
+.upload-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: stretch;   /* the file column is exactly as tall as the form */
+  margin-bottom: 60px;
+}
+.upload-layout .upload-card { margin-bottom: 0; }
+.upload-card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 24px;
+}
+.upload-main { display: flex; flex-direction: column; min-width: 0; }
+.upload-main .upload-card { flex: 1; }   /* stays level with the file column when the progress bar appears */
+.upload-side { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+/* The file card takes all the height the form sets: the drop box grows to fill it,
+   so the Upload button lines up with the bottom of the form. (Single column: natural height.) */
+.upload-side .upload-card { flex: 1; display: flex; flex-direction: column; }
+.upload-side .dropzone { flex: 1; min-height: 220px; }
+
 .dropzone {
   border: 2px dashed var(--border);
   border-radius: 12px;
-  padding: 40px;
+  padding: 40px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   cursor: pointer;
-  transition: all .2s;
   background: var(--cream);
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+  transition:
+    border-color 180ms var(--ease-out),
+    background-color 180ms var(--ease-out),
+    transform 180ms var(--ease-out);
 }
-.dropzone:hover { border-color: var(--sage); background: var(--sage-l); }
-.dropzone-icon { font-size: 40px; margin-bottom: 12px; }
+/* children never steal drag events, so dragleave only fires when you really leave */
+.dropzone > * { pointer-events: none; }
+@media (hover: hover) and (pointer: fine) {
+  .dropzone:hover { border-color: var(--sage); background: var(--sage-l); }
+}
+.dropzone.is-over, .dropzone.is-demo { border-color: var(--sage); background: var(--sage-l); }
+.dropzone.is-over { transform: scale(1.01); }
+.dropzone:active { transform: scale(.985); }
+.dropzone:focus-visible { outline: 2px solid var(--sage); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  .dropzone.is-over, .dropzone:active { transform: none; }
+}
+
+/* ── Guided fill (js/typing-placeholder.js) ──
+   A select "typing" its example must not look like a real choice: muted, like a placeholder. */
+.filter-select.is-guiding { color: var(--muted); }
+
+/* The demo "file" lands in the drop box (transform + opacity only) ... */
+@keyframes nl-file-drop {
+  0%   { opacity: 0; transform: translateY(-22px); }
+  55%  { opacity: 1; }
+  100% { opacity: 1; transform: none; }
+}
+.dropzone.is-demo .dropzone-icon { animation: nl-file-drop 700ms var(--ease-out) both; }
+
+/* ... and a ring pulses out of the submit button, where the whole flow ends */
+.upload-side .btn-full { position: relative; }
+@keyframes nl-ring {
+  from { opacity: .7; transform: scale(1); }
+  to   { opacity: 0;  transform: scale(1.05, 1.35); }
+}
+.btn-full.is-pulsing::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--sage);
+  border-radius: inherit;
+  pointer-events: none;
+  animation: nl-ring 900ms var(--ease-out) 2;
+}
+/* Two icons stacked in one spot: they take turns (JS flips data-icon), and swap on hover.
+   Entering icon: scale .9 -> 1 + fade + a touch of blur, so the swap reads as one object changing. */
+.dropzone-icon {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 14px;
+  color: var(--sage);
+  transition: transform 200ms var(--ease-out);
+}
+.dz-ico {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+  transform: scale(.9);
+  filter: blur(3px);
+  transition:
+    opacity 300ms var(--ease-out),
+    transform 300ms var(--ease-out),
+    filter 300ms var(--ease-out);
+}
+.dropzone:not([data-icon="up"]) .dropzone-icon .dz-doc,
+.dropzone[data-icon="up"] .dropzone-icon .dz-up { opacity: 1; transform: none; filter: none; }
+
+/* Hover (mouse only), dragging a file over, or keyboard focus: the upload icon takes over,
+   the whole icon lifts a little and the arrow keeps bobbing upward. */
+@keyframes nl-arrow-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-2.5px); }
+}
+@media (hover: hover) and (pointer: fine) {
+  .dropzone:hover .dropzone-icon { transform: translateY(-3px); }
+  .dropzone:hover .dropzone-icon .dz-up   { opacity: 1; transform: none; filter: none; }
+  .dropzone:hover .dropzone-icon .dz-doc  { opacity: 0; transform: scale(.9); filter: blur(3px); }
+  .dropzone:hover .dz-arrow { animation: nl-arrow-bob 1100ms ease-in-out infinite; }
+}
+.dropzone.is-over .dropzone-icon .dz-up,
+.dropzone:focus-visible .dropzone-icon .dz-up   { opacity: 1; transform: none; filter: none; }
+.dropzone.is-over .dropzone-icon .dz-doc,
+.dropzone:focus-visible .dropzone-icon .dz-doc  { opacity: 0; transform: scale(.9); filter: blur(3px); }
+.dropzone.is-over .dz-arrow,
+.dropzone:focus-visible .dz-arrow { animation: nl-arrow-bob 1100ms ease-in-out infinite; }
+/* the guided demo drops a document in, so show the document while it runs */
+.dropzone.is-demo .dropzone-icon .dz-doc { opacity: 1; transform: none; filter: none; }
+.dropzone.is-demo .dropzone-icon .dz-up  { opacity: 0; transform: scale(.9); filter: blur(3px); }
+@media (prefers-reduced-motion: reduce) {
+  /* keep the cross-fade (it explains the state), drop the movement and blur */
+  .dz-ico, .dropzone .dropzone-icon .dz-ico { transform: none; filter: none; transition-duration: 160ms; }
+  .dropzone .dropzone-icon, .dropzone .dz-arrow { transform: none; animation: none; }
+}
 .dropzone-text { font-size: 14px; font-weight: 600; color: var(--ink2); margin-bottom: 4px; }
 .dropzone-sub { font-size: 12px; color: var(--muted); }
 .dropzone input[type="file"] { display: none; }
+
+/* Attached file. Long names truncate in the middle of the name, never the extension. */
+.file-chip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 14px 16px;
+  background: var(--sage-l);
+  border: 1px solid var(--sage-m);
+  border-radius: 10px;
+}
+.file-chip-icon { flex-shrink: 0; font-size: 24px; line-height: 1; }
+.file-chip-text { flex: 1; min-width: 0; }
+.file-chip-name { display: flex; font-size: 14px; font-weight: 600; color: var(--ink); }
+.file-chip-base { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-chip-ext  { flex-shrink: 0; white-space: nowrap; }
+.file-chip-size { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.file-chip-remove {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  line-height: 1;
+  color: var(--muted);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: transform 120ms var(--ease-out), background-color 160ms ease, color 160ms ease;
+}
+.file-chip-remove:active { transform: scale(.92); }
+.file-chip-remove:focus-visible { outline: 2px solid var(--sage); outline-offset: 2px; }
+@media (hover: hover) and (pointer: fine) {
+  .file-chip-remove:hover { background: var(--sage-m); color: var(--ink); }
+}
+@media (pointer: coarse) { .file-chip-remove { width: 44px; height: 44px; } }
+@media (prefers-reduced-motion: reduce) { .file-chip-remove:active { transform: none; } }
 
 .upload-tip {
   background: var(--sage-l);
@@ -1212,13 +1517,15 @@ footer {
   font-size: 13px;
   color: var(--sage-d);
   line-height: 1.5;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 .upload-tip strong { font-weight: 700; }
+.upload-tip ul { list-style: none; }   /* one tip per line, under the heading */
 
 /* ─── AUTH PAGES ─── */
 .auth-wrapper {
   min-height: 100vh;
+  min-height: 100dvh; /* tracks the mobile URL bar instead of overflowing it */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1297,7 +1604,9 @@ footer {
   transition: all .2s;
 }
 .btn-full.primary { background: var(--sage); color: #fff; }
-.btn-full.primary:hover { background: var(--sage-d); }
+@media (hover: hover) and (pointer: fine) {
+  .btn-full.primary:hover { background: var(--sage-d); }   /* touch screens would keep it stuck after a tap */
+}
 
 /* ─── TOAST NOTIFICATIONS ─── */
 .toast-container {
@@ -1340,6 +1649,10 @@ footer {
   .resources-grid, .results-grid { grid-template-columns: repeat(2, 1fr); }
   .testi-grid { grid-template-columns: repeat(2, 1fr); }
   .browse-layout { grid-template-columns: 220px 1fr; }
+}
+
+@media (max-width: 900px) {
+  .upload-layout { grid-template-columns: 1fr; }   /* form first, then the file */
 }
 
 @media (max-width: 768px) {
@@ -1538,4 +1851,1711 @@ footer {
 [data-theme="dark"] .theme-toggle:hover {
   background: var(--sage-m, #2A5248);
   border-color: var(--sage, #5BBDA8);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SURFACE SYSTEM — solid panels with beveled edges, real keycap buttons
+   Panels: a hairline outer edge, a bright inner rim all the way round,
+   a soft diagonal shade across the face, and a cool, long, diffuse shadow.
+   Buttons: a glossy face, a bright top rim, a visible solid base, and
+   key travel — on press the face drops onto its base.
+   Loaded last; the `html:root body` prefix makes these win over per-page
+   rules without needing !important.
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+
+  /* ── light mode ── */
+  --rim:   rgba(255, 255, 255, .95);      /* bright inner edge, all the way round */
+  --hit:   rgba(255, 255, 255, 1);        /* extra-bright catch-light on the top edge */
+  --g1:    rgba(255, 255, 255, 0);        /* face shading: top-left ... */
+  --g2:    rgba(13, 27, 42, .035);        /* ... to bottom-right */
+  --panel-shadow:
+    inset 0 0 0 1px var(--rim),
+    inset 0 1px 0 var(--hit),
+    inset 0 -1px 0 rgba(13, 27, 42, .04),
+    0 1px 2px rgba(40, 55, 95, .07),
+    0 6px 14px -6px rgba(40, 55, 95, .10);
+  --panel-shadow-lg:
+    inset 0 0 0 1px var(--rim),
+    inset 0 1px 0 var(--hit),
+    0 2px 4px rgba(40, 55, 95, .08),
+    0 14px 30px -10px rgba(40, 55, 95, .18);
+  --field-recess: inset 0 1px 3px rgba(13, 27, 42, .09), inset 0 0 0 1px rgba(13, 27, 42, .02);
+
+  /* keycap faces */
+  --key-gloss: linear-gradient(180deg, rgba(255,255,255,.28) 0%, rgba(255,255,255,.06) 48%, rgba(0,0,0,.10) 100%);
+  --key-rim:
+    inset 0 1px 0 rgba(255, 255, 255, .55),
+    inset 0 0 0 1px rgba(255, 255, 255, .12),
+    inset 0 -1px 0 rgba(0, 0, 0, .18);
+  --key-ambient: 0 6px 10px -5px rgba(13, 27, 42, .22);
+  --key-pressed-inner: inset 0 2px 6px rgba(0, 0, 0, .30), inset 0 0 0 1px rgba(0, 0, 0, .10);
+
+  /* soft keycaps (outline / tinted buttons) */
+  --soft-face: linear-gradient(180deg, rgba(255,255,255,.95) 0%, rgba(13,27,42,.045) 100%);
+  --soft-rim: inset 0 1px 0 rgba(255, 255, 255, 1), inset 0 0 0 1px rgba(255, 255, 255, .6);
+  --soft-ambient: 0 3px 6px -3px rgba(13, 27, 42, .10);
+  --soft-pressed-inner: inset 0 2px 4px rgba(13, 27, 42, .14), inset 0 0 0 1px rgba(13, 27, 42, .05);
+}
+
+[data-theme="dark"] {
+  --rim:   rgba(255, 255, 255, .06);
+  --hit:   rgba(255, 255, 255, .11);
+  --g1:    rgba(255, 255, 255, .045);
+  --g2:    rgba(0, 0, 0, .14);
+  --panel-shadow:
+    inset 0 0 0 1px var(--rim),
+    inset 0 1px 0 var(--hit),
+    inset 0 -1px 0 rgba(0, 0, 0, .25),
+    0 1px 2px rgba(0, 0, 0, .30),
+    0 6px 14px -6px rgba(0, 0, 0, .32);
+  --panel-shadow-lg:
+    inset 0 0 0 1px var(--rim),
+    inset 0 1px 0 var(--hit),
+    0 2px 4px rgba(0, 0, 0, .35),
+    0 14px 30px -10px rgba(0, 0, 0, .45);
+  --field-recess: inset 0 2px 4px rgba(0, 0, 0, .50), inset 0 0 0 1px rgba(0, 0, 0, .20);
+
+  --key-gloss: linear-gradient(180deg, rgba(255,255,255,.22) 0%, rgba(255,255,255,.05) 48%, rgba(0,0,0,.14) 100%);
+  --key-rim:
+    inset 0 1px 0 rgba(255, 255, 255, .42),
+    inset 0 0 0 1px rgba(255, 255, 255, .10),
+    inset 0 -1px 0 rgba(0, 0, 0, .28);
+  --key-ambient: 0 6px 10px -5px rgba(0, 0, 0, .38);
+  --key-pressed-inner: inset 0 2px 7px rgba(0, 0, 0, .55), inset 0 0 0 1px rgba(0, 0, 0, .25);
+
+  --soft-face: linear-gradient(180deg, rgba(255,255,255,.08) 0%, rgba(0,0,0,.18) 100%);
+  --soft-rim: inset 0 1px 0 rgba(255, 255, 255, .12), inset 0 0 0 1px rgba(255, 255, 255, .04);
+  --soft-ambient: 0 3px 6px -3px rgba(0, 0, 0, .32);
+  --soft-pressed-inner: inset 0 2px 5px rgba(0, 0, 0, .50), inset 0 0 0 1px rgba(0, 0, 0, .20);
+}
+
+/* ── Panels: beveled edge, shaded face, long soft shadow ── */
+html:root body :is(
+  .panel, .stat-card, .quick-links-panel, .profile-banner-wrap, .verify-widget,
+  .search-card, .res-card, .filter-panel, .upload-card, .auth-card, .step-card,
+  .testi-card, .form-card, .contact-card, .value-card, .team-card, .table-card,
+  .reviews-card, .related-card, .status-card, .preview-card, .edit-panel
+) {
+  box-shadow: var(--panel-shadow);
+  background-image: linear-gradient(160deg, var(--g1) 0%, var(--g2) 100%);
+}
+/* Bigger surfaces read as thicker */
+html:root body .modal-box {
+  box-shadow: var(--panel-shadow-lg);
+  background-image: linear-gradient(160deg, var(--g1) 0%, var(--g2) 100%);
+}
+
+/* ── Fields: recessed, so the panels read as raised by contrast ── */
+html:root body :is(.form-input, .form-textarea, .filter-select, .sort-select) {
+  box-shadow: var(--field-recess);
+}
+
+/* ── Buttons: shared motion. Press snaps down fast, release eases back ── */
+html:root body :is([class*="btn-"]:not(.btn-spinner), .filter-chip, .panel-action) {
+  transition:
+    transform 180ms var(--ease-out),
+    box-shadow 180ms var(--ease-out),
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    opacity 160ms ease;
+}
+
+/* ═════ SOLID KEYCAPS (filled buttons) ═════
+   face colour stays each button's own; --key is its darker "base" colour */
+html:root body :is(
+  .btn-primary, .btn-sage, .btn-nav, .btn-search, .btn-save, .btn-submit-review,
+  .btn-download, .btn-lock-signin, .btn-modal-approve
+) { --key: color-mix(in srgb, var(--sage) 68%, #000); }
+
+html:root body :is(.btn-verify, .btn-submit-verify) { --key: color-mix(in srgb, var(--gold) 68%, #000); }
+html:root body .btn-danger { --key: color-mix(in srgb, #e74c3c 68%, #000); }
+html:root body :is(.btn-hero-primary, .btn-white, .btn-lock-signup) { --key: #bfcbc6; }
+
+html:root body :is(
+  .btn-primary, .btn-sage, .btn-nav, .btn-search, .btn-save, .btn-submit-review,
+  .btn-download, .btn-lock-signin, .btn-modal-approve, .btn-verify, .btn-submit-verify,
+  .btn-danger, .btn-hero-primary, .btn-white, .btn-lock-signup
+) {
+  background-image: var(--key-gloss);
+  box-shadow:
+    var(--key-rim),
+    0 2px 0 var(--key),          /* the solid base the key sits on */
+    var(--key-ambient);          /* its shadow on the surface below */
+}
+/* the white keycaps need a lighter rim so it doesn't look dirty */
+html:root body :is(.btn-hero-primary, .btn-white, .btn-lock-signup) {
+  background-image: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(13,27,42,.06) 100%);
+  box-shadow:
+    inset 0 1px 0 #fff,
+    inset 0 -1px 0 rgba(13, 27, 42, .10),
+    0 2px 0 var(--key),
+    var(--key-ambient);
+}
+
+/* ═════ SOFT KEYCAPS (outline and tinted buttons) ═════ */
+html:root body :is(
+  .btn-ghost, .btn-edit-profile, .btn-cancel-edit, .btn-cancel-modal, .btn-modal-close,
+  .btn-share, .btn-view, .btn-show-more, .btn-modal-reject, .btn-approve, .btn-unsuspend,
+  .btn-promote, .btn-reject, .btn-suspend, .btn-remove
+) {
+  background-image: var(--soft-face);
+  box-shadow:
+    var(--soft-rim),
+    0 1px 0 color-mix(in srgb, currentColor 20%, transparent),
+    var(--soft-ambient);
+}
+
+/* Touch screens: no stuck hover lifts */
+@media (hover: none) {
+  html:root body :is([class*="btn-"], .stat-card, .res-card, .filter-chip):hover {
+    transform: none;
+  }
+}
+
+/* ═════ PRESSED: the face drops onto its base ═════ */
+/* :where() keeps this general rule's specificity low, so the keycap rules below can override it */
+html:root body :where([class*="btn-"]:not(.btn-spinner), .filter-chip):where(:not(:disabled)):active {
+  transition-duration: 100ms;
+  transform: scale(0.97);
+  box-shadow: var(--soft-pressed-inner);
+}
+html:root body :is(
+  .btn-primary, .btn-sage, .btn-nav, .btn-search, .btn-save, .btn-submit-review,
+  .btn-download, .btn-lock-signin, .btn-modal-approve, .btn-verify, .btn-submit-verify,
+  .btn-danger, .btn-hero-primary, .btn-white, .btn-lock-signup
+):not(:disabled):active {
+  transform: translateY(1px);
+  box-shadow:
+    var(--key-pressed-inner),
+    0 1px 0 var(--key);
+}
+html:root body :is(
+  .btn-ghost, .btn-edit-profile, .btn-cancel-edit, .btn-cancel-modal, .btn-modal-close,
+  .btn-share, .btn-view, .btn-show-more, .btn-modal-reject, .btn-approve, .btn-unsuspend,
+  .btn-promote, .btn-reject, .btn-suspend, .btn-remove
+):not(:disabled):active {
+  transform: translateY(1px);
+  box-shadow: var(--soft-pressed-inner);
+}
+/* List rows and text links: press in, but don't move inside their card */
+html:root body :is(.quick-link, .panel-action):active {
+  box-shadow: var(--soft-pressed-inner);
+}
+
+/* Selected chips stay pressed in, like a depressed key */
+html:root body .filter-chip:has(input:checked) {
+  box-shadow: var(--soft-pressed-inner);
+}
+
+/* Reduced motion: keep the shadow change, drop the movement */
+/* ═════ SOLID KEYCAP — the secondary button on the dashboard banner ═════
+   Fully opaque deep green face, so nothing shows through from the banner. */
+html:root body .btn-hero-ghost {
+  background-color: #1f5c47;
+  background-image: linear-gradient(180deg, rgba(255,255,255,.20) 0%, rgba(255,255,255,.05) 50%, rgba(0,0,0,.12) 100%);
+  border-color: #2f7a60;
+  color: #fff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .40),
+    inset 0 0 0 1px rgba(255, 255, 255, .10),
+    inset 0 -1px 0 rgba(0, 0, 0, .22),
+    0 2px 0 #11392b,
+    0 6px 10px -5px rgba(0, 0, 0, .35);
+}
+html:root body .btn-hero-ghost:hover {
+  background-color: #256a53;
+  border-color: #38886d;
+}
+html:root body .btn-hero-ghost:not(:disabled):active {
+  transform: translateY(1px);
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, .40),
+    inset 0 0 0 1px rgba(0, 0, 0, .15),
+    0 1px 0 #11392b;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:root body :is([class*="btn-"], .filter-chip):not(:disabled):active {
+    transform: none;
+  }
+}
+
+
+/* ─── TESTIMONIAL PHOTOS (initials show underneath if a photo is missing) ─── */
+.testi-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* ─── ANIMATED FLAME (Trending title) ─── */
+.flame {
+  display: inline-block;
+  width: .9em;
+  height: 1.12em;
+  margin-right: .14em;
+  vertical-align: -.14em;
+  filter: drop-shadow(0 0 .12em rgba(255, 122, 24, .45));
+  animation: flameGlow 1.6s ease-in-out infinite alternate;
+}
+.flame svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.flame .f-outer,
+.flame .f-mid,
+.flame .f-core,
+.flame .f-spark { transform-box: fill-box; transform-origin: 50% 100%; }
+.flame .f-outer { animation: flameFlicker 1.1s ease-in-out infinite alternate; }
+.flame .f-mid   { animation: flameFlicker .8s ease-in-out infinite alternate-reverse; }
+.flame .f-core  { animation: flameFlicker .55s ease-in-out infinite alternate; }
+.flame .f-spark { opacity: 0; transform-origin: 50% 50%; animation: flameSpark 2s ease-out infinite; }
+.flame .s2 { animation-delay: .7s; }
+.flame .s3 { animation-delay: 1.3s; }
+
+@keyframes flameFlicker {
+  0%   { transform: scale(1, 1) skewX(0deg); }
+  30%  { transform: scale(.96, 1.05) skewX(-3deg); }
+  60%  { transform: scale(1.03, .96) skewX(2.5deg); }
+  100% { transform: scale(.98, 1.08) skewX(-1.5deg); }
+}
+@keyframes flameSpark {
+  0%   { opacity: 0;  transform: translateY(10px) scale(.6); }
+  20%  { opacity: 1; }
+  100% { opacity: 0;  transform: translateY(-22px) scale(.2); }
+}
+@keyframes flameGlow {
+  from { filter: drop-shadow(0 0 .08em rgba(255, 122, 24, .30)); }
+  to   { filter: drop-shadow(0 0 .18em rgba(255, 150, 30, .65)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .flame, .flame * { animation: none !important; }
+  .flame .f-spark { opacity: 0; }
+}
+
+
+/* ─── TRENDING BAND: fades cream -> soft sage -> white so it flows into the next section ─── */
+.trending-band {
+  padding-top: 56px;
+  background: linear-gradient(
+    180deg,
+    var(--cream) 0%,
+    var(--sage-l) 110px,
+    var(--sage-l) 100%            /* green holds all the way to the section's end */
+  );
+}
+/* No divider line: the green from Trending carries on into the top of "How it works"
+   and fades out to the page colour there, so the two sections melt into each other. */
+.trending-band + .how-section {
+  border-top: 0;
+  background-color: var(--white);
+  background-image: linear-gradient(180deg, var(--sage-l) 0, var(--white) 180px);
+  background-repeat: no-repeat;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   APPLE-STYLE BUTTONS — soft, rounded, layered shadows, springy press
+   Loaded last so it refines the keycap rules above (same selectors, later wins).
+   Pressed state: the button sinks (scale + inner shadow + slightly darker),
+   and springs back on release.
+   ═══════════════════════════════════════════════════════════════════ */
+:root {
+  --apple-spring: cubic-bezier(.34, 1.56, .64, 1);     /* slight overshoot on release */
+  --apple-ease:   cubic-bezier(.25, .1, .25, 1);
+  --apple-lift:
+    0 1px 1px rgba(13, 27, 42, .08),
+    0 4px 10px -2px rgba(13, 27, 42, .16);
+  --apple-sink:
+    inset 0 2px 5px rgba(13, 27, 42, .32),
+    inset 0 0 0 1px rgba(13, 27, 42, .10);
+}
+[data-theme="dark"] {
+  --apple-lift:
+    0 1px 1px rgba(0, 0, 0, .35),
+    0 5px 12px -3px rgba(0, 0, 0, .50);
+  --apple-sink:
+    inset 0 2px 6px rgba(0, 0, 0, .55),
+    inset 0 0 0 1px rgba(0, 0, 0, .25);
+}
+
+/* Shared motion: quick sink, springy release */
+html:root body :is([class*="btn-"]:not(.btn-spinner), .filter-chip, .how-tab, .nav-toggle, .testi-nav, .testi-dot) {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+  transition:
+    transform 380ms var(--apple-spring),
+    box-shadow 240ms var(--apple-ease),
+    background-color 200ms var(--apple-ease),
+    border-color 200ms var(--apple-ease),
+    color 200ms var(--apple-ease),
+    filter 200ms var(--apple-ease),
+    opacity 200ms var(--apple-ease);
+}
+
+/* Pill shape on the main call-to-action buttons */
+html:root body :is(
+  .btn-primary, .btn-sage, .btn-ghost, .btn-white, .btn-outline-w, .btn-nav, .btn-search,
+  .btn-hero-primary, .btn-hero-ghost
+) { border-radius: 980px; letter-spacing: -.01em; }
+
+/* ── Solid buttons: clean face, soft shadow, no hard "key base" ── */
+html:root body :is(
+  .btn-primary, .btn-sage, .btn-nav, .btn-search, .btn-save, .btn-submit-review,
+  .btn-download, .btn-lock-signin, .btn-modal-approve, .btn-verify, .btn-submit-verify,
+  .btn-danger, .btn-hero-primary, .btn-white, .btn-lock-signup, .btn-hero-ghost
+) {
+  background-image: linear-gradient(180deg, rgba(255,255,255,.16) 0%, rgba(255,255,255,0) 55%);
+  box-shadow: inset 0 .5px 0 rgba(255,255,255,.45), var(--apple-lift);
+}
+html:root body :is(.btn-hero-primary, .btn-white, .btn-lock-signup) {
+  background-image: none;
+  box-shadow: inset 0 0 0 .5px rgba(13,27,42,.06), var(--apple-lift);
+}
+
+/* ── Soft buttons: light frosted face ── */
+html:root body :is(
+  .btn-ghost, .btn-edit-profile, .btn-cancel-edit, .btn-cancel-modal, .btn-modal-close,
+  .btn-share, .btn-view, .btn-show-more, .btn-modal-reject, .btn-approve, .btn-unsuspend,
+  .btn-promote, .btn-reject, .btn-suspend, .btn-remove, .btn-outline-w
+) {
+  background-image: none;
+  box-shadow: inset 0 .5px 0 rgba(255,255,255,.35), 0 1px 2px rgba(13,27,42,.06);
+}
+html:root body :is(.btn-ghost, .btn-edit-profile, .btn-cancel-edit, .btn-cancel-modal, .btn-share, .btn-view, .btn-show-more) {
+  -webkit-backdrop-filter: saturate(180%) blur(10px);
+  backdrop-filter: saturate(180%) blur(10px);
+}
+
+/* Hover: gentle brighten, no jumpy lift */
+html:root body :is([class*="btn-"], .how-tab, .testi-nav):not(:disabled):hover {
+  transform: none;
+  filter: brightness(1.05);
+}
+@media (hover: none) {
+  html:root body :is([class*="btn-"], .how-tab, .testi-nav):hover { filter: none; }
+}
+
+/* ═════ PRESSED IN ═════ */
+html:root body :is([class*="btn-"]:not(.btn-spinner), .filter-chip, .how-tab):not(:disabled):active {
+  transform: scale(.955);
+  filter: brightness(.9);
+  box-shadow: var(--apple-sink);
+  transition-duration: 90ms, 90ms, 90ms, 90ms, 90ms, 90ms, 90ms;
+}
+html:root body :is(.btn-hero-primary, .btn-white, .btn-lock-signup):not(:disabled):active {
+  filter: brightness(.94);
+}
+
+/* ── Testimonial arrows: frosted round buttons that sink when pressed ── */
+html:root body .testi-nav {
+  background: rgba(255, 255, 255, .78);
+  -webkit-backdrop-filter: saturate(180%) blur(12px);
+  backdrop-filter: saturate(180%) blur(12px);
+  border: .5px solid rgba(13, 27, 42, .10);
+  box-shadow: inset 0 .5px 0 rgba(255,255,255,.8), var(--apple-lift);
+  transition-property: transform, box-shadow, filter, background-color;
+}
+[data-theme="dark"] html:root body .testi-nav,
+html[data-theme="dark"] body .testi-nav { background: rgba(40, 48, 56, .72); border-color: rgba(255,255,255,.10); }
+html:root body .testi-nav:hover { transform: scale(1.06); }
+html:root body .testi-nav:active {
+  transform: scale(.88);
+  filter: brightness(.9);
+  box-shadow: var(--apple-sink);
+  transition-duration: 90ms;
+}
+html:root body .testi-nav:focus-visible,
+html:root body :is([class*="btn-"], .how-tab, .testi-dot):focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--sage) 45%, transparent);
+  outline-offset: 2px;
+}
+
+/* ── Dots and the "View on the material" link ── */
+html:root body .testi-dot:active { transform: scale(.7); }
+html:root body .testi-more {
+  display: inline-block;
+  transition: transform 380ms var(--apple-spring), opacity 200ms var(--apple-ease);
+}
+html:root body .testi-more:active { transform: scale(.95); opacity: .6; text-decoration: none; }
+
+/* ── Tabs / hamburger ── */
+html:root body .how-tab { border-radius: 980px; }
+html:root body .nav-toggle:active { transform: scale(.88); opacity: .7; }
+
+@media (prefers-reduced-motion: reduce) {
+  html:root body :is([class*="btn-"], .filter-chip, .how-tab, .nav-toggle, .testi-nav, .testi-dot, .testi-more) {
+    transition-duration: 1ms;
+  }
+  html:root body :is([class*="btn-"], .filter-chip, .how-tab, .testi-nav):not(:disabled):active { transform: none; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   LIGHT MODE: DARKER, CLEARLY VISIBLE BUTTONS
+   (dark mode is untouched — everything is scoped to :not([data-theme="dark"]))
+   ═══════════════════════════════════════════════════════════════════ */
+html:root:not([data-theme="dark"]) {
+  --btn-dark:    #1b4d40;   /* deep green face */
+  --btn-dark-hi: #246052;   /* hover */
+  --btn-line:    #0f3a2f;   /* edge */
+  --apple-lift:
+    0 1px 1px rgba(13, 27, 42, .20),
+    0 5px 12px -3px rgba(13, 27, 42, .34);
+}
+
+/* Solid buttons: deep green, white text */
+html:root:not([data-theme="dark"]) body :is(
+  .btn-primary, .btn-sage, .btn-nav, .btn-search, .btn-save, .btn-submit-review,
+  .btn-download, .btn-lock-signin, .btn-modal-approve
+) {
+  background-color: var(--btn-dark);
+  border: 1px solid var(--btn-line);
+  color: #fff;
+}
+html:root:not([data-theme="dark"]) body :is(
+  .btn-primary, .btn-sage, .btn-nav, .btn-search, .btn-save, .btn-submit-review,
+  .btn-download, .btn-lock-signin, .btn-modal-approve
+):not(:disabled):hover { background-color: var(--btn-dark-hi); filter: none; }
+
+/* Gold verify buttons: darker amber */
+html:root:not([data-theme="dark"]) body :is(.btn-verify, .btn-submit-verify) {
+  background-color: #8a5a12;
+  border: 1px solid #5f3d08;
+  color: #fff;
+}
+html:root:not([data-theme="dark"]) body .btn-danger {
+  background-color: #a52a1d;
+  border: 1px solid #741b11;
+  color: #fff;
+}
+
+/* Outline / soft buttons: dark text and a strong edge so they read as buttons */
+html:root:not([data-theme="dark"]) body :is(
+  .btn-ghost, .btn-edit-profile, .btn-cancel-edit, .btn-cancel-modal, .btn-modal-close,
+  .btn-share, .btn-view, .btn-show-more
+) {
+  background-color: #eef1f0;
+  color: var(--ink);
+  border: 1.5px solid #2d3f50;
+}
+html:root:not([data-theme="dark"]) body :is(
+  .btn-ghost, .btn-edit-profile, .btn-cancel-edit, .btn-cancel-modal, .btn-modal-close,
+  .btn-share, .btn-view, .btn-show-more
+):not(:disabled):hover { background-color: #e1e7e5; border-color: var(--btn-dark); color: var(--btn-dark); }
+
+/* Coloured action buttons (approve / reject / suspend …): keep their colour, firmer edge */
+html:root:not([data-theme="dark"]) body :is(
+  .btn-modal-reject, .btn-approve, .btn-unsuspend, .btn-promote, .btn-reject, .btn-suspend, .btn-remove
+) {
+  border-color: color-mix(in srgb, currentColor 70%, transparent);
+  font-weight: 700;
+}
+
+/* Carousel arrows: dark discs with white arrows */
+html:root:not([data-theme="dark"]) body .testi-nav {
+  background: var(--btn-dark);
+  border: 1px solid var(--btn-line);
+  color: #fff;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+html:root:not([data-theme="dark"]) body .testi-nav:hover { background: var(--btn-dark-hi); }
+
+/* Dots, tabs, menu button, text link */
+html:root:not([data-theme="dark"]) body .testi-dot { background: #9fb0ab; }
+html:root:not([data-theme="dark"]) body .testi-dot.active { background: var(--btn-dark); }
+html:root:not([data-theme="dark"]) body .how-tab { border: 1.5px solid #2d3f50; color: var(--ink); background: #fff; }
+html:root:not([data-theme="dark"]) body .how-tab.active { background: var(--btn-dark); border-color: var(--btn-line); color: #fff; }
+html:root:not([data-theme="dark"]) body .testi-more { color: var(--btn-dark); }
+html:root:not([data-theme="dark"]) body .nav-toggle { color: var(--ink); }
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   APPLE-STYLE REVIEW CARDS — soft glass surface, large radius,
+   hairline edge, layered shadow, gentle lift on hover
+   ═══════════════════════════════════════════════════════════════════ */
+html:root body :where(.testi-viewport) { padding: 8px 4px 22px; }   /* room so shadows aren't clipped */
+
+html:root:not([data-theme="dark"]) body .testi-card {
+  border-radius: 22px;
+  border: .5px solid rgba(13, 27, 42, .10);
+  background-color: rgba(255, 255, 255, .86);
+  background-image: linear-gradient(180deg, rgba(255,255,255,.95) 0%, rgba(246,248,247,.90) 100%);
+  -webkit-backdrop-filter: saturate(180%) blur(18px);
+  backdrop-filter: saturate(180%) blur(18px);
+  box-shadow:
+    inset 0 .5px 0 rgba(255,255,255,.9),
+    0 1px 2px rgba(13, 27, 42, .06),
+    0 8px 24px -8px rgba(13, 27, 42, .16),
+    0 22px 40px -22px rgba(13, 27, 42, .14);
+}
+html[data-theme="dark"] body .testi-card {
+  border-radius: 22px;
+  border: .5px solid rgba(255, 255, 255, .10);
+  background-color: rgba(30, 38, 46, .78);
+  background-image: linear-gradient(180deg, rgba(255,255,255,.06) 0%, rgba(255,255,255,0) 100%);
+  -webkit-backdrop-filter: saturate(160%) blur(18px);
+  backdrop-filter: saturate(160%) blur(18px);
+  box-shadow:
+    inset 0 .5px 0 rgba(255,255,255,.12),
+    0 1px 2px rgba(0, 0, 0, .40),
+    0 12px 28px -10px rgba(0, 0, 0, .55);
+}
+
+html:root body .testi-card {
+  padding: 24px 26px 22px;
+  transition: transform 420ms var(--apple-spring), box-shadow 260ms var(--apple-ease);
+}
+@media (hover: hover) {
+  html:root body .testi-card:hover { transform: translateY(-3px) scale(1.012); }
+}
+html:root body .testi-card:active { transform: scale(.985); transition-duration: 90ms; }
+
+/* Details */
+html:root body .testi-quote { color: var(--ink); letter-spacing: -.01em; }
+html:root body .testi-author { border-top: .5px solid rgba(13, 27, 42, .12); }
+html[data-theme="dark"] body .testi-author { border-top-color: rgba(255,255,255,.12); }
+html:root body .testi-avatar { box-shadow: 0 0 0 2px #fff, 0 2px 6px rgba(13, 27, 42, .25); }
+html[data-theme="dark"] body .testi-avatar { box-shadow: 0 0 0 2px rgba(255,255,255,.18), 0 2px 6px rgba(0,0,0,.5); }
+html:root body .testi-name { letter-spacing: -.01em; }
+html:root body .testi-mark { opacity: .5; }
+
+@media (prefers-reduced-motion: reduce) {
+  html:root body .testi-card { transition-duration: 1ms; }
+  html:root body .testi-card:hover, html:root body .testi-card:active { transform: none; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   REVIEW CARDS: HOVER + WHOLE-CARD PRESS
+   The "View on the material" link is stretched over the whole card, so
+   clicking/tapping anywhere on it opens the material and the entire card
+   sinks in while pressed. Keyboard: Tab to the link, the card shows a ring.
+   ═══════════════════════════════════════════════════════════════════ */
+html:root body .testi-card { position: relative; cursor: pointer; }
+html:root body .testi-more::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: 1;
+}
+html:root body .testi-more:active { transform: none; opacity: 1; }   /* the card does the pressing, not the link */
+
+/* Hover: lifts, shadow deepens, link underlines */
+@media (hover: hover) {
+  html:root:not([data-theme="dark"]) body .testi-card:hover {
+    transform: translateY(-4px) scale(1.012);
+    border-color: rgba(27, 77, 64, .28);
+    box-shadow:
+      inset 0 .5px 0 rgba(255,255,255,.9),
+      0 2px 4px rgba(13, 27, 42, .08),
+      0 14px 30px -8px rgba(13, 27, 42, .24),
+      0 32px 52px -26px rgba(13, 27, 42, .24);
+  }
+  html[data-theme="dark"] body .testi-card:hover {
+    transform: translateY(-4px) scale(1.012);
+    border-color: rgba(255, 255, 255, .22);
+    box-shadow:
+      inset 0 .5px 0 rgba(255,255,255,.16),
+      0 2px 4px rgba(0, 0, 0, .45),
+      0 18px 36px -10px rgba(0, 0, 0, .65);
+  }
+  html:root body .testi-card:hover .testi-more { text-decoration: underline; text-underline-offset: 3px; }
+}
+
+/* Pressed: the whole card sinks in */
+html:root:not([data-theme="dark"]) body .testi-card:active {
+  transform: scale(.965);
+  filter: brightness(.95);
+  box-shadow:
+    inset 0 3px 10px rgba(13, 27, 42, .22),
+    inset 0 0 0 1px rgba(13, 27, 42, .08),
+    0 1px 2px rgba(13, 27, 42, .08);
+  transition-duration: 90ms;
+}
+html[data-theme="dark"] body .testi-card:active {
+  transform: scale(.965);
+  filter: brightness(.88);
+  box-shadow:
+    inset 0 3px 10px rgba(0, 0, 0, .6),
+    inset 0 0 0 1px rgba(0, 0, 0, .3);
+  transition-duration: 90ms;
+}
+html:root body .testi-card { transition: transform 420ms var(--apple-spring), box-shadow 260ms var(--apple-ease), filter 200ms var(--apple-ease), border-color 200ms var(--apple-ease); }
+
+/* Keyboard focus */
+html:root body .testi-card:has(.testi-more:focus-visible) {
+  outline: 3px solid color-mix(in srgb, var(--sage) 50%, transparent);
+  outline-offset: 3px;
+}
+html:root body .testi-more:focus-visible { outline: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  html:root body .testi-card:hover, html:root body .testi-card:active { transform: none; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   APPLE-STYLE RESOURCE CARDS (Trending / Browse)
+   Soft rounded glass card, hairline edge, layered shadow, gentle hover
+   lift, and a whole-card press-in with a springy release.
+   ═══════════════════════════════════════════════════════════════════ */
+html:root body .res-card {
+  border-radius: 22px;
+  position: relative;
+  isolation: isolate;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  transition:
+    transform 420ms var(--apple-spring),
+    box-shadow 260ms var(--apple-ease),
+    border-color 200ms var(--apple-ease),
+    filter 200ms var(--apple-ease);
+}
+html:root:not([data-theme="dark"]) body .res-card {
+  border: .5px solid rgba(13, 27, 42, .10);
+  background-color: rgba(255, 255, 255, .88);
+  background-image: linear-gradient(180deg, rgba(255,255,255,.95) 0%, rgba(246,248,247,.90) 100%);
+  box-shadow:
+    inset 0 .5px 0 rgba(255,255,255,.9),
+    0 1px 2px rgba(13, 27, 42, .06),
+    0 8px 24px -8px rgba(13, 27, 42, .16),
+    0 22px 40px -22px rgba(13, 27, 42, .14);
+}
+html[data-theme="dark"] body .res-card {
+  border: .5px solid rgba(255, 255, 255, .10);
+  box-shadow:
+    inset 0 .5px 0 rgba(255,255,255,.12),
+    0 1px 2px rgba(0, 0, 0, .40),
+    0 12px 28px -10px rgba(0, 0, 0, .55);
+}
+
+/* Pressed-in overlay: sits above the coloured header too, so the WHOLE card looks sunk */
+html:root body .res-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 5;
+  opacity: 0;
+  box-shadow:
+    inset 0 4px 14px rgba(13, 27, 42, .34),
+    inset 0 0 0 1px rgba(13, 27, 42, .10);
+  background: rgba(13, 27, 42, .04);
+  transition: opacity 200ms var(--apple-ease);
+}
+html[data-theme="dark"] body .res-card::after {
+  box-shadow: inset 0 4px 14px rgba(0, 0, 0, .65), inset 0 0 0 1px rgba(0, 0, 0, .3);
+  background: rgba(0, 0, 0, .10);
+}
+
+/* Hover */
+@media (hover: hover) {
+  html:root:not([data-theme="dark"]) body .res-card:hover {
+    transform: translateY(-5px) scale(1.012);
+    border-color: rgba(27, 77, 64, .28);
+    box-shadow:
+      inset 0 .5px 0 rgba(255,255,255,.9),
+      0 2px 4px rgba(13, 27, 42, .08),
+      0 16px 32px -8px rgba(13, 27, 42, .24),
+      0 34px 56px -28px rgba(13, 27, 42, .26);
+  }
+  html[data-theme="dark"] body .res-card:hover {
+    transform: translateY(-5px) scale(1.012);
+    border-color: rgba(255, 255, 255, .22);
+    box-shadow:
+      inset 0 .5px 0 rgba(255,255,255,.16),
+      0 2px 4px rgba(0, 0, 0, .45),
+      0 20px 38px -10px rgba(0, 0, 0, .65);
+  }
+}
+
+/* Pressed: the whole card sinks */
+html:root body .res-card:active {
+  transform: scale(.965);
+  filter: brightness(.96);
+  transition-duration: 90ms;
+}
+html:root body .res-card:active::after { opacity: 1; transition-duration: 60ms; }
+html:root:not([data-theme="dark"]) body .res-card:active {
+  box-shadow: 0 1px 2px rgba(13, 27, 42, .10);
+}
+html[data-theme="dark"] body .res-card:active { box-shadow: 0 1px 2px rgba(0, 0, 0, .5); }
+
+/* Keyboard focus (cards that are real links/buttons) */
+html:root body .res-card:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--sage) 50%, transparent);
+  outline-offset: 3px;
+}
+
+/* Inner details */
+html:root body .res-badge {
+  border-radius: 980px;
+  padding: 4px 12px;
+  border: .5px solid rgba(13, 27, 42, .10);
+  background: rgba(255, 255, 255, .85);
+  -webkit-backdrop-filter: saturate(180%) blur(10px);
+  backdrop-filter: saturate(180%) blur(10px);
+  box-shadow: 0 1px 2px rgba(13, 27, 42, .10);
+}
+html:root body .res-verified {
+  border-radius: 980px;
+  padding: 4px 10px;
+  box-shadow: 0 1px 2px rgba(13, 27, 42, .18);
+}
+html:root body .meta-tag { border-radius: 980px; padding: 3px 10px; }
+html:root body .res-title { letter-spacing: -.01em; }
+html:root body .res-footer { border-top: .5px solid rgba(13, 27, 42, .12); }
+html[data-theme="dark"] body .res-footer { border-top-color: rgba(255,255,255,.12); }
+
+@media (prefers-reduced-motion: reduce) {
+  html:root body .res-card { transition-duration: 1ms; }
+  html:root body .res-card:hover, html:root body .res-card:active { transform: none; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   RING WAVE — hovering a resource card sends a ripple through the rings
+   (inner → outer, repeating while the pointer stays on the card)
+   ═══════════════════════════════════════════════════════════════════ */
+.res-thumb .ring { transform-box: fill-box; transform-origin: center; }
+
+@keyframes ringWave {
+  0%   { transform: scale(1);    opacity: var(--ring-o, .12); }
+  35%  { transform: scale(1.14); opacity: calc(var(--ring-o, .12) + .12); }
+  70%  { transform: scale(1);    opacity: var(--ring-o, .12); }
+  100% { transform: scale(1);    opacity: var(--ring-o, .12); }
+}
+.res-thumb .ring-1 { --ring-o: .08; }
+.res-thumb .ring-2 { --ring-o: .10; }
+.res-thumb .ring-3 { --ring-o: .12; }
+
+@media (hover: hover) {
+  .res-card:hover .res-thumb .ring {
+    animation: ringWave 1.9s cubic-bezier(.37, 0, .63, 1) infinite;
+  }
+  .res-card:hover .res-thumb .ring-1 { animation-delay: 0s; }
+  .res-card:hover .res-thumb .ring-2 { animation-delay: .22s; }
+  .res-card:hover .res-thumb .ring-3 { animation-delay: .44s; }
+}
+/* touch: one ripple when pressed */
+.res-card:active .res-thumb .ring { animation: ringWave 1.2s cubic-bezier(.37, 0, .63, 1) 1; }
+.res-card:active .res-thumb .ring-2 { animation-delay: .12s; }
+.res-card:active .res-thumb .ring-3 { animation-delay: .24s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .res-card:hover .res-thumb .ring, .res-card:active .res-thumb .ring { animation: none; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   SUBJECT ICON — each icon moves in its own way when the card is hovered
+   (default: a playful shake; atom spins, plant sways, flask tilts, etc.)
+   ═══════════════════════════════════════════════════════════════════ */
+.res-icon { transition: opacity .3s ease; }
+.res-icon i { display: inline-block; transform-origin: 50% 60%; }
+
+@keyframes iconShake {
+  0%, 100% { transform: rotate(0) scale(1); }
+  8%  { transform: rotate(-14deg) scale(1.12); }
+  16% { transform: rotate(12deg)  scale(1.12); }
+  24% { transform: rotate(-9deg)  scale(1.1); }
+  32% { transform: rotate(7deg)   scale(1.08); }
+  40% { transform: rotate(-3deg)  scale(1.04); }
+  50% { transform: rotate(0)      scale(1); }
+}
+@keyframes iconSpin   { 0% { transform: rotate(0) scale(1.08); } 60%, 100% { transform: rotate(360deg) scale(1.08); } }
+@keyframes iconSway   { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(10deg) translateY(-2px); } 75% { transform: rotate(-10deg) translateY(-2px); } }
+@keyframes iconTilt   { 0%, 55%, 100% { transform: rotate(0); } 15%, 40% { transform: rotate(-28deg) translateY(-2px); } }
+@keyframes iconTwist  { 0% { transform: rotateY(0); } 55%, 100% { transform: rotateY(360deg); } }
+@keyframes iconBounce { 0%, 60%, 100% { transform: translateY(0); } 15% { transform: translateY(-9px) scale(1.08); } 30% { transform: translateY(0); } 42% { transform: translateY(-4px); } }
+@keyframes iconPulse  { 0%, 60%, 100% { transform: scale(1); } 15% { transform: scale(1.22); } 30% { transform: scale(1); } 42% { transform: scale(1.14); } }
+
+@media (hover: hover) {
+  .res-card:hover .res-icon { opacity: .34 !important; }
+  .res-card:hover .res-icon i { animation: iconShake 1.8s ease-in-out infinite; }
+
+  .res-card:hover .res-icon .ti-atom,
+  .res-card:hover .res-icon .ti-world,
+  .res-card:hover .res-icon .ti-settings-2,
+  .res-card:hover .res-icon .ti-engine     { animation: iconSpin 2.6s cubic-bezier(.45, 0, .2, 1) infinite; }
+
+  .res-card:hover .res-icon .ti-plant,
+  .res-card:hover .res-icon .ti-salad,
+  .res-card:hover .res-icon .ti-wind       { animation: iconSway 1.8s ease-in-out infinite; }
+
+  .res-card:hover .res-icon .ti-flask,
+  .res-card:hover .res-icon .ti-bowl-spoon { animation: iconTilt 2s ease-in-out infinite; }
+
+  .res-card:hover .res-icon .ti-dna        { animation: iconTwist 2.4s ease-in-out infinite; }
+
+  .res-card:hover .res-icon .ti-heart,
+  .res-card:hover .res-icon .ti-heart-rate-monitor,
+  .res-card:hover .res-icon .ti-home-heart { animation: iconPulse 1.6s ease-in-out infinite; }
+
+  .res-card:hover .res-icon .ti-run,
+  .res-card:hover .res-icon .ti-plane,
+  .res-card:hover .res-icon .ti-music      { animation: iconBounce 1.6s ease-in-out infinite; }
+}
+/* touch: one short shake when pressed */
+.res-card:active .res-icon i { animation: iconShake 1s ease-in-out 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  .res-card:hover .res-icon i, .res-card:active .res-icon i { animation: none !important; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   HOW IT WORKS — Apple segmented control + Apple-style step cards
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Segmented control (For Teachers / For Homeschool Parents) ── */
+html:root body .how-tabs {
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto 44px;
+  padding: 4px;
+  gap: 2px;
+  border-radius: 980px;
+  background: rgba(13, 27, 42, .07);
+  box-shadow: inset 0 1px 3px rgba(13, 27, 42, .14), inset 0 0 0 .5px rgba(13, 27, 42, .06);
+}
+html[data-theme="dark"] body .how-tabs {
+  background: rgba(255, 255, 255, .08);
+  box-shadow: inset 0 1px 4px rgba(0, 0, 0, .5), inset 0 0 0 .5px rgba(255,255,255,.06);
+}
+html:root body .how-tab {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  background-image: none;
+  padding: 10px 24px;
+  font-size: 13.5px;
+  font-weight: 600;
+  border-radius: 980px;
+  color: var(--ink2);
+  white-space: nowrap;
+}
+html:root:not([data-theme="dark"]) body .how-tab { border: 0; background: transparent; color: var(--ink2); }
+html:root body .how-tab:not(.active):not(:disabled):hover { background: rgba(13, 27, 42, .06); filter: none; }
+html[data-theme="dark"] body .how-tab { color: #c7d2d9; }
+html[data-theme="dark"] body .how-tab:not(.active):hover { background: rgba(255,255,255,.08); }
+
+/* active segment: raised deep-green pill */
+html:root body .how-tab.active,
+html:root:not([data-theme="dark"]) body .how-tab.active {
+  background: var(--btn-dark, #1b4d40);
+  color: #fff;
+  border: 0;
+  box-shadow: inset 0 .5px 0 rgba(255,255,255,.35), 0 1px 2px rgba(13,27,42,.25), 0 4px 10px -3px rgba(13,27,42,.35);
+}
+html[data-theme="dark"] body .how-tab.active { background: var(--sage); }
+
+/* pressed: the segment sinks in */
+html:root body .how-tab:not(:disabled):active {
+  transform: scale(.95);
+  filter: brightness(.92);
+  box-shadow: inset 0 2px 5px rgba(13, 27, 42, .35);
+}
+html:root body .how-tab:not(.active):active { background: rgba(13, 27, 42, .12); }
+
+@media (max-width: 520px) {
+  html:root body .how-tab { padding: 9px 14px; font-size: 12.5px; }
+}
+
+/* ── Step cards ── */
+html:root body .step-card {
+  position: relative;
+  isolation: isolate;
+  border-radius: 22px;
+  padding: 30px 28px 28px;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 420ms var(--apple-spring),
+    box-shadow 260ms var(--apple-ease),
+    border-color 200ms var(--apple-ease),
+    filter 200ms var(--apple-ease);
+}
+html:root:not([data-theme="dark"]) body .step-card {
+  border: .5px solid rgba(13, 27, 42, .10);
+  background-color: rgba(255, 255, 255, .88);
+  background-image: linear-gradient(180deg, rgba(255,255,255,.96) 0%, rgba(244,247,246,.92) 100%);
+  box-shadow:
+    inset 0 .5px 0 rgba(255,255,255,.9),
+    0 1px 2px rgba(13, 27, 42, .06),
+    0 8px 24px -8px rgba(13, 27, 42, .14),
+    0 22px 40px -22px rgba(13, 27, 42, .12);
+}
+html[data-theme="dark"] body .step-card {
+  border: .5px solid rgba(255, 255, 255, .10);
+  box-shadow:
+    inset 0 .5px 0 rgba(255,255,255,.12),
+    0 1px 2px rgba(0, 0, 0, .40),
+    0 12px 28px -10px rgba(0, 0, 0, .55);
+}
+
+/* press-in overlay (sits above the content so the whole card looks sunk) */
+html:root body .step-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  box-shadow: inset 0 4px 14px rgba(13, 27, 42, .30), inset 0 0 0 1px rgba(13, 27, 42, .08);
+  background: rgba(13, 27, 42, .03);
+  transition: opacity 200ms var(--apple-ease);
+}
+html[data-theme="dark"] body .step-card::after {
+  box-shadow: inset 0 4px 14px rgba(0,0,0,.65), inset 0 0 0 1px rgba(0,0,0,.3);
+  background: rgba(0,0,0,.10);
+}
+
+/* number badge: Apple "squircle" tile */
+html:root body .step-num {
+  border-radius: 14px;
+  width: 46px; height: 46px;
+  background-image: linear-gradient(180deg, rgba(255,255,255,.22) 0%, rgba(255,255,255,0) 60%);
+  box-shadow: inset 0 .5px 0 rgba(255,255,255,.45), 0 1px 2px rgba(13,27,42,.20), 0 6px 12px -4px rgba(27,77,64,.45);
+  transition: transform 420ms var(--apple-spring), box-shadow 260ms var(--apple-ease);
+}
+html:root:not([data-theme="dark"]) body .step-num { background-color: var(--btn-dark, #1b4d40); }
+html:root body .step-icon {
+  display: inline-block;
+  transition: transform 420ms var(--apple-spring);
+  filter: drop-shadow(0 3px 4px rgba(13, 27, 42, .15));
+}
+html:root body .step-title { letter-spacing: -.01em; }
+
+/* hover */
+@media (hover: hover) {
+  html:root:not([data-theme="dark"]) body .step-card:hover {
+    transform: translateY(-5px) scale(1.012);
+    border-color: rgba(27, 77, 64, .28);
+    box-shadow:
+      inset 0 .5px 0 rgba(255,255,255,.9),
+      0 2px 4px rgba(13, 27, 42, .08),
+      0 16px 32px -8px rgba(13, 27, 42, .22),
+      0 34px 56px -28px rgba(13, 27, 42, .22);
+  }
+  html[data-theme="dark"] body .step-card:hover {
+    transform: translateY(-5px) scale(1.012);
+    border-color: rgba(255,255,255,.22);
+    box-shadow: inset 0 .5px 0 rgba(255,255,255,.16), 0 2px 4px rgba(0,0,0,.45), 0 20px 38px -10px rgba(0,0,0,.65);
+  }
+  html:root body .step-card:hover .step-num  { transform: scale(1.1) rotate(-4deg); }
+  html:root body .step-card:hover .step-icon { animation: stepIconHop 1.4s ease-in-out infinite; }
+}
+@keyframes stepIconHop {
+  0%, 55%, 100% { transform: translateY(0) rotate(0) scale(1); }
+  12% { transform: translateY(-8px) rotate(-8deg) scale(1.14); }
+  26% { transform: translateY(0) rotate(5deg) scale(1.04); }
+  38% { transform: translateY(-3px) rotate(-3deg) scale(1.06); }
+}
+
+/* pressed: whole card sinks */
+html:root body .step-card:active {
+  transform: scale(.965);
+  filter: brightness(.96);
+  transition-duration: 90ms;
+}
+html:root body .step-card:active::after { opacity: 1; transition-duration: 60ms; }
+html:root:not([data-theme="dark"]) body .step-card:active { box-shadow: 0 1px 2px rgba(13,27,42,.10); }
+html[data-theme="dark"] body .step-card:active { box-shadow: 0 1px 2px rgba(0,0,0,.5); }
+html:root body .step-card:active .step-num { transform: scale(.92); }
+
+@media (prefers-reduced-motion: reduce) {
+  html:root body .step-card, html:root body .step-num, html:root body .step-icon { transition-duration: 1ms; }
+  html:root body .step-card:hover, html:root body .step-card:active { transform: none; }
+  html:root body .step-card:hover .step-icon { animation: none; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   SEGMENTED SELECTOR — clip-path "oil drop"
+   A copy of the tab row (white labels on deep green) is clipped to the
+   active tab. Four registered custom properties drive the clip insets;
+   the leading edge transitions fast, the trailing edge follows a beat
+   later, so the pill stretches and settles. Transitions (not keyframes)
+   keep it interruptible; clip-path keeps the ends true pills (no scaleX
+   distortion) and the label colour change is perfectly in sync.
+   ═══════════════════════════════════════════════════════════════════ */
+@property --cl { syntax: '<length>'; inherits: false; initial-value: 0px; }
+@property --cr { syntax: '<length>'; inherits: false; initial-value: 0px; }
+@property --ct { syntax: '<length>'; inherits: false; initial-value: 0px; }
+@property --cb { syntax: '<length>'; inherits: false; initial-value: 0px; }
+@property --cv { syntax: '<length>'; inherits: false; initial-value: 0px; }   /* temporary vertical squash */
+@property --cp { syntax: '<length>'; inherits: false; initial-value: 0px; }   /* press-in shrink */
+
+html:root body .how-tabs.has-fill { position: relative; isolation: isolate; }
+
+/* real buttons: transparent, dark labels (the fill layer paints the active state) */
+html:root body .how-tabs.has-fill .how-tab,
+html:root body .how-tabs.has-fill .how-tab.active,
+html:root:not([data-theme="dark"]) body .how-tabs.has-fill .how-tab,
+html:root:not([data-theme="dark"]) body .how-tabs.has-fill .how-tab.active,
+html[data-theme="dark"] body .how-tabs.has-fill .how-tab.active {
+  background: transparent;
+  box-shadow: none;
+  color: var(--ink2);
+  position: relative;
+}
+html[data-theme="dark"] body .how-tabs.has-fill .how-tab { background: transparent; color: #c7d2d9; box-shadow: none; }
+
+html:root body .how-fill-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 1px rgba(13, 27, 42, .28)) drop-shadow(0 5px 7px rgba(27, 77, 64, .28));
+}
+html:root body .how-fill {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  background-color: var(--btn-dark, #1b4d40);
+  background-image: linear-gradient(180deg, rgba(255,255,255,.18) 0%, rgba(255,255,255,0) 55%);
+  clip-path: inset(
+    calc(var(--ct) + var(--cv) + var(--cp))
+    calc(var(--cr) + var(--cp))
+    calc(var(--cb) + var(--cv) + var(--cp))
+    calc(var(--cl) + var(--cp))
+    round 999px);
+  /* moving right: right edge leads, left edge trails */
+  transition:
+    --cr 200ms cubic-bezier(0.23, 1, 0.32, 1),
+    --cl 300ms cubic-bezier(0.23, 1, 0.32, 1) 45ms,
+    --cv 140ms cubic-bezier(0.23, 1, 0.32, 1),
+    --cp 120ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+html:root body .how-fill.to-left {
+  /* moving left: left edge leads, right edge trails */
+  transition:
+    --cl 200ms cubic-bezier(0.23, 1, 0.32, 1),
+    --cr 300ms cubic-bezier(0.23, 1, 0.32, 1) 45ms,
+    --cv 140ms cubic-bezier(0.23, 1, 0.32, 1),
+    --cp 120ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+html[data-theme="dark"] body .how-fill { background-color: var(--sage); }
+
+/* labels inside the fill copy the real tabs' metrics exactly, in white */
+html:root body .how-tabs.has-fill .how-fill .how-tab {
+  color: #fff !important;
+  background: none;
+  box-shadow: none;
+  transition: none;
+  transform: none;
+  filter: none;
+  opacity: 1;
+  cursor: default;
+}
+
+/* press: shrink the pill a little (sink), release eases back */
+html:root body .how-tabs.has-fill:has(.how-tab.active:active) .how-fill { --cp: 1.5px; }
+
+/* real tabs: hover only on real pointers; press = 0.97, inactive label dims */
+html:root body .how-tabs.has-fill .how-tab:not(:disabled):active { transform: scale(.97); filter: none; box-shadow: none; }
+html:root body .how-tabs.has-fill .how-tab:not(.active):not(:disabled):active { opacity: .6; background: transparent; }
+@media (hover: hover) and (pointer: fine) {
+  html:root body .how-tabs.has-fill .how-tab:not(.active):not(:disabled):hover { background: rgba(13, 27, 42, .06); filter: none; }
+  html[data-theme="dark"] body .how-tabs.has-fill .how-tab:not(.active):not(:disabled):hover { background: rgba(255,255,255,.08); }
+}
+@media (hover: none), (pointer: coarse) {
+  html:root body .how-tabs.has-fill .how-tab:not(.active):not(:disabled):hover { background: transparent; filter: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html:root body .how-fill { transition: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   CARD ENTRY on tab switch — direction-aware, 50ms stagger, transitions
+   (a card moves a little toward where the selector went, so the content
+   follows the selector; 240–280ms, ease-out)
+   ═══════════════════════════════════════════════════════════════════ */
+html:root body .step-card.enter-from {
+  opacity: 0 !important;
+  transform: translate(calc(var(--dir, 1) * 14px), 6px) scale(.985) !important;
+}
+html:root body .step-card.enter-run {
+  transition:
+    opacity 240ms cubic-bezier(0.23, 1, 0.32, 1) calc(var(--i, 0) * 50ms),
+    transform 280ms cubic-bezier(0.23, 1, 0.32, 1) calc(var(--i, 0) * 50ms) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  html:root body .step-card.enter-from { transform: none !important; }
+}
+
+/* Trending cards fade/rise in once when they render (a play-once entry, staggered) */
+@keyframes resCardIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+#trending-grid .res-card { animation: resCardIn 300ms cubic-bezier(0.23, 1, 0.32, 1) backwards; }
+#trending-grid .res-card:nth-child(2) { animation-delay: 50ms; }
+#trending-grid .res-card:nth-child(3) { animation-delay: 100ms; }
+#trending-grid .res-card:nth-child(4) { animation-delay: 150ms; }
+#trending-grid .res-card:nth-child(5) { animation-delay: 200ms; }
+#trending-grid .res-card:nth-child(6) { animation-delay: 250ms; }
+@media (prefers-reduced-motion: reduce) {
+  @keyframes resCardIn { from { opacity: 0; } to { opacity: 1; } }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   MOTION TUNING (pass over everything above, per the animation rules)
+   · one easing: cubic-bezier(0.23, 1, 0.32, 1)  — strong ease-out, no overshoot
+   · UI transitions 160–200ms; press snaps in at 100ms, release eases back
+   · press = scale(.97); no brightness filter on cards (the overlay darkens)
+   · hover lift only on real pointers, small (≤3px), no scale
+   · hover decorations play once instead of looping
+   ═══════════════════════════════════════════════════════════════════ */
+:root { --apple-spring: cubic-bezier(0.23, 1, 0.32, 1); }   /* the old overshoot curve is retired */
+
+/* Buttons & small controls */
+html:root body :is([class*="btn-"]:not(.btn-spinner), .filter-chip, .how-tab, .nav-toggle, .testi-nav, .testi-dot) {
+  transition:
+    transform 160ms cubic-bezier(0.23, 1, 0.32, 1),
+    box-shadow 160ms cubic-bezier(0.23, 1, 0.32, 1),
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    filter 160ms ease,
+    opacity 160ms ease;
+}
+html:root body :is([class*="btn-"]:not(.btn-spinner), .filter-chip):not(:disabled):active { transform: scale(.97); filter: brightness(.94); }
+html:root body :is(.btn-hero-primary, .btn-white, .btn-lock-signup):not(:disabled):active { filter: brightness(.96); }
+@media (hover: hover) and (pointer: fine) {
+  html:root body .testi-nav:hover { transform: scale(1.04); }
+}
+@media (hover: none), (pointer: coarse) {
+  html:root body :is([class*="btn-"], .how-tab, .testi-nav):hover { filter: none; transform: none; }
+}
+html:root body .testi-nav:active { transform: scale(.92); filter: brightness(.94); }
+html:root body .testi-dot:active { transform: scale(.8); }
+html:root body .testi-more { transition: opacity 160ms ease, transform 160ms cubic-bezier(0.23, 1, 0.32, 1); }
+
+/* Cards: shared timing — press in at 100ms, release ease-out 200ms */
+html:root body :is(.res-card, .testi-card, .step-card) {
+  transition:
+    transform 200ms cubic-bezier(0.23, 1, 0.32, 1),
+    box-shadow 200ms cubic-bezier(0.23, 1, 0.32, 1),
+    border-color 200ms ease;
+}
+html:root body :is(.res-card, .testi-card, .step-card):active {
+  transform: scale(.97);
+  filter: none;
+  transition-duration: 100ms;
+}
+html:root:not([data-theme="dark"]) body :is(.res-card, .testi-card, .step-card):active,
+html[data-theme="dark"] body :is(.res-card, .testi-card, .step-card):active { transform: scale(.97); filter: none; }
+html:root body :is(.res-card, .step-card)::after { transition: opacity 160ms ease; }
+
+/* Hover: small lift, real pointers only */
+@media (hover: hover) and (pointer: fine) {
+  html:root:not([data-theme="dark"]) body :is(.res-card, .testi-card, .step-card):hover,
+  html[data-theme="dark"] body :is(.res-card, .testi-card, .step-card):hover { transform: translateY(-3px); }
+}
+@media (hover: none), (pointer: coarse) {
+  html:root:not([data-theme="dark"]) body :is(.res-card, .testi-card, .step-card):hover,
+  html[data-theme="dark"] body :is(.res-card, .testi-card, .step-card):hover { transform: none; }
+}
+
+/* Step card number + icon: quicker and calmer */
+html:root body .step-num  { transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 200ms cubic-bezier(0.23, 1, 0.32, 1); }
+html:root body .step-icon { transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1); }
+@media (hover: hover) and (pointer: fine) {
+  html:root body .step-card:hover .step-num { transform: scale(1.06); }
+}
+@media (hover: none), (pointer: coarse) {
+  html:root body .step-card:hover .step-num { transform: none; }
+}
+
+/* Step-card icon hop plays once per hover. Resource cards (ring wave + corner icon)
+   now keep looping for as long as the pointer stays on the card. */
+.step-card:hover .step-icon { animation-iteration-count: 1 !important; }
+.res-card:active .res-thumb .ring { animation-iteration-count: 1; }
+
+/* ═════ QUICK-SEARCH CHIPS (.stag) + SUBJECT CARDS (.subject-pill) ═════
+   Apple-style keycaps: soft face, rim light, ambient shadow. Press sinks
+   in fast (90ms), release eases back out (200ms). Hover lift is for real
+   pointers only. Movement is dropped under prefers-reduced-motion. */
+html:root body .stag {
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 200ms var(--ease-out),
+    box-shadow 200ms var(--ease-out),
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  html:root body .stag:hover { background: var(--sage); color: #fff; }
+}
+html:root body .stag:active {
+  transform: scale(.95);
+  background: var(--sage);
+  border-color: var(--sage);
+  color: #fff;
+  box-shadow: var(--key-pressed-inner);
+  transition-duration: 90ms;
+}
+
+html:root body .subject-pill {
+  position: relative;
+  background-image: var(--soft-face);
+  border-color: var(--border);
+  box-shadow: var(--soft-rim), var(--soft-ambient);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 200ms var(--ease-out),
+    box-shadow 200ms var(--ease-out),
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+html:root body .subject-pill .subj-icon {
+  transition: transform 200ms var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) {
+  html:root body .subject-pill:hover {
+    background-color: var(--white);
+    border-color: var(--sage-m);
+    transform: translateY(-2px);
+    box-shadow:
+      var(--soft-rim),
+      0 2px 4px rgba(13, 27, 42, .06),
+      0 10px 18px -8px rgba(13, 27, 42, .18);
+  }
+  html:root body .subject-pill:hover .subj-icon { transform: scale(1.06); }
+  /* Icon glyph wiggles on a loop for as long as the pointer is on the card */
+  html:root body .subject-pill:hover .subj-icon i {
+    display: inline-block;   /* transforms don't apply to inline elements */
+    transform-origin: var(--subj-origin, 50% 50%);
+    animation: var(--subj-anim, subj-shake 1100ms ease-in-out infinite);
+  }
+}
+@keyframes subj-shake {
+  0%   { transform: rotate(0); }
+  8%   { transform: rotate(-12deg); }
+  18%  { transform: rotate(10deg); }
+  28%  { transform: rotate(-7deg); }
+  38%  { transform: rotate(4deg); }
+  48%  { transform: rotate(0); }
+  100% { transform: rotate(0); }   /* short rest so it reads as a wiggle, not a vibration */
+}
+html:root body .subject-pill:active {
+  transform: scale(.97);
+  background-color: var(--sage-l);
+  border-color: var(--sage-m);
+  box-shadow: var(--soft-pressed-inner);
+  transition-duration: 90ms;
+}
+html:root body .subject-pill:active .subj-icon { transform: scale(.94); }
+html:root body .subject-pill:focus-visible { outline: 2px solid var(--sage); outline-offset: 2px; }
+
+/* Per-subject icon motions (looping while hovered). Matched by the card's subject name. */
+html:root body .subject-pill:has([data-subject="Mathematics"]) { --subj-anim: subj-pulse 1000ms ease-in-out infinite; }
+html:root body .subject-pill:has([data-subject="English Language"]) { --subj-anim: subj-tilt 1200ms ease-in-out infinite; --subj-origin: 50% 100%; }
+html:root body .subject-pill:has([data-subject="Biology"]) { --subj-anim: subj-spin 2600ms linear infinite; }
+html:root body .subject-pill:has([data-subject="Physics"]) { --subj-anim: subj-spin 1800ms linear infinite; }
+html:root body .subject-pill:has([data-subject="Chemistry"]) { --subj-anim: subj-pour 1400ms ease-in-out infinite; --subj-origin: 50% 100%; }
+html:root body .subject-pill:has([data-subject="Civic Education"]) { --subj-anim: subj-hop 900ms ease-out infinite; --subj-origin: 50% 100%; }
+html:root body .subject-pill:has([data-subject="Agricultural Science"]) { --subj-anim: subj-sway 1800ms ease-in-out infinite; --subj-origin: 50% 100%; }
+html:root body .subject-pill:has([data-subject="Computer Studies"]) { --subj-anim: subj-tap 700ms ease-in-out infinite; }
+html:root body .subject-pill:has([data-subject="Further Mathematics"]) { --subj-anim: subj-pulse 1000ms ease-in-out infinite; }
+html:root body .subject-pill:has([data-subject="Literature in English"]) { --subj-anim: subj-tilt 1200ms ease-in-out infinite; --subj-origin: 0% 100%; }
+html:root body .subject-pill:has([data-subject="Economics"]) { --subj-anim: subj-rise 1300ms ease-in-out infinite; }
+html:root body .subject-pill:has([data-subject="Government"]) { --subj-anim: subj-pulse 1400ms ease-in-out infinite; --subj-origin: 50% 100%; }
+html:root body .subject-pill:has([data-subject="Geography"]) { --subj-anim: subj-spin 3200ms linear infinite; }
+html:root body .subject-pill:has([data-subject="History"]) { --subj-anim: subj-spin-rev 2200ms linear infinite; }
+html:root body .subject-pill:has([data-subject="Social Studies"]) { --subj-anim: subj-hop 1000ms ease-out infinite; --subj-origin: 50% 100%; }
+html:root body .subject-pill:has([data-subject="Commerce"]) { --subj-anim: subj-swing 1500ms ease-in-out infinite; --subj-origin: 50% 0%; }
+html:root body .subject-pill:has([data-subject="Accounting"]) { --subj-anim: subj-tap 800ms ease-in-out infinite; }
+html:root body .subject-pill:has([data-subject="Yoruba Language"]) { --subj-anim: subj-shake 1100ms ease-in-out infinite; }
+html:root body .subject-pill:has([data-subject="French"]) { --subj-anim: subj-pulse 900ms ease-in-out infinite; }
+html:root body .subject-pill:has([data-subject="Christian Religious Studies"]) { --subj-anim: subj-float 1800ms ease-in-out infinite; }
+html:root body .subject-pill:has([data-subject="Islamic Religious Studies"]) { --subj-anim: subj-swing 2200ms ease-in-out infinite; --subj-origin: 50% 0%; }
+html:root body .subject-pill:has([data-subject="Fine Arts"]) { --subj-anim: subj-dance 1100ms ease-in-out infinite; }
+html:root body .subject-pill:has([data-subject="Music"]) { --subj-anim: subj-dance 800ms ease-in-out infinite; --subj-origin: 50% 100%; }
+html:root body .subject-pill:has([data-subject="Physical Education"]) { --subj-anim: subj-run 700ms ease-in-out infinite; --subj-origin: 50% 100%; }
+
+@keyframes subj-spin     { to { transform: rotate(360deg); } }
+@keyframes subj-spin-rev { to { transform: rotate(-360deg); } }
+@keyframes subj-pulse    { 0%,100% { transform: scale(1); } 50% { transform: scale(1.25); } }
+@keyframes subj-hop      { 0%,100% { transform: translateY(0); } 35% { transform: translateY(-4px); } 60% { transform: translateY(0); } 78% { transform: translateY(-1.5px); } }
+@keyframes subj-sway     { 0%,100% { transform: rotate(-9deg); } 50% { transform: rotate(9deg); } }
+@keyframes subj-swing    { 0%,100% { transform: rotate(-14deg); } 50% { transform: rotate(14deg); } }
+@keyframes subj-tilt     { 0%,100% { transform: rotate(0); } 50% { transform: rotate(-12deg) translateY(-1px); } }
+@keyframes subj-pour     { 0%,100% { transform: rotate(0); } 40%,65% { transform: rotate(-24deg); } }
+@keyframes subj-tap      { 0%,100% { transform: translateY(0) scale(1); } 40% { transform: translateY(1.5px) scale(.9); } }
+@keyframes subj-rise     { 0%,100% { transform: translate(0,0); } 50% { transform: translate(2px,-3px); } }
+@keyframes subj-float    { 0%,100% { transform: translateY(1px); } 50% { transform: translateY(-3px); } }
+@keyframes subj-dance    { 0%,100% { transform: rotate(-8deg) scale(1); } 50% { transform: rotate(8deg) scale(1.12); } }
+@keyframes subj-run      { 0%,100% { transform: translate(-2px,0); } 25% { transform: translate(0,-3px); } 50% { transform: translate(2px,0); } 75% { transform: translate(0,-3px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  html:root body .stag:active,
+  html:root body .subject-pill:active,
+  html:root body .subject-pill:hover,
+  html:root body .subject-pill:hover .subj-icon,
+  html:root body .subject-pill:active .subj-icon { transform: none; }
+  html:root body .subject-pill:hover .subj-icon i { animation: none; }
+}
+
+/* ═════ THEME TOGGLE: soft keycap, sinks on press and eases back ═════ */
+html:root body .theme-toggle {
+  background-image: var(--soft-face);
+  box-shadow: var(--soft-rim), var(--soft-ambient);
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 200ms var(--ease-out),
+    box-shadow 200ms var(--ease-out),
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  html:root body .theme-toggle:hover {
+    transform: translateY(-1px);   /* replaces the old 20deg tilt */
+    box-shadow:
+      var(--soft-rim),
+      0 2px 4px rgba(13, 27, 42, .08),
+      0 8px 14px -6px rgba(13, 27, 42, .22);
+  }
+}
+html:root body .theme-toggle:active {
+  transform: scale(.92);
+  box-shadow: var(--soft-pressed-inner);
+  transition-duration: 90ms;
+}
+html:root body .theme-toggle:focus-visible { outline: 2px solid var(--sage); outline-offset: 2px; }
+@media (hover: none), (pointer: coarse) {
+  html:root body .theme-toggle:hover { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html:root body .theme-toggle:hover,
+  html:root body .theme-toggle:active { transform: none; }
+}
+
+/* ═════ FOOTER HEART: heartbeat (lub-dub, then rest) ═════ */
+.footer-heart {
+  display: inline-block;
+  transform-origin: 50% 60%;
+  animation: footer-heartbeat 1600ms ease-in-out infinite;
+}
+@keyframes footer-heartbeat {
+  0%, 60%, 100% { transform: scale(1); }
+  12%  { transform: scale(1.22); }
+  24%  { transform: scale(1); }
+  36%  { transform: scale(1.14); }
+  48%  { transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .footer-heart { animation: none; }
+}
+
+/* Space between the two footer sentences */
+.footer-copy-line { margin-right: 18px; }
+@media (max-width: 480px) {
+  /* when the line wraps on small phones, stack them with a little breathing room instead */
+  .footer-copy-line { display: block; margin: 0 0 4px; }
+}
+
+/* ═════ RESOURCE PAGE BANNER: same ring wave + icon motion as the cards, loops while hovered ═════ */
+.resource-banner .ring { transform-box: fill-box; transform-origin: center; }
+.resource-banner .ring-1 { --ring-o: .08; }
+.resource-banner .ring-2 { --ring-o: .10; }
+.resource-banner .ring-3 { --ring-o: .12; }
+.banner-icon { transition: opacity .3s ease; }
+.banner-icon i { display: inline-block; transform-origin: 50% 60%; }
+
+@media (hover: hover) {
+  .resource-banner:hover .ring { animation: ringWave 1.9s cubic-bezier(.37, 0, .63, 1) infinite; }
+  .resource-banner:hover .ring-1 { animation-delay: 0s; }
+  .resource-banner:hover .ring-2 { animation-delay: .22s; }
+  .resource-banner:hover .ring-3 { animation-delay: .44s; }
+
+  .resource-banner:hover .banner-icon { opacity: .34 !important; }
+  .resource-banner:hover .banner-icon i { animation: iconShake 1.8s ease-in-out infinite; }
+  .resource-banner:hover .banner-icon .ti-atom,
+  .resource-banner:hover .banner-icon .ti-world,
+  .resource-banner:hover .banner-icon .ti-settings-2,
+  .resource-banner:hover .banner-icon .ti-engine     { animation: iconSpin 2.6s cubic-bezier(.45, 0, .2, 1) infinite; }
+  .resource-banner:hover .banner-icon .ti-plant,
+  .resource-banner:hover .banner-icon .ti-salad,
+  .resource-banner:hover .banner-icon .ti-wind       { animation: iconSway 1.8s ease-in-out infinite; }
+  .resource-banner:hover .banner-icon .ti-flask,
+  .resource-banner:hover .banner-icon .ti-bowl-spoon { animation: iconTilt 2s ease-in-out infinite; }
+  .resource-banner:hover .banner-icon .ti-dna        { animation: iconTwist 2.4s ease-in-out infinite; }
+  .resource-banner:hover .banner-icon .ti-heart,
+  .resource-banner:hover .banner-icon .ti-heart-rate-monitor,
+  .resource-banner:hover .banner-icon .ti-home-heart { animation: iconPulse 1.6s ease-in-out infinite; }
+  .resource-banner:hover .banner-icon .ti-run,
+  .resource-banner:hover .banner-icon .ti-plane,
+  .resource-banner:hover .banner-icon .ti-music      { animation: iconBounce 1.6s ease-in-out infinite; }
+}
+/* "Alive" cycle (class added by script on the resource page): 2 beats x 2.5s = exactly 5s,
+   then it rests on its own, so nothing snaps back. */
+.banner-icon i { --bi: iconShake; }
+.banner-icon .ti-atom, .banner-icon .ti-world, .banner-icon .ti-settings-2, .banner-icon .ti-engine { --bi: iconSpin; }
+.banner-icon .ti-plant, .banner-icon .ti-salad, .banner-icon .ti-wind { --bi: iconSway; }
+.banner-icon .ti-flask, .banner-icon .ti-bowl-spoon { --bi: iconTilt; }
+.banner-icon .ti-dna { --bi: iconTwist; }
+.banner-icon .ti-heart, .banner-icon .ti-heart-rate-monitor, .banner-icon .ti-home-heart { --bi: iconPulse; }
+.banner-icon .ti-run, .banner-icon .ti-plane, .banner-icon .ti-music { --bi: iconBounce; }
+
+.resource-banner.is-alive .ring { animation: ringWave 2.5s cubic-bezier(.37, 0, .63, 1) 2; }
+.resource-banner.is-alive .ring-1 { animation-delay: 0s; }
+.resource-banner.is-alive .ring-2 { animation-delay: .22s; }
+.resource-banner.is-alive .ring-3 { animation-delay: .44s; }
+.resource-banner.is-alive .banner-icon i { animation: var(--bi) 2.5s ease-in-out 2; }
+
+@media (prefers-reduced-motion: reduce) {
+  .resource-banner.is-alive .ring,
+  .resource-banner.is-alive .banner-icon i,
+  .resource-banner:hover .ring,
+  .resource-banner:hover .banner-icon i { animation: none !important; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   MOBILE-NATIVE BASELINE
+   Platform-layer fixes: tap flash, font inflation, input zoom, tap delay.
+   ═══════════════════════════════════════════════════════════════════ */
+html {
+  -webkit-tap-highlight-color: transparent;  /* the grey flash fights our own :active feedback */
+  -webkit-text-size-adjust: 100%;            /* no font inflation in landscape */
+  text-size-adjust: 100%;
+}
+
+/* No 300ms tap delay on anything tappable */
+a, button, label, summary, select, [role="button"], [onclick] {
+  touch-action: manipulation;
+}
+
+/* Controls are not content: no text selection / callout on long-press */
+button, [role="button"], .nav-toggle, .theme-toggle, .subject-pill, .res-card, .stag {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* iOS zooms the page when an input under 16px gets focus (and never zooms back).
+   Raise it on touch screens only, so the desktop design is untouched.
+   Specificity matches the site's "html:root body" layers so page-local rules can't undercut it. */
+@media (pointer: coarse) {
+  html:root body :is(input, select, textarea),
+  html:root body :is(.form-input, .form-textarea, .form-select, .search-input, .filter-select, .sort-select, .review-textarea) {
+    font-size: 16px;
+  }
+}
+
+/* Toasts: full-width strip on phones instead of a corner card that can clip */
+@media (max-width: 600px) {
+  .toast-container { left: 16px; right: 16px; bottom: 16px; }
+}
+
+
+/* ═════ SUBJECT CARDS: SINK AND SPRING BACK ═════
+   Press: fast sink with ease-out (90ms), the card is under the finger.
+   Release: springs back with a small overshoot, the icon follows through a beat later.
+   Overrides the earlier .subject-pill layers. Hover lift is untouched (fine pointers only). */
+html:root body .subject-pill {
+  --press-spring: cubic-bezier(.3, 1.9, .5, 1);   /* overshoots ~1.5% past rest, then settles */
+  transition:
+    transform 420ms var(--press-spring),
+    box-shadow 260ms var(--ease-out),
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+html:root body .subject-pill .subj-icon {
+  transition: transform 520ms var(--press-spring);
+}
+html:root body .subject-pill:active {
+  transform: scale(.95);                           /* deeper than before so the release has room to travel */
+  transition:
+    transform 90ms var(--ease-out),
+    box-shadow 90ms var(--ease-out),
+    background-color 90ms ease,
+    border-color 90ms ease;
+}
+html:root body .subject-pill:active .subj-icon {
+  transform: scale(.9);
+  transition: transform 90ms var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* keep the tint and inner shadow feedback, drop the movement */
+  html:root body .subject-pill,
+  html:root body .subject-pill .subj-icon,
+  html:root body .subject-pill:active {
+    transition-property: box-shadow, background-color, border-color;
+    transition-duration: 120ms;
+    transition-timing-function: ease;
+  }
+}
+
+
+/* ═════ SUBJECT CARDS: ICON CHIPS FOLLOW THE THEME ═════
+   The chip colours used to be inline hex in index.html (same pastel in both modes).
+   They now come from the theme tokens, which already have dark values:
+   light: sage-l / sage and gold-l / gold   dark: deep green / mint and deep amber / amber */
+html:root body .subj-icon[data-tone="sage"] { background: var(--sage-l); color: var(--sage); }
+html:root body .subj-icon[data-tone="gold"] { background: var(--gold-l); color: var(--gold); }
+html:root body .subj-icon i { color: inherit; }
+html[data-theme="dark"] body .subj-icon { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .06); }  /* keeps the chip edge readable on the dark face */
+
+/* Dark hover lift: the light-mode shadow is navy at 6-18% and disappears on a dark surface */
+@media (hover: hover) and (pointer: fine) {
+  html[data-theme="dark"] body .subject-pill:hover {
+    box-shadow:
+      var(--soft-rim),
+      0 2px 4px rgba(0, 0, 0, .35),
+      0 12px 20px -8px rgba(0, 0, 0, .6);
+  }
+}
+
+
+/* ═════ TRENDING / RESOURCE CARD BANNERS: LIGHT + DARK ═════
+   index.html hands each subject's palette over as --l-bg / --l-arc / --l-dot / --l-text.
+   Light mode uses them as-is. Dark mode derives a matching dark banner from the same arc colour,
+   so every subject (sage, gold, and the early-years colours) gets a dark counterpart without a second palette. */
+.subj-thumb {
+  --t-bg: var(--l-bg);
+  --t-arc: var(--l-arc);
+  --t-dot: var(--l-dot);
+  --t-text: var(--l-text);
+  background: var(--t-bg);
+}
+.subj-thumb .thumb-arc-stroke { stroke: var(--t-arc); }
+.subj-thumb .thumb-arc-fill   { fill: var(--t-arc); }
+.subj-thumb .ring             { opacity: var(--ring-o); }
+.subj-thumb .thumb-dot        { fill: var(--t-dot); opacity: .18; }
+.subj-thumb .thumb-eyebrow    { color: var(--t-arc); opacity: .75; }
+.subj-thumb .thumb-name       { color: var(--t-text); }
+.subj-thumb .res-icon         { opacity: .18; }
+.subj-thumb .res-icon i       { color: var(--t-arc); }
+
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  html[data-theme="dark"] .subj-thumb {
+    --t-bg:   color-mix(in srgb, var(--l-arc) 20%, #0f1b24);   /* deep tint of the subject colour */
+    --t-arc:  color-mix(in srgb, var(--l-arc) 62%, #fff);      /* lifted so rings and icon read on dark */
+    --t-dot:  color-mix(in srgb, var(--l-dot) 75%, #fff);
+    --t-text: color-mix(in srgb, var(--l-arc) 20%, #fff);      /* near-white with a hint of the subject colour */
+  }
+  html[data-theme="dark"] .subj-thumb .ring-1 { --ring-o: .14; }
+  html[data-theme="dark"] .subj-thumb .ring-2 { --ring-o: .15; }
+  html[data-theme="dark"] .subj-thumb .ring-3 { --ring-o: .17; }
+  html[data-theme="dark"] .subj-thumb .thumb-dot { opacity: .28; }
+  html[data-theme="dark"] .subj-thumb .thumb-eyebrow { opacity: .85; }
+  html[data-theme="dark"] .subj-thumb .res-icon { opacity: .26; }
+}
+
+/* Badges on the banner: the light-mode frosted pill and white-on-mint chip fail on a dark banner */
+html[data-theme="dark"] body .res-badge {
+  background: rgba(15, 27, 36, .62);
+  color: var(--ink);
+  border-color: rgba(255, 255, 255, .14);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .35);
+}
+html[data-theme="dark"] body .res-verified {
+  color: #06231c;                       /* dark text on the mint chip, white on mint was ~2:1 */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .35);
+}
+
+
+/* ═════ RESOURCE PAGE + SMALL ICON CHIPS: LIGHT + DARK ═════ */
+/* Page-local rules (".resource-banner { background: var(--sage-l) }") load after this file, so the
+   banner background needs more specificity than them to follow the subject palette. */
+html:root body .subj-thumb { background: var(--t-bg); }
+.subj-thumb .banner-icon   { opacity: .15; }
+.subj-thumb .banner-icon i { color: var(--t-arc); }
+
+/* Small square icon chips (related resources list) share the same derivation */
+.subj-chip { --t-bg: var(--l-bg); --t-arc: var(--l-arc); background: var(--t-bg); }
+.subj-chip i { color: var(--t-arc); }
+
+@supports (color: color-mix(in srgb, red 50%, blue)) {
+  html[data-theme="dark"] .subj-chip {
+    --t-bg:  color-mix(in srgb, var(--l-arc) 22%, #0f1b24);
+    --t-arc: color-mix(in srgb, var(--l-arc) 62%, #fff);
+  }
+  html[data-theme="dark"] .subj-thumb .banner-icon { opacity: .24; }
+}
+
+/* Resource page tags: the "plain" pill was a fixed light grey (#F0F2F4) with light text in dark mode */
+html[data-theme="dark"] body .rtag.plain {
+  background: rgba(255, 255, 255, .07);
+  color: var(--ink2);
+}
+
+
+/* ═════ "SHOW MORE" BUTTON + NEW-ROW REVEAL ═════
+   Browse and profile used an inline blue (#2563eb via an undefined --primary). They now use the shared
+   .btn-show-more soft keycap, which already carries the theme colours and the press sink.
+   :where() keeps this base size at zero specificity, so dashboard.html's smaller local sizing still wins there. */
+:where(.btn-show-more) {
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 28px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* Rows added by "Show more" rise in: 260ms ease-out, 40ms stagger (first 9 only).
+   fill-mode is "backwards", so once it ends the stylesheet owns the transform again and hover/press still work. */
+@keyframes nl-rise {
+  from { opacity: 0; transform: translateY(10px) scale(.985); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes nl-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.nl-reveal {
+  animation: nl-rise 260ms var(--ease-out, cubic-bezier(.23, 1, .32, 1)) backwards;
+  animation-delay: calc(var(--i, 0) * 40ms);
+}
+@media (prefers-reduced-motion: reduce) {
+  .nl-reveal { animation-name: nl-fade; }
+}
+
+/* ═════ "SHOW MORE": FILLED BUTTON ═════
+   Light mode: the site's deep-green solid face with white text (same as the primary buttons).
+   Dark mode: filled sage with dark text, since white on that mint is only ~2:1.
+   Specificity mirrors the earlier light-mode outline rules so these win. */
+html:root:not([data-theme="dark"]) body .btn-show-more {
+  background-color: var(--btn-dark);
+  background-image: none;
+  border: 1px solid var(--btn-line);
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .14), 0 1px 2px rgba(13, 27, 42, .28);
+}
+html:root:not([data-theme="dark"]) body .btn-show-more:not(:disabled):hover {
+  background-color: var(--btn-dark-hi);
+  border-color: var(--btn-line);
+  color: #fff;
+}
+html[data-theme="dark"] body .btn-show-more {
+  background-color: var(--sage);
+  background-image: none;
+  border: 1px solid color-mix(in srgb, var(--sage) 70%, #fff);
+  color: #06231c;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .28), 0 1px 2px rgba(0, 0, 0, .4);
+}
+@media (hover: hover) and (pointer: fine) {
+  html[data-theme="dark"] body .btn-show-more:not(:disabled):hover {
+    background-color: color-mix(in srgb, var(--sage) 86%, #fff);
+    border-color: color-mix(in srgb, var(--sage) 55%, #fff);
+  }
 }

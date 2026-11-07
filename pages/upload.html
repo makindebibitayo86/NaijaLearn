@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+  <meta name="theme-color" content="#ffffff">
   <meta name="description" content="Upload your lesson notes, schemes of work, and past questions to NaijaLearn.">
   <title>Upload a Resource — NaijaLearn</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,10 +12,11 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="../js/nav-auth.js"></script>
+<script src="../js/typing-placeholder.js" defer></script>
 
 <style>
   /* ── Upload progress / confirmation ── */
-  .up-progress { margin: 0 0 14px; }
+  .up-progress { margin: 0; }
   .up-track { height: 6px; border-radius: 99px; background: var(--sage-l); overflow: hidden; }
   .up-bar { height: 100%; width: 40%; border-radius: 99px; background: var(--sage); animation: up-slide 1.3s ease-in-out infinite; }
   .up-progress.done .up-bar  { animation: none; width: 100%; transition: width .45s ease; }
@@ -29,9 +31,71 @@
   @keyframes up-fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
   .btn-spinner { display: inline-block; width: 14px; height: 14px; margin-right: 9px; vertical-align: -2px; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; animation: up-spin .7s linear infinite; }
   @keyframes up-spin { to { transform: rotate(360deg); } }
+
+  /* ── Upload button: one control for every state (ready / warning / busy / done) ──
+     Colour and shadow ease between states (transitions retarget if clicked quickly);
+     the shake and the label swap are played from JS so they restart cleanly each time. */
+  #upload-btn {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 48px;
+    line-height: 1.35;
+    text-align: center;
+    overflow-wrap: anywhere;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none; user-select: none;
+    transition:
+      transform 160ms var(--ease-out),
+      background-color 200ms var(--ease-out),
+      box-shadow 200ms var(--ease-out);
+  }
+  #upload-btn:not(:disabled):active { transform: scale(.97); transition-duration: 100ms; }
   #upload-btn:disabled { cursor: default; }
-  #upload-btn.is-busy { opacity: .92; }
-  #upload-btn.is-done, #upload-btn.is-done:hover { background: var(--sage-d); }
+  #upload-btn .btn-label { display: block; }
+
+  #upload-btn[data-state="busy"] { opacity: .92; }
+  #upload-btn[data-state="done"] { background: var(--sage-d); }
+  /* Warning: the button itself turns red. The ID selector keeps it red on hover too. */
+  #upload-btn[data-state="warn"] {
+    background: #C0392B;
+    color: #fff;
+    box-shadow: 0 0 0 3px rgba(192, 57, 43, .28);
+  }
+  /* Thin bar along the bottom edge that drains over 5s: shows when the warning will clear */
+  #upload-btn .btn-timer {
+    position: absolute; left: 14px; right: 14px; bottom: 5px;
+    height: 3px; border-radius: 99px;
+    background: rgba(255, 255, 255, .6);
+    transform-origin: left center;
+    opacity: 0; pointer-events: none;
+    transition: opacity 160ms var(--ease-out);
+  }
+  #upload-btn[data-state="warn"] .btn-timer { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) {
+    #upload-btn:not(:disabled):active { transform: none; }
+  }
+
+  /* ── The field the warning is about: red border + soft ring, red label and *.
+     ID-level selectors so they win over the site's layered field styles. */
+  #upload-form :is(.form-input, .form-textarea, .filter-select) {
+    transition: border-color 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
+  }
+  #upload-form .form-label, #upload-form .form-label span { transition: color 200ms var(--ease-out); }
+  #upload-form .is-invalid {
+    border-color: #C0392B;
+    box-shadow: var(--field-recess, none), 0 0 0 3px rgba(192, 57, 43, .22);
+  }
+  #upload-form .dropzone.is-invalid:not(.is-over) {
+    border-color: #C0392B;
+    background-color: rgba(192, 57, 43, .06);
+    box-shadow: none;
+  }
+  #upload-form .form-group.has-warning .form-label,
+  #upload-form .form-group.has-warning .form-label span { color: #C0392B; }
+  [data-theme="dark"] #upload-form .is-invalid { border-color: #E05656; }
+  [data-theme="dark"] #upload-form .dropzone.is-invalid:not(.is-over) { border-color: #E05656; background-color: rgba(224, 86, 86, .08); }
+  [data-theme="dark"] #upload-form .form-group.has-warning .form-label,
+  [data-theme="dark"] #upload-form .form-group.has-warning .form-label span { color: #FF7A70; }
 </style>
 </head>
 <body>
@@ -74,28 +138,37 @@
   <div class="upload-page-title">Upload a Resource</div>
   <div class="upload-page-sub">Share your lesson notes, schemes of work, or past questions with thousands of Nigerian teachers.</div>
 
-  <div class="upload-tip">
-    <strong>✓ Tips for a great upload:</strong><br>    Use a descriptive title (e.g. "SS2 Biology — Excretory System, First Term Week 4") <br>    Choose the correct subject and class level. <br>    Make sure your file is clearly formatted. <br>    Verified resources get 3× more downloads.
+  <div class="upload-tip" role="note">
+    <strong>✓ Tips for a great upload:</strong>
+    <ul>
+      <li>Use a descriptive title (e.g. "SS2 Biology — Excretory System, First Term Week 4")</li>
+      <li>Choose the correct subject and class level.</li>
+      <li>Make sure your file is clearly formatted.</li>
+      <li>Verified resources get 3× more downloads.</li>
+    </ul>
   </div>
 
-  <form id="upload-form" novalidate>
+  <form id="upload-form" class="upload-layout" data-guide-root data-guide-blockers=".file-chip, #upload-btn:disabled" novalidate>
+
+    <!-- LEFT: details -->
+    <div class="upload-main">
     <div class="upload-card">
-      <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--ink);margin-bottom:24px">Resource Details</div>
+      <div class="upload-card-title">Resource Details</div>
 
       <div class="form-group">
         <label class="form-label" for="res-title">Resource Title <span>*</span></label>
-        <input id="res-title" class="form-input" type="text" placeholder="e.g. SS2 Biology — Excretory System Lesson Note">
+        <input id="res-title" class="form-input" data-guide="SS2 Biology — Excretory System Lesson Note|JSS1 Mathematics — Scheme of Work, Second Term|Primary 4 English — Past Questions, Third Term|SS3 Economics — Demand and Supply Summary|Nursery 2 Number Work — Counting 1 to 20 Activity" type="text" placeholder="e.g. SS2 Biology — Excretory System Lesson Note">
       </div>
 
       <div class="form-group">
         <label class="form-label" for="res-description">Short Description</label>
-        <textarea id="res-description" class="form-textarea" placeholder="Briefly describe what's covered in this resource…"></textarea>
+        <textarea id="res-description" class="form-textarea" data-guide="Covers the kidney, nephron and urine formation, with diagrams and review questions.|Week-by-week topics, objectives and teaching aids for the full term.|Twenty exam-style questions on comprehension, tenses and punctuation, with answers.|A short revision summary of demand, supply and price determination for WAEC.|A fun counting activity with pictures for pupils to count and colour." placeholder="Briefly describe what's covered in this resource…"></textarea>
       </div>
 
       <div class="form-row">
         <div class="form-group">
           <label class="form-label" for="res-subject">Subject <span>*</span></label>
-          <select id="res-subject" class="filter-select" style="padding:12px 16px">
+          <select id="res-subject" class="filter-select" data-guide="Biology|Mathematics|English Language|Economics|Number Work" style="padding:12px 16px">
             <option value="">Select subject…</option>
             <optgroup label="🌐 General">
               <option>All Subjects</option>
@@ -165,7 +238,7 @@
         </div>
         <div class="form-group">
           <label class="form-label" for="res-type">Resource Type <span>*</span></label>
-          <select id="res-type" class="filter-select" style="padding:12px 16px">
+          <select id="res-type" class="filter-select" data-guide="Lesson Note|Scheme of Work|Past Questions|Textbook Summary|Activity" style="padding:12px 16px">
             <option value="">Select type…</option>
             <option value="Lesson Note">Lesson Note</option>
             <option value="Scheme of Work">Scheme of Work</option>
@@ -180,7 +253,7 @@
       <div class="form-row">
         <div class="form-group">
           <label class="form-label" for="res-class">Class Level <span>*</span></label>
-          <select id="res-class" class="filter-select" style="padding:12px 16px">
+          <select id="res-class" class="filter-select" data-guide="SS2|JSS1|Primary 4|SS3|Nursery 2" style="padding:12px 16px">
             <option value="">Select class…</option>
             <optgroup label="Nursery">
               <option>Pre-Nursery</option><option>Nursery 1</option><option>Nursery 2</option><option>Nursery 3</option>
@@ -199,7 +272,7 @@
         </div>
         <div class="form-group">
           <label class="form-label" for="res-term">Term <span>*</span></label>
-          <select id="res-term" class="filter-select" style="padding:12px 16px">
+          <select id="res-term" class="filter-select" data-guide="First Term|Second Term|Third Term|Full Year|Second Term" style="padding:12px 16px">
             <option value="">Select term…</option>
             <option>First Term</option>
             <option>Second Term</option>
@@ -220,28 +293,34 @@
         </select>
       </div>
     </div>
+    </div>
 
-    <div class="upload-card">
-      <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--ink);margin-bottom:24px">Attach File</div>
+    <!-- RIGHT: file + submit -->
+    <div class="upload-side">
+      <div class="upload-card">
+        <div class="upload-card-title">Attach File</div>
 
-      <label for="file-input">
-        <div class="dropzone" id="dropzone">
-          <input type="file" id="file-input" accept=".pdf,.doc,.docx,.ppt,.pptx">
-          <div class="dropzone-icon">📄</div>
+        <div class="dropzone" id="dropzone" data-guide-drop role="button" tabindex="0" aria-label="Choose a file to upload, or drag and drop it here">
+          <input type="file" id="file-input" accept=".pdf,.doc,.docx,.ppt,.pptx" tabindex="-1">
+          <div class="dropzone-icon" aria-hidden="true">
+            <svg class="dz-ico dz-doc" viewBox="0 0 24 24" focusable="false"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg>
+            <svg class="dz-ico dz-up" viewBox="0 0 24 24" focusable="false"><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/><g class="dz-arrow"><path d="M12 15V4"/><path d="M7.5 8.5 12 4l4.5 4.5"/></g></svg>
+          </div>
           <div class="dropzone-text">Click to upload or drag & drop</div>
           <div class="dropzone-sub">PDF, Word (.docx), or PowerPoint (.pptx) — max 20MB</div>
         </div>
-      </label>
 
-      <div id="file-info" style="margin-top:12px"></div>
+        <div id="file-info"></div>
+      </div>
+
+      <div id="upload-progress" class="up-progress" style="display:none" aria-live="polite">
+        <div class="up-track"><div class="up-bar"></div></div>
+        <div class="up-text" id="up-text"></div>
+      </div>
+
+      <button type="submit" id="upload-btn" class="btn-full primary" data-state="idle" data-guide-cta><span class="btn-label">Upload Resource</span><span class="btn-timer" aria-hidden="true"></span></button>
+      <div id="upload-live" class="sr-only" role="alert" aria-live="assertive"></div>
     </div>
-
-    <div id="upload-progress" class="up-progress" style="display:none" aria-live="polite">
-      <div class="up-track"><div class="up-bar"></div></div>
-      <div class="up-text" id="up-text"></div>
-    </div>
-
-    <button type="submit" id="upload-btn" class="btn-full primary" style="margin-bottom:60px">Upload Resource</button>
   </form>
 
 </div>
@@ -300,6 +379,7 @@
   // ── Nav auth handled by nav-auth.js ──
 
   var selectedFile = null;
+  var uploading = false;
 
   // Auth guard — redirect if not signed in
   sb.auth.getSession().then(function(result) {
@@ -309,26 +389,127 @@
     }
   });
 
-  function showStatus(msg, type) {
-    var bar = document.getElementById('upload-status');
-    if (!bar) {
-      bar = document.createElement('div');
-      bar.id = 'upload-status';
-      bar.style.cssText = 'padding:12px 16px;border-radius:10px;font-size:14px;font-weight:500;margin-bottom:16px;text-align:center';
-      var form = document.getElementById('upload-form');
-      form.parentNode.insertBefore(bar, form);
+  // ── The Upload button shows every message itself ──
+  // Warning = the button turns red, its label swaps to the message, it shakes once, and a thin
+  // bar drains along the bottom. After 5 seconds (or as soon as the field is fixed) it goes back.
+  var WARNING_MS = 5000;
+  var EASE_OUT = 'cubic-bezier(0.23, 1, 0.32, 1)';
+  var REDUCED = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  var upBtn   = document.getElementById('upload-btn');
+  var upLabel = upBtn.querySelector('.btn-label');
+  var upTimer = upBtn.querySelector('.btn-timer');
+  var upLive  = document.getElementById('upload-live');
+  var idleLabel = 'Upload Resource';   // becomes "Try Again" after a failed upload
+  var statusTimer = null, timerAnim = null, warnField = null;
+
+  // Put new text on the button and play a short rise-and-unblur so the change reads as one swap
+  function setLabel(text, spinner) {
+    upLabel.textContent = '';
+    if (spinner) {
+      var sp = document.createElement('span');
+      sp.className = 'btn-spinner';
+      upLabel.appendChild(sp);
     }
-    bar.style.display = 'block';
-    bar.textContent = msg;
-    try { bar.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
-    var styles = {
-      error:   { bg: '#FEF0F0', color: '#C0392B', border: '#F5C6C6' },
-      success: { bg: '#E8F4F0', color: '#1D6B56', border: '#B8DDD5' },
-      info:    { bg: '#EDF6FF', color: '#1A5276', border: '#AED6F1' }
-    };
-    var s = styles[type] || styles.info;
-    bar.style.background = s.bg; bar.style.color = s.color; bar.style.border = '1px solid ' + s.border;
+    upLabel.appendChild(document.createTextNode(text));
+    if (!upLabel.animate) return;
+    upLabel.animate(
+      REDUCED
+        ? [{ opacity: 0 }, { opacity: 1 }]
+        : [{ opacity: 0, transform: 'translateY(6px)', filter: 'blur(2px)' },
+           { opacity: 1, transform: 'none',            filter: 'blur(0)' }],
+      { duration: 200, easing: EASE_OUT }
+    );
   }
+  function setBtn(state, text, spinner) {
+    upBtn.dataset.state = state;
+    setLabel(text, spinner);
+  }
+
+  function shake() {
+    if (REDUCED || !upBtn.animate) return;
+    upBtn.animate(
+      [{ transform: 'translateX(0)' }, { transform: 'translateX(-7px)' }, { transform: 'translateX(6px)' },
+       { transform: 'translateX(-4px)' }, { transform: 'translateX(2px)' }, { transform: 'translateX(0)' }],
+      { duration: 300, easing: EASE_OUT }
+    );
+  }
+  function drainBar() {
+    if (timerAnim) timerAnim.cancel();
+    if (!upTimer.animate) return;
+    timerAnim = upTimer.animate(
+      [{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }],
+      { duration: WARNING_MS, easing: 'linear', fill: 'forwards' }
+    );
+  }
+
+  // ── Mark the field the warning is about (stays marked until it is fixed) ──
+  var markedEl = null;
+  function unmarkField() {
+    if (!markedEl) return;
+    markedEl.classList.remove('is-invalid');
+    markedEl.removeAttribute('aria-invalid');
+    var g0 = markedEl.closest('.form-group');
+    if (g0) g0.classList.remove('has-warning');
+    markedEl = null;
+  }
+  function markField(id) {
+    unmarkField();
+    var el = id && document.getElementById(id);
+    if (!el) return;
+    markedEl = el;
+    el.classList.add('is-invalid');
+    if (id !== 'dropzone') el.setAttribute('aria-invalid', 'true');   // the drop box is a button, not an input
+    var g = el.closest('.form-group');
+    if (g) g.classList.add('has-warning');
+    // if the field is off screen (phones), bring it into view
+    var r = el.getBoundingClientRect();
+    var vh = window.innerHeight || document.documentElement.clientHeight;
+    if ((r.bottom < 0 || r.top > vh) && el.scrollIntoView) {
+      el.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'center' });
+    }
+    if (!REDUCED && el.animate) {
+      el.animate(
+        [{ transform: 'translateX(0)' }, { transform: 'translateX(-4px)' }, { transform: 'translateX(4px)' },
+         { transform: 'translateX(-2px)' }, { transform: 'translateX(0)' }],
+        { duration: 260, easing: EASE_OUT }
+      );
+    }
+  }
+
+  // fieldId (optional): the field the warning is about, so fixing it clears the warning at once
+  function showStatus(msg, type, fieldId) {
+    if (uploading) return;                       // never interrupt a running upload
+    clearTimeout(statusTimer);
+    warnField = fieldId || null;
+    markField(warnField);
+    var same = upBtn.dataset.state === 'warn' && upLabel.textContent === msg;
+    upBtn.dataset.state = 'warn';
+    if (!same) setLabel(msg);                    // same message again: just shake, don't re-swap
+    upLive.textContent = '';  upLive.textContent = msg;   // announce to screen readers
+    shake();
+    drainBar();
+    statusTimer = setTimeout(function () { hideStatus(); }, WARNING_MS);
+  }
+
+  // silent = the caller sets the next button state itself, so skip the label swap here
+  function hideStatus(silent) {
+    clearTimeout(statusTimer);
+    warnField = null;
+    if (timerAnim) { timerAnim.cancel(); timerAnim = null; }
+    unmarkField();                               // the red field clears together with the button
+    if (upBtn.dataset.state !== 'warn' || silent) return;
+    setBtn('idle', idleLabel);
+  }
+
+  // Fixing the field the warning is about clears it straight away
+  function fieldTouched(e) {
+    var el = e.target;
+    if (!el || el !== markedEl || !String(el.value || '').trim()) return;   // still empty = still a problem
+    unmarkField();
+    if (upBtn.dataset.state === 'warn' && warnField === el.id) hideStatus();
+  }
+  document.getElementById('upload-form').addEventListener('input', fieldTouched);
+  document.getElementById('upload-form').addEventListener('change', fieldTouched);
 
   // Drag & drop
   var dropzone = document.getElementById('dropzone');
@@ -337,32 +518,95 @@
 
   if (dropzone) {
     dropzone.addEventListener('click', function() { if (fileInput) fileInput.click(); });
-    dropzone.addEventListener('dragover', function(e) { e.preventDefault(); dropzone.style.borderColor='var(--sage)'; dropzone.style.background='var(--sage-l)'; });
-    dropzone.addEventListener('dragleave', function() { dropzone.style.borderColor=''; dropzone.style.background=''; });
-    dropzone.addEventListener('drop', function(e) { e.preventDefault(); dropzone.style.borderColor=''; dropzone.style.background=''; if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+    dropzone.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (fileInput) fileInput.click(); }
+    });
+    dropzone.addEventListener('dragover', function(e) { e.preventDefault(); dropzone.classList.add('is-over'); });
+    dropzone.addEventListener('dragleave', function() { dropzone.classList.remove('is-over'); });
+    dropzone.addEventListener('drop', function(e) {
+      e.preventDefault();
+      dropzone.classList.remove('is-over');
+      if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+    });
   }
+  // A file dropped just outside the box would make the browser open it and wipe the form
+  ['dragover', 'drop'].forEach(function(evt) {
+    window.addEventListener(evt, function(e) { e.preventDefault(); });
+  });
   if (fileInput) { fileInput.addEventListener('change', function() { if (fileInput.files[0]) handleFile(fileInput.files[0]); }); }
+
+  // Drop-box icon: the document and the upload arrow take turns (CSS does the cross-fade).
+  // Paused while the tab is hidden, the box is off screen, or a file is already attached.
+  if (dropzone && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+    var iconInView = true;
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function(entries) { iconInView = entries[0].isIntersecting; }).observe(dropzone);
+    }
+    setInterval(function() {
+      if (document.hidden || !iconInView || selectedFile || dropzone.classList.contains('is-demo')) return;
+      dropzone.dataset.icon = dropzone.dataset.icon === 'up' ? 'doc' : 'up';
+    }, 2600);
+  }
+
+  function formatSize(bytes) {
+    return bytes < 1024 * 1024
+      ? Math.max(1, Math.round(bytes / 1024)) + ' KB'
+      : (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+  }
 
   function handleFile(file) {
     var allowed = ['application/pdf','application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       'application/vnd.ms-powerpoint',
       'application/vnd.openxmlformats-officedocument.presentationml.presentation'];
-    if (!allowed.includes(file.type)) return showStatus('Only PDF, Word, or PowerPoint files are allowed.', 'error');
-    if (file.size > 20 * 1024 * 1024) return showStatus('File too large. Maximum 20MB.', 'error');
+    if (!allowed.includes(file.type)) return showStatus('Only PDF, Word, or PowerPoint files are allowed.', 'error', 'dropzone');
+    if (file.size > 20 * 1024 * 1024) return showStatus('File too large. Maximum 20MB.', 'error', 'dropzone');
     selectedFile = file;
-    var sizeMB = (file.size / (1024*1024)).toFixed(2);
-    fileInfo.innerHTML = '<div style="display:flex;align-items:center;gap:12px;padding:14px 18px;background:var(--sage-l);border-radius:10px;border:1px solid var(--sage-m)"><span style="font-size:24px">📄</span><div><div style="font-size:14px;font-weight:600;color:var(--ink)">'+file.name+'</div><div style="font-size:12px;color:var(--muted)">'+sizeMB+' MB</div></div><button onclick="clearFile()" style="margin-left:auto;background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted)">✕</button></div>';
+    unmarkField();
+    hideStatus();
+
+    // Built with DOM nodes (not innerHTML) so a file name can never inject markup
+    var dot = file.name.lastIndexOf('.');
+    var base = dot > 0 ? file.name.slice(0, dot) : file.name;
+    var ext  = dot > 0 ? file.name.slice(dot) : '';
+
+    var chip = document.createElement('div');
+    chip.className = 'file-chip nl-reveal';
+
+    var icon = document.createElement('span');
+    icon.className = 'file-chip-icon';
+    icon.textContent = '📄';
+
+    var text = document.createElement('div');
+    text.className = 'file-chip-text';
+    var name = document.createElement('div');
+    name.className = 'file-chip-name';
+    name.title = file.name;
+    var baseEl = document.createElement('span');
+    baseEl.className = 'file-chip-base';
+    baseEl.textContent = base;
+    var extEl = document.createElement('span');
+    extEl.className = 'file-chip-ext';
+    extEl.textContent = ext;
+    name.appendChild(baseEl); name.appendChild(extEl);
+    var size = document.createElement('div');
+    size.className = 'file-chip-size';
+    size.textContent = formatSize(file.size);
+    text.appendChild(name); text.appendChild(size);
+
+    var remove = document.createElement('button');
+    remove.type = 'button';            // a plain button inside a form would submit it
+    remove.className = 'file-chip-remove';
+    remove.setAttribute('aria-label', 'Remove file');
+    remove.textContent = '✕';
+    remove.addEventListener('click', function() { clearFile(); });
+
+    chip.appendChild(icon); chip.appendChild(text); chip.appendChild(remove);
+    fileInfo.textContent = '';
+    fileInfo.appendChild(chip);
   }
 
-  window.clearFile = function() { selectedFile = null; if (fileInput) fileInput.value=''; if (fileInfo) fileInfo.innerHTML=''; };
-
-  var uploading = false;
-
-  function hideStatus() {
-    var bar = document.getElementById('upload-status');
-    if (bar) bar.style.display = 'none';
-  }
+  window.clearFile = function() { selectedFile = null; if (fileInput) fileInput.value=''; if (fileInfo) fileInfo.textContent=''; };
 
   // Form submit
   document.getElementById('upload-form').addEventListener('submit', function(e) {
@@ -378,15 +622,15 @@
     var type     = document.getElementById('res-type') ? document.getElementById('res-type').value : 'Lesson Note';
     var btn      = document.querySelector('#upload-form button[type="submit"]');
 
-    if (!title)    return showStatus('Please enter a resource title.', 'error');
-    if (!subject)  return showStatus('Please select a subject.', 'error');
-    if (!classLvl) return showStatus('Please select a class level.', 'error');
-    if (!term)     return showStatus('Please select a term.', 'error');
+    if (!title)    return showStatus('Please enter a resource title.', 'error', 'res-title');
+    if (!subject)  return showStatus('Please select a subject.', 'error', 'res-subject');
+    if (!classLvl) return showStatus('Please select a class level.', 'error', 'res-class');
+    if (!term)     return showStatus('Please select a term.', 'error', 'res-term');
     // week always has a value (defaults to 'General')
-    if (!selectedFile) return showStatus('Please attach a file (PDF, Word, or PowerPoint).', 'error');
+    if (!selectedFile) return showStatus('Please attach a file (PDF, Word, or PowerPoint).', 'error', 'dropzone');
 
     if (btn.disabled) return;
-    hideStatus();
+    hideStatus(true);
 
     var uploadedPath = null;   // so we can clean up the file if saving the details fails
     var longTimer = null;
@@ -400,7 +644,7 @@
     }
     function setStage(btnLabel, longText) {
       stageStartedAt = Date.now();
-      btn.innerHTML = '<span class="btn-spinner"></span>' + btnLabel;
+      setBtn('busy', btnLabel, true);
       setText(longText, true);
     }
     // keep each stage on screen long enough to be read, even on a fast connection
@@ -411,7 +655,6 @@
 
     uploading = true;
     btn.disabled = true;
-    btn.classList.add('is-busy');
     progressBox.className = 'up-progress';
     progressBox.style.display = 'block';
     setStage('Checking details…', 'Checking your details…');
@@ -473,21 +716,20 @@
         console.error('Upload error:', err);
         // don't leave an orphaned file behind if the details could not be saved
         if (uploadedPath) { sb.storage.from('resources').remove([uploadedPath]).then(function () {}); }
-        progressBox.className = 'up-progress error';
-        setText('✕ ' + (err.message || 'Upload failed. Please try again.'), true);
-        btn.classList.remove('is-busy');
-        btn.textContent = 'Try Again';
+        // the failure shows on the button itself (red, shake, then back to "Try Again")
+        progressBox.style.display = 'none';
+        progressBox.className = 'up-progress';
+        progressText.textContent = '';
         btn.disabled = false;
         uploading = false;
-        try { progressBox.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
+        idleLabel = 'Try Again';
+        showStatus(err.message || 'Upload failed. Please try again.', 'error');
       });
 
     // ── Success: confirmation, then clear the whole form after 5 seconds ──
     function showSuccess(resTitle, newId) {
       progressBox.className = 'up-progress done';
-      btn.classList.remove('is-busy');
-      btn.classList.add('is-done');
-      btn.innerHTML = '✓ Uploaded successfully';
+      setBtn('done', '✓ Uploaded successfully');
 
       progressText.innerHTML = '';
       var line = document.createElement('div');
@@ -523,14 +765,14 @@
       var form = document.getElementById('upload-form');
       form.reset();                       // title, description, subject, type, class, term, week
       clearFile();                        // attached file + file preview
-      hideStatus();
       progressBox.style.display = 'none';
       progressBox.className = 'up-progress';
       progressText.textContent = '';
-      btn.classList.remove('is-done', 'is-busy');
-      btn.textContent = 'Upload Resource';
       btn.disabled = false;
       uploading = false;
+      idleLabel = 'Upload Resource';
+      hideStatus(true);
+      setBtn('idle', idleLabel);
       try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { window.scrollTo(0, 0); }
       showToast('Form cleared — ready for your next upload.', 'info');
     }
