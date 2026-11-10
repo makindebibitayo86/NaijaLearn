@@ -43,8 +43,7 @@
   <div class="nav-links">
     <a href="pages/browse.html" class="nav-browse-tip" title="Search lesson notes, past questions &amp; schemes of work by subject, class, term or type">Browse</a>
     <a href="pages/upload.html" title="Share lesson notes, past questions &amp; schemes of work with Nigerian students">Upload</a>
-    <a href="pages/signin.html" title="Sign in to your NaijaLearn account to upload, save and download resources" style="color:var(--sage)">Sign In</a>
-    <button class="btn-nav" title="Create a free account to access all resources" onclick="window.location.href='pages/signup.html'">Get Started Free</button>
+    <button class="btn-nav" title="Create a free account to access all resources" onclick="window.location.href='pages/signin.html#signup'">Get Started</button>
   </div>
   <button class="nav-toggle">☰</button>
 </nav>
@@ -102,16 +101,18 @@
             <option>Week 10</option>
           </select>
         </div>
-        <div class="search-tags">
-          <span class="stag">Mathematics</span>
+        <!-- Random class + subject chips, rebuilt on every load by js/quick-tags.js (static ones are the no-JS fallback) -->
+        <div class="search-tags" id="search-tags">
+          <span class="stag">Mathematics Primary 4</span>
           <span class="stag">Biology SS2</span>
           <span class="stag">JSS1 English</span>
-          <span class="stag">Civic Education</span>
-          <span class="stag">Week 4 Physics</span>
-          <span class="stag">Chemistry</span>
-          <span class="stag">Economics</span>
-          <span class="stag">Government</span>
+          <span class="stag">Civic Education JSS2</span>
+          <span class="stag">SS2 Physics Week 4</span>
+          <span class="stag">SS1 Chemistry</span>
+          <span class="stag">Economics SS2</span>
+          <span class="stag">SS3 Government</span>
         </div>
+        <script src="js/quick-tags.js"></script>
       </div>
     </div>
   </div>
@@ -121,8 +122,9 @@
 
 <!-- SUBJECTS — counts updated live from Supabase -->
 <div class="section">
-  <div class="section-header">
+  <div class="section-header has-sub">
     <div class="section-title">Browse by Subject</div>
+    <p class="section-sub">Tap a subject to see its lesson notes, schemes of work and past questions.</p>
     <a class="section-link" href="pages/browse.html">See all subjects →</a>
   </div>
   <div class="subjects-grid" id="subjects-grid">
@@ -151,12 +153,32 @@
     <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Music'"><div class="subj-icon" data-tone="sage"><i class="ti ti-music" style="font-size:20px"></i></div><div class="subj-info"><span class="subj-name">Music</span><span class="subj-count" data-subject="Music">—</span></div></div>
     <div class="subject-pill" onclick="window.location.href='pages/browse.html?subject=Physical Education'"><div class="subj-icon" data-tone="gold"><i class="ti ti-run" style="font-size:20px"></i></div><div class="subj-info"><span class="subj-name">Physical Education</span><span class="subj-count" data-subject="Physical Education">—</span></div></div>
   </div>
+  <!-- Phones show the first 10 subjects (5 rows); this button unfolds the rest (CSS in the MOBILE PASS block) -->
+  <div class="subjects-more" id="subjects-more">
+    <button type="button" class="btn-show-more" id="subjects-more-btn" aria-expanded="false" aria-controls="subjects-grid">Show more subjects</button>
+  </div>
+  <script>
+  (function () {
+    var SHOWN = 10;  // 5 rows of 2 — keep in sync with .subject-pill:nth-child(n+11) in css/styles.css
+    var grid = document.getElementById('subjects-grid');
+    var btn  = document.getElementById('subjects-more-btn');
+    if (!grid || !btn) return;
+    var extra = grid.children.length - SHOWN;
+    if (extra <= 0) return;
+    btn.textContent = 'Show ' + extra + ' more subjects';
+    grid.classList.add('is-collapsed');     // without JS the full list simply stays visible
+    btn.addEventListener('click', function () {
+      grid.classList.remove('is-collapsed'); // the scroll-fade observer eases the new cards in
+      btn.setAttribute('aria-expanded', 'true');
+    });
+  })();
+  </script>
 </div>
 
 <!-- TRENDING RESOURCES — populated live from Supabase -->
 <div class="trending-band">
 <div class="section" style="padding-top:0">
-  <div class="section-header">
+  <div class="section-header has-sub">
     <div class="section-title"><span class="flame" aria-hidden="true"><svg viewBox="0 0 64 80" xmlns="http://www.w3.org/2000/svg" focusable="false">
         <defs>
           <linearGradient id="flameOuterG" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#E8421A"/><stop offset=".55" stop-color="#FF7A18"/><stop offset="1" stop-color="#FFB02E"/></linearGradient>
@@ -170,6 +192,7 @@
         <circle class="f-spark s2" cx="45" cy="26" r="1.8" fill="#FF7A18"/>
         <circle class="f-spark s3" cx="33" cy="10" r="1.6" fill="#FFD84D"/>
       </svg></span>Trending This Week</div>
+    <p class="section-sub">The lesson notes teachers across Nigeria are downloading the most right now.</p>
     <a class="section-link" href="pages/browse.html">View all →</a>
   </div>
   <div class="resources-grid" id="trending-grid">
@@ -186,6 +209,10 @@
       <div class="res-thumb" style="background:#eee"></div>
       <div class="res-body"><div style="height:12px;background:#eee;border-radius:6px;margin-bottom:10px"></div><div style="height:36px;background:#f5f5f5;border-radius:6px"></div></div>
     </div>
+  </div>
+  <!-- Phones: only the top 3 trending cards show, then this link (see MOBILE PASS in css/styles.css) -->
+  <div class="trending-more">
+    <a class="btn-show-more" href="pages/browse.html">View all resources →</a>
   </div>
 </div>
 </div>
@@ -584,15 +611,20 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   // ─── QUICK SEARCH TAGS ───
-  document.querySelectorAll('.stag').forEach(tag => {
-    tag.addEventListener('click', () => {
+  // Clicking a chip fills the box and opens the browse page with that search applied.
+  // Delegated on the container so the randomly generated chips work too.
+  const tagBox = document.querySelector('.search-tags');
+  if (tagBox) {
+    tagBox.addEventListener('click', e => {
+      const tag = e.target.closest('.stag');
+      if (!tag) return;
+      const q = tag.textContent.trim();
       const searchInput = document.querySelector('.search-input');
-      if (searchInput) {
-        searchInput.value = tag.textContent.trim();
-        searchInput.focus();
-      }
+      if (searchInput) searchInput.value = q;
+      // short beat so the chip's press feedback is visible before the page changes
+      setTimeout(() => { window.location.href = `pages/browse.html?q=${encodeURIComponent(q)}`; }, 150);
     });
-  });
+  }
 
   // ─── SEARCH FORM ───
   const searchBtn = document.querySelector('.btn-search');
@@ -882,5 +914,67 @@ document.addEventListener('DOMContentLoaded', () => {
 })();
 </script>
 
+<script>
+// HOW IT WORKS · phones only (≤768px): the step cards become a stacked deck. CSS lives in the MOBILE PASS block of css/styles.css.
+// The chosen card sits in front; the others are cascaded behind it in step order. Tap a card behind to bring it forward.
+(function () {
+  var mq = window.matchMedia('(max-width: 768px)');
+  var decks = Array.prototype.map.call(document.querySelectorAll('.steps-grid'), function (grid) {
+    var cards = Array.prototype.slice.call(grid.querySelectorAll('.step-card'));
+    var active = 0;
+    var on = false;
+
+    function label(card, i) {
+      var t = card.querySelector('.step-title');
+      return 'Show step ' + (i + 1) + (t ? ': ' + t.textContent.trim() : '');
+    }
+    function render() {
+      var behind = 0;
+      cards.forEach(function (card, i) {
+        var depth = i === active ? 0 : cards.length - 1 - behind++;   // earlier steps sit higher up the stack
+        card.setAttribute('data-depth', depth);
+        if (depth === 0) {
+          card.removeAttribute('role'); card.removeAttribute('aria-label'); card.tabIndex = -1;
+        } else {
+          card.setAttribute('role', 'button'); card.setAttribute('aria-label', label(card, i)); card.tabIndex = 0;
+        }
+      });
+    }
+    function bringForward(i, focus) {
+      if (i === active) return;
+      active = i;
+      render();
+      if (focus) cards[i].focus({ preventScroll: true });
+    }
+    function onClick(e) { bringForward(cards.indexOf(e.currentTarget), true); }
+    function onKey(e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); bringForward(cards.indexOf(e.currentTarget), true); }
+    }
+    return {
+      enable: function () {
+        if (on || cards.length < 2 || cards.length > 4) return;
+        on = true;
+        grid.classList.add('is-stack');
+        grid.style.setProperty('--n', cards.length);
+        cards.forEach(function (c) { c.addEventListener('click', onClick); c.addEventListener('keydown', onKey); });
+        render();
+      },
+      disable: function () {
+        if (!on) return;
+        on = false;
+        grid.classList.remove('is-stack');
+        grid.style.removeProperty('--n');
+        cards.forEach(function (c) {
+          c.removeEventListener('click', onClick); c.removeEventListener('keydown', onKey);
+          c.removeAttribute('data-depth'); c.removeAttribute('role'); c.removeAttribute('aria-label'); c.removeAttribute('tabindex');
+        });
+      }
+    };
+  });
+  function sync() { decks.forEach(function (d) { mq.matches ? d.enable() : d.disable(); }); }
+  sync();
+  if (mq.addEventListener) mq.addEventListener('change', sync); else mq.addListener(sync);
+})();
+</script>
 </body>
 </html>

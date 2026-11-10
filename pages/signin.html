@@ -10,7 +10,30 @@
   <link rel="stylesheet" href="../css/styles.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="../js/nav-auth.js"></script>
+  <style>
+    /* Pill switch: light track, dark-green sliding thumb */
+    .auth-tabs{position:relative;display:flex;margin:0 auto 24px;padding:4px;border-radius:999px;
+      background:#ECEDEF;border:1px solid #E1E3E6;box-shadow:inset 0 1px 2px rgba(13,27,42,.06)}
+    .auth-tabs-thumb{position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);border-radius:999px;
+      background:linear-gradient(180deg,#2B5A4D 0%,#1C4E41 100%);
+      box-shadow:0 4px 12px rgba(28,78,65,.35),0 1px 2px rgba(13,27,42,.2);
+      transition:transform .3s cubic-bezier(.4,0,.2,1);pointer-events:none}
+    .auth-tabs[data-mode="signup"] .auth-tabs-thumb{transform:translateX(100%)}
+    .auth-tab{position:relative;z-index:1;flex:1;padding:12px 16px;border:none;border-radius:999px;background:transparent;
+      color:#2D3F50;font:600 14px 'DM Sans',sans-serif;cursor:pointer;transition:color .25s;white-space:nowrap}
+    .auth-tab.active{color:#fff;font-weight:700}
+    .auth-tab:focus-visible{outline:2px solid var(--sage);outline-offset:2px}
+    [data-theme="dark"] .auth-tabs{background:#1E2A35;border-color:#2D3F50;box-shadow:inset 0 1px 2px rgba(0,0,0,.3)}
+    [data-theme="dark"] .auth-tab{color:#B8C4CE}
+    [data-theme="dark"] .auth-tab.active{color:#fff}
+    @media (prefers-reduced-motion:reduce){.auth-tabs-thumb{transition:none}}
+    .auth-panel[hidden]{display:none}
+    .auth-panel{animation:authFade .25s ease}
+    @keyframes authFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+    @media (prefers-reduced-motion:reduce){.auth-panel{animation:none}}
+  </style>
 </head>
+
 <body style="background:var(--cream)">
 
 <div class="auth-wrapper">
@@ -38,30 +61,79 @@
   <text x="115" y="80" font-family="'DM Sans',Arial,sans-serif" font-size="11" font-weight="500" letter-spacing="2.4" class="nl-t">EDUCATIONAL RESOURCE LIBRARY</text>
 </svg></div>
     <div class="auth-sub">Nigeria's educational resource library</div>
-    <div class="auth-title">Welcome back</div>
-    <p style="text-align:center;font-size:13px;color:var(--muted);margin-bottom:28px">Sign in to your account</p>
+
+    <div class="auth-tabs" data-mode="signin" role="tablist" aria-label="Sign in or create account">
+      <span class="auth-tabs-thumb" aria-hidden="true"></span>
+      <button type="button" class="auth-tab active" id="tab-signin" role="tab" aria-selected="true" aria-controls="panel-signin" data-mode="signin">Sign In</button>
+      <button type="button" class="auth-tab" id="tab-signup" role="tab" aria-selected="false" aria-controls="panel-signup" data-mode="signup">Create Account</button>
+    </div>
 
     <div id="status-bar" style="display:none;padding:12px 16px;border-radius:10px;font-size:14px;font-weight:500;margin-bottom:16px;text-align:center"></div>
 
-    <form id="signin-form" novalidate>
-      <div class="form-group">
-        <label class="form-label" for="email">Email Address</label>
-        <input id="email" class="form-input" type="email" placeholder="you@example.com" autocomplete="email">
-      </div>
-      <div class="form-group">
-        <label class="form-label" for="password" style="display:flex;justify-content:space-between">
-          Password
-          <a href="forgot-password.html" style="color:var(--sage);font-weight:600;font-size:12px">Forgot password?</a>
-        </label>
-        <div style="position:relative">
-          <input id="password" class="form-input" type="password" placeholder="Your password" autocomplete="current-password" style="padding-right:44px">
-          <button type="button" class="toggle-password" data-target="password" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px">👁</button>
+    <!-- SIGN IN -->
+    <div class="auth-panel" id="panel-signin" role="tabpanel" aria-labelledby="tab-signin">
+      <div class="auth-title">Welcome back</div>
+      <p style="text-align:center;font-size:13px;color:var(--muted);margin-bottom:28px">Sign in to your account</p>
+      <form id="signin-form" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="signin-email">Email Address</label>
+          <input id="signin-email" class="form-input" type="email" placeholder="you@example.com" autocomplete="email">
         </div>
-      </div>
-      <button type="submit" id="submit-btn" class="btn-full primary" style="margin-top:8px">Sign In</button>
-    </form>
+        <div class="form-group">
+          <label class="form-label" for="signin-password" style="display:flex;justify-content:space-between">
+            Password
+            <a href="forgot-password.html" style="color:var(--sage);font-weight:600;font-size:12px">Forgot password?</a>
+          </label>
+          <div style="position:relative">
+            <input id="signin-password" class="form-input" type="password" placeholder="Your password" autocomplete="current-password" style="padding-right:44px">
+            <button type="button" class="toggle-password" data-target="signin-password" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px">👁</button>
+          </div>
+        </div>
+        <button type="submit" id="signin-btn" class="btn-full primary" style="margin-top:8px">Sign In</button>
+      </form>
+      <div class="auth-switch" style="margin-top:20px">Don't have an account? <a href="#signup" data-mode="signup">Create one free</a></div>
+    </div>
 
-    <div class="auth-switch" style="margin-top:20px">Don't have an account? <a href="signup.html">Create one free</a></div>
+    <!-- SIGN UP -->
+    <div class="auth-panel" id="panel-signup" role="tabpanel" aria-labelledby="tab-signup" hidden>
+      <div class="auth-title">Create your account</div>
+      <p style="text-align:center;font-size:13px;color:var(--muted);margin-bottom:28px">Free forever. No credit card needed.</p>
+      <form id="signup-form" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="signup-name">Full Name</label>
+          <input id="signup-name" class="form-input" type="text" placeholder="Adaeze Okonkwo" autocomplete="name">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="signup-email">Email Address</label>
+          <input id="signup-email" class="form-input" type="email" placeholder="you@example.com" autocomplete="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="signup-role">I am a…</label>
+          <select id="signup-role" class="filter-select" style="padding:12px 16px;width:100%">
+            <option value="">Select your role</option>
+            <option value="teacher">Teacher</option>
+            <option value="student">Student</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="signup-password">Password</label>
+          <div style="position:relative">
+            <input id="signup-password" class="form-input" type="password" placeholder="Min. 8 characters" autocomplete="new-password" style="padding-right:44px">
+            <button type="button" class="toggle-password" data-target="signup-password" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px">👁</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="signup-confirm">Confirm Password</label>
+          <div style="position:relative">
+            <input id="signup-confirm" class="form-input" type="password" placeholder="Repeat your password" autocomplete="new-password" style="padding-right:44px">
+            <button type="button" class="toggle-password" data-target="signup-confirm" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px">👁</button>
+          </div>
+        </div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:20px;line-height:1.5">By creating an account you agree to our <a href="#" style="color:var(--sage)">Terms of Service</a> and <a href="#" style="color:var(--sage)">Privacy Policy</a>.</p>
+        <button type="submit" id="signup-btn" class="btn-full primary">Create Free Account</button>
+      </form>
+      <div class="auth-switch" style="margin-top:20px">Already have an account? <a href="#signin" data-mode="signin">Sign in</a></div>
+    </div>
   </div>
 </div>
 
@@ -71,6 +143,7 @@
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVsYXdzcWNiaXVpZXJrZXppeXd6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MDA5NjEsImV4cCI6MjA5NDE3Njk2MX0.2h9hN3zRLPeLVFKeXtwqxv_dWvg6XXFzHXaheK6ZviI'
   );
 
+  /* ── Status bar ── */
   function setStatus(msg, type) {
     var bar = document.getElementById('status-bar');
     bar.style.display = 'block';
@@ -85,14 +158,50 @@
     bar.style.color = s.color;
     bar.style.border = '1px solid ' + s.border;
   }
+  function clearStatus() {
+    document.getElementById('status-bar').style.display = 'none';
+  }
 
+  /* ── Switching between Sign In and Create Account ── */
+  var TITLES = { signin: 'Sign In — NaijaLearn', signup: 'Create Account — NaijaLearn' };
+
+  function switchMode(mode, opts) {
+    opts = opts || {};
+    if (mode !== 'signup') mode = 'signin';
+    ['signin', 'signup'].forEach(function(m) {
+      var active = m === mode;
+      document.getElementById('panel-' + m).hidden = !active;
+      var tab = document.getElementById('tab-' + m);
+      tab.classList.toggle('active', active);
+      tab.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+    document.querySelector('.auth-tabs').dataset.mode = mode;
+    document.title = TITLES[mode];
+    if (!opts.keepStatus) clearStatus();
+    if (!opts.noHash && location.hash !== '#' + mode) {
+      history.replaceState(null, '', location.pathname + location.search + '#' + mode);
+    }
+  }
+
+  document.querySelectorAll('[data-mode]').forEach(function(el) {
+    el.addEventListener('click', function(e) {
+      e.preventDefault();
+      switchMode(el.dataset.mode);
+    });
+  });
+  window.addEventListener('hashchange', function() {
+    switchMode(location.hash === '#signup' ? 'signup' : 'signin', { noHash: true });
+  });
+  switchMode(location.hash === '#signup' ? 'signup' : 'signin', { noHash: true });
+
+  /* ── Sign in ── */
   document.getElementById('signin-form').addEventListener('submit', function(e) {
     e.preventDefault();
     e.stopPropagation();
 
-    var email    = document.getElementById('email').value.trim();
-    var password = document.getElementById('password').value;
-    var btn      = document.getElementById('submit-btn');
+    var email    = document.getElementById('signin-email').value.trim();
+    var password = document.getElementById('signin-password').value;
+    var btn      = document.getElementById('signin-btn');
 
     if (!email)    return setStatus('Please enter your email address.', 'error');
     if (!password) return setStatus('Please enter your password.', 'error');
@@ -111,7 +220,7 @@
         setStatus('✓ Signed in! Redirecting…', 'success');
         btn.textContent = 'Signed In ✓';
         var params = new URLSearchParams(window.location.search);
-        var next = params.get('next');
+        var next = params.get('next') || params.get('return');
         setTimeout(function() { window.location.href = next || '../index.html'; }, 1200);
       }
     }).catch(function(err) {
@@ -121,8 +230,87 @@
     });
   });
 
+  /* ── Create account ── */
+  function signupDone(email) {
+    var btn = document.getElementById('signup-btn');
+    setStatus('✓ Account created! Check your email to confirm, then sign in.', 'success');
+    btn.textContent = 'Account Created ✓';
+    setTimeout(function() {
+      switchMode('signin', { keepStatus: true });
+      document.getElementById('signin-email').value = email;
+      document.getElementById('signin-password').focus();
+      btn.textContent = 'Create Free Account';
+      btn.disabled = false;
+    }, 2500);
+  }
 
+  document.getElementById('signup-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
 
+    var name     = document.getElementById('signup-name').value.trim();
+    var email    = document.getElementById('signup-email').value.trim();
+    var role     = document.getElementById('signup-role').value;
+    var password = document.getElementById('signup-password').value;
+    var confirm  = document.getElementById('signup-confirm').value;
+    var btn      = document.getElementById('signup-btn');
+
+    if (!name)                          return setStatus('Please enter your full name.', 'error');
+    if (!email || !email.includes('@')) return setStatus('Please enter a valid email address.', 'error');
+    if (!role)                          return setStatus('Please select your role.', 'error');
+    if (!password || password.length < 8) return setStatus('Password must be at least 8 characters.', 'error');
+    if (password !== confirm)           return setStatus('Passwords do not match.', 'error');
+
+    btn.textContent = 'Creating account…';
+    btn.disabled = true;
+    setStatus('Creating your account, please wait…', 'info');
+
+    sb.auth.signUp({
+      email: email,
+      password: password,
+      options: { data: { full_name: name, role: role } }
+    }).then(function(result) {
+      if (result.error) {
+        setStatus('Error: ' + result.error.message, 'error');
+        btn.textContent = 'Create Free Account';
+        btn.disabled = false;
+        return;
+      }
+
+      var userId = result.data && result.data.user && result.data.user.id;
+      if (!userId) {
+        // User created but no session yet (email confirmation required) — still success
+        signupDone(email);
+        return;
+      }
+
+      // Write the profile row directly from the client.
+      // This bypasses the trigger entirely and works regardless of its state.
+      sb.from('profiles').upsert({
+        id:         userId,
+        full_name:  name,
+        email:      email,
+        role:       role,
+        verified:   false,
+        suspended:  false,
+        created_at: new Date().toISOString()
+      }, { onConflict: 'id' }).then(function(profResult) {
+        // Even if the upsert fails (e.g. trigger already inserted it fine),
+        // the auth account exists — still treat as success.
+        if (profResult.error) {
+          console.warn('Profile upsert warning:', profResult.error.message);
+        }
+        signupDone(email);
+      });
+
+    }).catch(function(err) {
+      setStatus('Error: ' + (err.message || 'Something went wrong.'), 'error');
+      btn.textContent = 'Create Free Account';
+      btn.disabled = false;
+    });
+  });
+
+  /* ── Show / hide password ── */
   document.querySelectorAll('.toggle-password').forEach(function(btn) {
     btn.addEventListener('click', function() {
       var input = document.getElementById(btn.dataset.target);

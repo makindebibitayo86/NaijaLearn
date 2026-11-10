@@ -341,16 +341,13 @@ window.openResource = async function (id, fileUrl) {
 
 // ─── HELPERS ──────────────────────────────────────────────────
 function showLoading(on) {
-  // Only show the spinner on first page load, not on "Load More"
+  // Only show the skeleton on first page load, not on "Load More"
   if (currentPage > 0) return;
   const grid = document.getElementById('results-grid');
   if (!grid || !on) return;
-  grid.innerHTML = `
-    <div style="grid-column:1/-1;text-align:center;padding:80px 0;color:var(--muted)">
-      <div style="font-size:32px;margin-bottom:12px;animation:spin 1s linear infinite;display:inline-block">⏳</div>
-      <div style="font-size:15px">Loading resources…</div>
-    </div>
-  `;
+  grid.innerHTML = window.nlSkeleton
+    ? window.nlSkeleton.browseGrid()
+    : '<div style="grid-column:1/-1;text-align:center;padding:80px 0;color:var(--muted)">Loading resources…</div>';
 }
 
 function showErrorState(msg) {

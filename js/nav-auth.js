@@ -106,7 +106,8 @@
     if (document.getElementById('nl-auth-lock')) return;
     var style = document.createElement('style');
     style.id = 'nl-auth-lock';
-    style.textContent = 'body > *:not(#nl-suspended-overlay):not(#nl-auth-gate-overlay) { visibility: hidden !important; }';
+    style.textContent = 'body > *:not(nav):not(#nl-suspended-overlay):not(#nl-auth-gate-overlay) { visibility: hidden !important; }'
+      + ' nav .nav-links, nav .nav-toggle { visibility: hidden !important; }';
     document.head.appendChild(style);
   }
 
@@ -115,14 +116,147 @@
     if (style) style.remove();
   }
 
-  /* Full-page spinner shown while the auth/suspension check is in flight */
+  /* Lock before the page paints (this script loads in <head>) */
+  if (isProtectedPage()) lockPage();
+
+  /* ── Skeleton screens (replace the old spinner) ──
+     Plain-HTML builders; the look lives in css/styles.css (.sk-*).
+     Exposed as window.nlSkeleton so page scripts can reuse them. */
+  var SK = (function () {
+    function b(w, h, x) {
+      return '<span class="sk" style="width:' + w + ';height:' + h + (x ? ';' + x : '') + '"></span>';
+    }
+    function dot(d) {
+      return '<span class="sk sk-circle" style="width:' + d + 'px;height:' + d + 'px"></span>';
+    }
+    function wrap(inner, extra) {
+      return '<div class="sk-wrap" role="status" aria-busy="true"' + (extra ? ' style="' + extra + '"' : '') + '>'
+           + '<span class="sk-sr">Loading…</span>' + inner + '</div>';
+    }
+    function card(i) {
+      return '<div class="sk-card sk-res" aria-hidden="true">'
+        + '<span class="sk sk-thumb"></span><div class="sk-body">'
+        + '<div class="sk-row" style="margin-bottom:12px">' + b('44px', '18px', 'border-radius:4px') + b('62px', '18px', 'border-radius:4px') + b('50px', '18px', 'border-radius:4px') + '</div>'
+        + b('92%', '14px', 'margin-bottom:8px') + b('64%', '14px')
+        + '<div class="sk-foot"><div class="sk-row">' + dot(20) + b('84px', '12px') + '</div>' + b('36px', '12px') + '</div>'
+        + '</div></div>';
+    }
+    function cards(n) { var o = ''; for (var i = 0; i < n; i++) o += card(i); return o; }
+    function resultsHeader() {
+      return '<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:20px">'
+        + b('170px', '16px') + b('130px', '34px') + '</div>';
+    }
+    function filterPanel() {
+      function grp(extra) {
+        return '<div class="' + (extra || '') + '" style="margin-bottom:20px">' + b('90px', '12px', 'margin-bottom:10px') + b('100%', '40px', 'border-radius:10px') + '</div>';
+      }
+      return '<div class="sk-card sk-pad" aria-hidden="true" style="padding:22px">'
+        + b('110px', '16px', 'margin-bottom:20px') + grp('') + grp('') + grp('sk-more') + grp('sk-more') + '</div>';
+    }
+
+    /* inner pieces (also used inside the real page frames) */
+    function resourceInner() {
+      return '<div class="sk-card" aria-hidden="true" style="margin-bottom:24px;border-radius:18px">'
+        + '<span class="sk" style="height:130px;border-radius:0"></span>'
+        + '<div class="sk-pad">'
+        +   '<div class="sk-row" style="margin-bottom:16px">' + b('76px', '24px', 'border-radius:20px') + b('64px', '24px', 'border-radius:20px') + b('80px', '24px', 'border-radius:20px') + '</div>'
+        +   b('78%', '26px', 'margin-bottom:12px') + b('96%', '13px', 'margin-bottom:8px') + b('70%', '13px', 'margin-bottom:22px')
+        +   '<div class="sk-row gap12" style="margin-bottom:22px">' + b('110px', '34px') + b('110px', '34px') + b('110px', '34px') + '</div>'
+        +   '<div class="sk-row gap12" style="margin-bottom:22px">' + dot(40) + b('140px', '14px') + '</div>'
+        +   '<div class="sk-row gap12">' + b('160px', '44px', 'border-radius:10px') + b('96px', '44px', 'border-radius:10px') + '</div>'
+        + '</div></div>'
+        + '<div class="sk-card sk-pad" aria-hidden="true">' + b('90px', '16px', 'margin-bottom:16px') + b('100%', '300px', 'border-radius:12px') + '</div>';
+    }
+    function panel(rows) {
+      var r = '';
+      for (var i = 0; i < rows; i++) {
+        r += '<div class="sk-row gap12" style="padding:12px 0;' + (i ? 'border-top:1px solid var(--border)' : '') + '">'
+          + b('40px', '40px', 'border-radius:10px;flex-shrink:0')
+          + '<div style="flex:1;min-width:0">' + b('70%', '13px', 'margin-bottom:8px') + b('40%', '11px') + '</div></div>';
+      }
+      return '<div class="sk-card sk-pad" aria-hidden="true" style="padding:20px 22px">' + b('130px', '16px', 'margin-bottom:10px') + r + '</div>';
+    }
+    function statCards(n) {
+      var o = '';
+      for (var i = 0; i < n; i++) o += '<div class="sk-card" aria-hidden="true" style="padding:20px 18px 16px">' + b('34px', '34px', 'border-radius:10px;margin-bottom:14px') + b('50%', '22px', 'margin-bottom:8px') + b('70%', '11px') + '</div>';
+      return '<div class="sk-stats">' + o + '</div>';
+    }
+    function dashboardInner() {
+      return b('100%', '150px', 'border-radius:22px;margin-bottom:22px') .replace('class="sk"', 'class="sk sk-hero"')
+        + statCards(4)
+        + '<div class="sk-grid2"><div class="sk-stack">' + panel(3) + panel(4) + '</div><div class="sk-stack sk-side">' + panel(3) + '</div></div>';
+    }
+    function profileInner() {
+      return b('100%', '170px', 'border-radius:20px;margin-bottom:22px').replace('class="sk"', 'class="sk sk-hero"')
+        + statCards(4)
+        + '<div class="sk-grid2"><div class="sk-stack">' + panel(4) + '</div><div class="sk-stack sk-side">' + panel(3) + '</div></div>';
+    }
+    function adminInner() {
+      var rows = '';
+      for (var i = 0; i < 6; i++) rows += '<div class="sk-row gap12" style="padding:14px 0;' + (i ? 'border-top:1px solid var(--border)' : '') + '">' + b('34%', '13px') + b('18%', '13px') + b('14%', '13px') + '</div>';
+      return '<div class="sk-frame" style="padding-top:28px">' + statCards(4)
+        + '<div class="sk-card sk-pad" aria-hidden="true" style="padding:22px">' + b('150px', '16px', 'margin-bottom:12px') + rows + '</div></div>';
+    }
+    function uploadInner() {
+      var f = '';
+      for (var i = 0; i < 4; i++) f += b('90px', '12px', 'margin-bottom:8px') + b('100%', '44px', 'border-radius:10px;margin-bottom:18px');
+      return b('240px', '30px', 'margin-bottom:12px') + b('70%', '14px', 'margin-bottom:22px')
+        + b('100%', '110px', 'border-radius:12px;margin-bottom:22px')
+        + '<div class="sk-grid2"><div class="sk-card sk-pad" aria-hidden="true">' + b('140px', '16px', 'margin-bottom:20px') + f + '</div>'
+        + '<div class="sk-card sk-pad sk-side" aria-hidden="true">' + b('100%', '200px', 'border-radius:12px;margin-bottom:16px') + b('100%', '46px', 'border-radius:10px') + '</div></div>';
+    }
+
+    /* full-page skeleton for the overlay, by page */
+    function page(name) {
+      if (name === 'browse.html')
+        return '<div class="browse-layout">' + filterPanel() + '<div style="min-width:0">' + resultsHeader() + '<div class="results-grid">' + cards(6) + '</div></div></div>';
+      if (name === 'resource.html')
+        return '<div class="sk-frame">' + b('120px', '14px', 'margin-bottom:22px') + resourceInner() + '</div>';
+      if (name === 'dashboard.html') return '<div class="sk-frame">' + dashboardInner() + '</div>';
+      if (name === 'profile.html')   return '<div class="sk-frame">' + b('70px', '14px', 'margin-bottom:22px') + profileInner() + '</div>';
+      if (name === 'upload.html')    return '<div class="sk-frame">' + uploadInner() + '</div>';
+      return '<div class="sk-frame">' + panel(4) + '</div>';
+    }
+
+    return {
+      wrap: wrap, cards: cards, page: page,
+      resource: resourceInner, dashboard: dashboardInner, profile: profileInner, admin: adminInner,
+      /* browse results area: cards inside their own grid so columns match the real one */
+      browseGrid: function () { return wrap('<div class="results-grid">' + cards(6) + '</div>', 'grid-column:1/-1'); },
+      countPill: function () { return '<span class="sk" style="display:inline-block;width:150px;height:14px;vertical-align:middle"></span>'; }
+    };
+  })();
+  window.nlSkeleton = SK;
+
+  /* Skeleton cover shown while the sign-in / suspension check is running.
+     It starts below the real nav bar, so the logo never flickers. */
   function showAuthGate() {
     if (document.getElementById('nl-auth-gate-overlay')) return;
+    var nav = document.querySelector('body > nav');
+    var top = nav ? Math.max(0, Math.round(nav.getBoundingClientRect().bottom)) : 0;
     var el = document.createElement('div');
     el.id = 'nl-auth-gate-overlay';
-    el.style.cssText = 'position:fixed;inset:0;z-index:99998;display:flex;align-items:center;justify-content:center;background:var(--cream,#FAFAF7)';
-    el.innerHTML = '<div style="text-align:center;font-family:\'DM Sans\',Arial,sans-serif"><style>@keyframes nl-spin{to{transform:rotate(360deg)}}#nl-spinner{width:36px;height:36px;border:3px solid #e0e0e0;border-top-color:#3D7A6B;border-radius:50%;animation:nl-spin .7s linear infinite;margin:0 auto 12px;}</style><div id="nl-spinner"></div><div style="font-size:14px;color:var(--muted,#6B7F8E)">Loading…</div></div>';
+    el.className = 'sk-overlay';
+    el.style.top = top + 'px';
+    el.innerHTML = SK.wrap(SK.page(currentPage()));
     document.body.appendChild(el);
+  }
+
+  /* The page's own "Loading…" boxes become the same skeleton, so when the
+     cover lifts there is no switch from skeleton to spinner underneath. */
+  function fillInPage() {
+    var page = currentPage();
+    var map = { 'resource.html': ['resource-content', SK.resource], 'dashboard.html': ['dash-root', SK.dashboard], 'profile.html': ['profile-content', SK.profile] };
+    if (map[page]) {
+      var box = document.getElementById(map[page][0]);
+      if (box && box.querySelector('.state-box')) box.innerHTML = SK.wrap(map[page][1]());
+    }
+    if (page === 'browse.html') {
+      var grid = document.getElementById('results-grid');
+      if (grid && !grid.firstElementChild) grid.innerHTML = SK.browseGrid();
+      var count = document.getElementById('results-count');
+      if (count && count.textContent.trim() === 'Loading…') count.innerHTML = SK.countPill();
+    }
   }
 
   function hideAuthGate() {
@@ -138,7 +272,7 @@
   }
 
   function applySession(sb, session) {
-    var signInLink = document.querySelector('a[href*="signin"]');
+    var signInLink = document.querySelector('.nav-links a[href*="signin"]');
     var signUpBtn  = document.querySelector('.btn-nav');
 
     if (!session) {
@@ -152,9 +286,9 @@
         signInLink.href = resolveHref('pages/signin.html');
       }
       if (signUpBtn) {
-        signUpBtn.textContent = 'Get Started Free';
+        signUpBtn.textContent = 'Get Started';
         signUpBtn.onclick = function () {
-          window.location.href = resolveHref('pages/signup.html');
+          window.location.href = resolveHref('pages/signin.html#signup');
         };
       }
       suppressCurrentPageLink();
@@ -236,17 +370,18 @@
   }
   /* ── boot ── */
   function boot() {
+    // Protected pages: lock, show the skeleton, and prepare the in-page skeleton
+    // right away. This must happen BEFORE waiting for supabase so nothing flashes.
+    if (isProtectedPage()) {
+      lockPage();
+      showAuthGate();
+      fillInPage();
+    }
+
     if (typeof supabase === 'undefined') {
       console.warn('nav-auth.js: supabase UMD not loaded yet — retrying');
       setTimeout(boot, 100);
       return;
-    }
-
-    // Lock protected pages immediately — content stays hidden until
-    // session + suspension check completes (avoids flash of protected content)
-    if (isProtectedPage()) {
-      lockPage();
-      showAuthGate();
     }
 
     var sb = supabase.createClient(
@@ -268,9 +403,41 @@
     var navToggle = document.querySelector('.nav-toggle');
     var navLinks  = document.querySelector('.nav-links');
     if (navToggle && navLinks) {
+      var nav   = navToggle.closest('nav') || document.querySelector('nav');
+      var root  = document.documentElement;
+      var scrim = document.createElement('div');
+      scrim.className = 'nav-scrim';
+      scrim.setAttribute('aria-hidden', 'true');
+      nav.appendChild(scrim);
+
+      // Two bars that morph into a cross (transform-only, styled in styles.css)
+      navToggle.innerHTML = '<span class="nav-toggle-bars" aria-hidden="true"></span>';
+      navToggle.setAttribute('type', 'button');
+      navToggle.setAttribute('aria-label', 'Menu');
+      navToggle.setAttribute('aria-expanded', 'false');
+
+      function setMenu(open) {
+        if (open) root.style.setProperty('--nav-h', nav.offsetHeight + 'px');
+        navLinks.classList.toggle('open', open);
+        root.classList.toggle('nav-menu-open', open);
+        navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      }
+
       navToggle.addEventListener('click', function () {
-        navLinks.classList.toggle('open');
-        navToggle.textContent = navLinks.classList.contains('open') ? '\u2715' : '\u2630';
+        setMenu(!navLinks.classList.contains('open'));
+      });
+      scrim.addEventListener('click', function () { setMenu(false); });
+      navLinks.addEventListener('click', function (e) {
+        if (e.target.closest('a, .btn-nav')) setMenu(false);
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && navLinks.classList.contains('open')) {
+          setMenu(false);
+          navToggle.focus();
+        }
+      });
+      window.addEventListener('resize', function () {
+        if (window.innerWidth > 768 && navLinks.classList.contains('open')) setMenu(false);
       });
     }
 

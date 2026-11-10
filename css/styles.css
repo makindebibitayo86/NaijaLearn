@@ -100,7 +100,13 @@ img {
   color: var(--sage);
 }
 
-.section-link:hover { text-decoration: underline; }
+/* hover only where a real pointer exists — on touch it sticks after a tap */
+@media (hover: hover) and (pointer: fine) {
+  .section-link:hover { text-decoration: underline; }
+}
+
+/* instruction line under a section title — phones only (see MOBILE PASS at the end of this file) */
+.section-sub { display: none; }
 
 /* ─── BUTTONS ─── */
 .btn-primary {
@@ -3558,4 +3564,478 @@ html[data-theme="dark"] body .btn-show-more {
     background-color: color-mix(in srgb, var(--sage) 86%, #fff);
     border-color: color-mix(in srgb, var(--sage) 55%, #fff);
   }
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   MOBILE PASS — phones only (≤768px). Desktop is untouched.
+   Work page by page; each block is labelled with the page + area.
+   ═════════════════════════════════════════════════════════════════════ */
+
+/* ── index · section headers (title + instruction line + link) ──
+   Before: the 68px desktop title wrapped to 3 lines on a phone and squeezed
+   the "See all" link into a 3-line sliver beside it.
+   Now: fluid title, a one-line-ish instruction, and a full-size tap target. */
+@media (max-width: 768px) {
+  .section-header { margin-bottom: 20px; }
+
+  .section-title {
+    font-size: clamp(26px, 7.8vw, 34px);   /* 30px at 390 · 26px floor at 320 */
+    line-height: 1.1;                      /* tight leading on display text */
+    letter-spacing: -0.02em;               /* tighten as type grows */
+    text-wrap: balance;                    /* never a lone word on line 2 */
+  }
+
+  /* stacked: title → instruction → link */
+  .section-header.has-sub {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: start;
+  }
+  .section-header.has-sub .section-title { margin-bottom: 8px; }
+
+  .section-sub {
+    display: block;
+    margin: 0;
+    max-width: 34ch;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--ink2);                    /* --muted is too faint at this size */
+    text-wrap: pretty;
+  }
+
+  /* links beside a title: 44px-tall tap area, instant press feedback */
+  .section-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-size: 14px;
+    white-space: nowrap;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 120ms var(--ease-out), transform 120ms var(--ease-out);
+  }
+  .section-link:active { opacity: .6; transform: scale(.97); }
+  .section-header.has-sub .section-link { margin-top: 2px; }
+  .section-header:not(.has-sub) { align-items: center; }
+}
+@media (max-width: 768px) and (prefers-reduced-motion: reduce) {
+  .section-link { transition: opacity 120ms ease; }
+  .section-link:active { transform: none; }   /* keep the fade, drop the movement */
+}
+
+/* ── index · subjects grid: show 10 (5 rows), unfold the rest ──
+   Collapsed state is added by a small script (so no-JS keeps everything visible).
+   The button only exists visually while the grid is collapsed. */
+.subjects-more { display: none; }
+@media (max-width: 768px) {
+  .subjects-grid.is-collapsed .subject-pill:nth-child(n+11) { display: none; }
+  .subjects-grid.is-collapsed + .subjects-more {
+    display: flex;
+    justify-content: center;
+    margin-top: 16px;
+  }
+  .subjects-more .btn-show-more {
+    min-height: 44px;                 /* comfortable thumb target */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* ── index · Trending This Week: top 3 on phones ──
+   Six full-size cards in one column was ~1,500px of scrolling. Phones now get the three
+   most-downloaded (the list is already sorted that way)
+   and a "View all resources" button where the list ends. */
+.trending-more { display: none; }
+@media (max-width: 768px) {
+  #trending-grid { gap: 16px; }
+  #trending-grid .res-card:nth-child(n+4) { display: none; }
+
+  /* the "View all" link stays in the header, under the instruction line, like the other sections */
+  .trending-more { display: flex; justify-content: center; margin-top: 20px; }
+  .trending-more .btn-show-more {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    text-decoration: none;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* ── index · hero + search card: stop the page scrolling sideways ──
+   Before: the page was 455px wide on every phone. The hero's single grid column can't shrink
+   below its widest child (the search row), so everything was pushed ~65px off-screen, and at
+   320px the Search button was clipped out of its box.
+   Now: grid items and the subject grid may shrink; the search input gives way to its button. */
+@media (max-width: 768px) {
+  .hero > * { min-width: 0; }
+  .search-input { min-width: 0; }
+  .subjects-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 480px) {
+  .search-card { padding: 20px; }      /* 32px padding left only ~216px of room at 320 */
+}
+
+/* ── index · How It Works header: same arrangement as the other section headers ──
+   Before: centred 34px title and a faint centred subtitle.
+   Now: centred, with the same fluid title and instruction-line style as the other headers. */
+@media (max-width: 768px) {
+  .how-title {
+    font-size: clamp(26px, 7.8vw, 34px);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    text-align: center;
+    text-wrap: balance;
+    margin-bottom: 8px;
+  }
+  .how-sub {
+    text-align: center;
+    max-width: 34ch;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--ink2);
+    margin-bottom: 28px;
+    text-wrap: pretty;
+  }
+}
+
+/* ── index · Trending header: centred on phones (title, instruction line, link) ── */
+@media (max-width: 768px) {
+  .trending-band .section-header.has-sub {
+    justify-items: center;
+    text-align: center;
+  }
+}
+
+/* ── index · How It Works: step cards as a stacked deck (phones) ──
+   Before: three tall cards in a column (~900px of scrolling).
+   Now: one deck. The chosen card sits in front; the others are cascaded behind it, each showing
+   its number badge as a 60px tap strip. Tap a strip and that card comes forward.
+   Built with the separate `translate` and `scale` properties so it composes with the existing
+   hover / press / fade-in / tab-switch transforms instead of fighting them. Transitions (not
+   keyframes), so a second tap mid-flight retargets from where the card is.
+   The script in index.html adds .is-stack / data-depth only at ≤768px, so desktop never sees any of this. */
+@media (max-width: 768px) {
+  html:root body .steps-grid.is-stack {
+    --peek: 60px;                                   /* visible strip of each card behind the front one */
+    grid-template-columns: minmax(0, 1fr);
+    padding-top: calc(var(--peek) * (var(--n, 3) - 1));
+  }
+  html:root body .steps-grid.is-stack .step-card {
+    grid-area: 1 / 1;                               /* every card in the same cell: height = tallest card */
+    transform-origin: 50% 0;
+    padding-top: 14px;                              /* the badge sits inside the strip */
+    touch-action: manipulation;
+    background-color: var(--white);                 /* opaque, so cards never ghost through each other */
+    background-image: linear-gradient(180deg, var(--white) 0%, color-mix(in srgb, var(--white) 92%, var(--sage-l)) 100%);
+    transition:
+      translate 280ms var(--ease-out),
+      scale 280ms var(--ease-out),
+      transform 200ms var(--ease-out),
+      opacity 400ms ease,
+      box-shadow 200ms var(--ease-out),
+      border-color 200ms ease !important;
+  }
+  html:root body .steps-grid.is-stack .step-card:active { transition-duration: 280ms, 280ms, 100ms, 400ms, 100ms, 200ms !important; }
+
+  html:root:not([data-theme="dark"]) body .steps-grid.is-stack .step-card {
+    box-shadow:
+      inset 0 .5px 0 rgba(255,255,255,.9),
+      0 -6px 14px -8px rgba(13,27,42,.28),          /* lets each card read as sitting on the one behind */
+      0 10px 22px -12px rgba(13,27,42,.18);
+  }
+  html[data-theme="dark"] body .steps-grid.is-stack .step-card {
+    box-shadow:
+      inset 0 .5px 0 rgba(255,255,255,.12),
+      0 -6px 14px -8px rgba(0,0,0,.6),
+      0 10px 22px -12px rgba(0,0,0,.55);
+  }
+
+  /* depth: 0 = front, then each card further back sits one strip higher and a little smaller */
+  html:root body .steps-grid.is-stack .step-card[data-depth="0"] { translate: 0 0;                          scale: 1;   z-index: 4; }
+  html:root body .steps-grid.is-stack .step-card[data-depth="1"] { translate: 0 calc(var(--peek) * -1);    scale: .94; z-index: 3; }
+  html:root body .steps-grid.is-stack .step-card[data-depth="2"] { translate: 0 calc(var(--peek) * -2);    scale: .88; z-index: 2; }
+  html:root body .steps-grid.is-stack .step-card[data-depth="3"] { translate: 0 calc(var(--peek) * -3);    scale: .82; z-index: 1; }
+
+  /* back cards are buttons; the front card is just a card */
+  html:root body .steps-grid.is-stack .step-card:not([data-depth="0"]) {
+    cursor: pointer;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  html:root body .steps-grid.is-stack .step-card:not([data-depth="0"]):focus-visible {
+    outline: 2px solid var(--sage);
+    outline-offset: 2px;
+  }
+  html:root body .steps-grid.is-stack .step-card[data-depth="0"] { outline: none; }
+  html:root body .steps-grid.is-stack .step-card[data-depth="0"]:active { transform: none; }
+  html:root body .steps-grid.is-stack .step-card[data-depth="0"]:active::after { opacity: 0; }
+}
+@media (max-width: 768px) and (prefers-reduced-motion: reduce) {
+  html:root body .steps-grid.is-stack .step-card {
+    transition: box-shadow 200ms ease, opacity 200ms ease !important;   /* the cards swap places instantly */
+  }
+}
+
+
+
+/* ═════ MOBILE MENU: sheet that hangs from the nav bar, under the hamburger ═════
+   Opens a few times a session, so it gets a real (but quick) transition.
+   Purpose: spatial consistency + state change. The panel slides in from the right edge,
+   leaves the same way (faster), and never covers the whole screen: the page stays
+   visible behind a light scrim, and a tap on it closes the menu.
+   transform + opacity only. Transitions (not keyframes) so a quick open/close retargets
+   from wherever it is. Phones only; the desktop bar is untouched. */
+@media (max-width: 768px) {
+  :root { --nav-h: 81px; }
+
+  html.nav-menu-open { overflow: hidden; }
+
+  /* Hamburger: 44px target, three bars that cross over into an X */
+  html:root body .nav-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    margin-right: -8px;           /* optically aligns the bars with the page gutter */
+    border-radius: 14px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nav-toggle-bars,
+  .nav-toggle-bars::before,
+  .nav-toggle-bars::after {
+    display: block;
+    width: 20px;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+    transition: transform 240ms var(--ease-out), background-color 120ms ease-out;
+  }
+  .nav-toggle-bars { position: relative; }                 /* the middle bar */
+  .nav-toggle-bars::before,
+  .nav-toggle-bars::after { content: ""; position: absolute; left: 0; top: 0; }
+  .nav-toggle-bars::before { transform: translateY(-6px); }
+  .nav-toggle-bars::after  { transform: translateY(6px); }
+  .nav-toggle[aria-expanded="true"] .nav-toggle-bars { background-color: transparent; }
+  .nav-toggle[aria-expanded="true"] .nav-toggle-bars::before { transform: rotate(45deg); }
+  .nav-toggle[aria-expanded="true"] .nav-toggle-bars::after  { transform: rotate(-45deg); }
+
+  /* Scrim: dims the page below the bar, not the bar itself */
+  .nav-scrim {
+    position: fixed;
+    top: var(--nav-h);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(13, 27, 42, .32);
+    z-index: 1;                     /* under the sheet, over the page */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 200ms ease-out, visibility 0s linear 200ms;
+  }
+  html.nav-menu-open .nav-scrim {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0s;
+  }
+
+  /* The sheet */
+  html:root body nav .nav-links {
+    display: flex;                       /* stays rendered so it can transition */
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    position: fixed;
+    top: var(--nav-h);
+    left: auto;
+    right: 0;
+    width: min(54vw, 196px);
+    max-height: calc(100dvh - var(--nav-h));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 12px 12px calc(16px + env(safe-area-inset-bottom, 0px));
+    border: 0;
+    border-bottom: .5px solid var(--border);
+    border-left: .5px solid var(--border);
+    border-radius: 0 0 0 24px;
+    background: var(--white);
+    background: color-mix(in srgb, var(--white) 94%, transparent);
+    -webkit-backdrop-filter: saturate(180%) blur(28px);
+    backdrop-filter: saturate(180%) blur(28px);
+    box-shadow: 0 24px 48px -16px rgba(13, 27, 42, .30);
+    z-index: 2;
+    transform: translateX(100%);
+    visibility: hidden;                  /* out of the tab order while closed */
+    pointer-events: none;
+    transition:
+      transform 200ms var(--ease-out),                /* exit: snappy, same path as the entrance */
+      visibility 0s linear 200ms;
+  }
+  html:root body nav .nav-links.open {
+    transform: translateX(0);
+    visibility: visible;
+    pointer-events: auto;
+    transition: transform 300ms cubic-bezier(0.32, 0.72, 0, 1);   /* iOS sheet curve */
+  }
+
+  /* Rows: large, centred, easy to hit */
+  html:root body nav .nav-links > a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 52px;
+    padding: 0 16px;
+    border-radius: 14px;
+    font-size: 17px;
+    font-weight: 500;
+    letter-spacing: -.01em;
+    text-align: center;
+    color: var(--ink);
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 120ms ease-out, transform 120ms var(--ease-out);
+  }
+  html:root body nav .nav-links > a:active {
+    background: color-mix(in srgb, var(--sage) 12%, transparent);
+    transform: scale(.98);
+  }
+  html:root body nav .nav-links > a.active,
+  html:root body nav .nav-links > a[href*="dashboard"],
+  html:root body nav .nav-links > a[href*="signin"],
+  html:root body nav .nav-links > a[href*="profile"] { color: var(--sage); }
+
+  /* Primary action sits apart, full width */
+  html:root body nav .nav-links .btn-nav {
+    align-self: center;
+    margin-top: 8px;
+    width: auto;
+    min-width: 0;
+    min-height: 46px;
+    padding: 0 28px;
+    border-radius: 980px;        /* the pill shape every other button has */
+    font-size: 16px;
+  }
+
+  /* Theme switch keeps its original round keycap, centred in the sheet */
+  html:root body nav .nav-links .theme-toggle {
+    align-self: center;
+    margin: 8px 0 0;
+  }
+
+  /* Desktop hover tooltips make no sense inside the sheet */
+  .nav-links [title]::before,
+  .nav-links [title]::after { display: none; }
+
+  /* Rows settle in one after another (decorative, never blocks a tap) */
+  html:root body nav .nav-links > * {
+    opacity: 0;
+    transform: translateX(8px);
+    transition: opacity 160ms ease-out, transform 160ms var(--ease-out);
+  }
+  html:root body nav .nav-links.open > * {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 260ms var(--ease-out) calc(60ms + var(--i, 0) * 40ms),
+      transform 300ms var(--ease-out) calc(60ms + var(--i, 0) * 40ms),
+      background-color 120ms ease-out;
+  }
+  html:root body nav .nav-links > *:nth-child(2) { --i: 1; }
+  html:root body nav .nav-links > *:nth-child(3) { --i: 2; }
+  html:root body nav .nav-links > *:nth-child(4) { --i: 3; }
+  html:root body nav .nav-links > *:nth-child(n+5) { --i: 4; }
+  /* keep press feedback instant once a row has settled */
+  html:root body nav .nav-links.open > a:active { transform: scale(.98); }
+}
+
+/* Reduced motion: fade only, no travel */
+@media (max-width: 768px) and (prefers-reduced-motion: reduce) {
+  html:root body nav .nav-links,
+  html:root body nav .nav-links.open {
+    transform: none;
+    opacity: 0;
+    transition: opacity 150ms ease, visibility 0s linear 150ms;
+  }
+  html:root body nav .nav-links.open { opacity: 1; transition-delay: 0s; }
+  html:root body nav .nav-links > *,
+  html:root body nav .nav-links.open > * { transform: none; transition: opacity 150ms ease; opacity: 1; }
+  .nav-toggle-bars, .nav-toggle-bars::before, .nav-toggle-bars::after { transition-duration: 1ms; }
+}
+
+/* Users who ask for less transparency get a solid sheet */
+@media (max-width: 768px) and (prefers-reduced-transparency: reduce) {
+  html:root body nav .nav-links { background: var(--white); -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+
+/* Desktop never sees the scrim */
+@media (min-width: 769px) { .nav-scrim { display: none; } }
+
+
+/* ============================================
+   SKELETON LOADING
+   Shown instead of a spinner while a page checks sign-in and fetches data.
+   Why it's built this way (animation + performance rules):
+   - ONE opacity pulse on the wrapper, not a shimmer on every block. Opacity
+     is composite-only, runs off the main thread (stays smooth while the page
+     is busy loading), and one animated layer is cheap on mid-range phones.
+   - ease-in-out: it's looping motion on something already on screen.
+   - Reduced motion: the pulse stops, the grey blocks just sit there.
+   - Blocks use the real page frame/gutters, so skeleton and real page line
+     up at every screen size.
+   ============================================ */
+:root { --sk: #E6EBEE; }
+[data-theme="dark"] { --sk: #243645; }
+
+.sk-wrap { animation: sk-pulse 1.5s ease-in-out infinite; }
+@keyframes sk-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
+@media (prefers-reduced-motion: reduce) { .sk-wrap { animation: none; } }
+
+.sk { display: block; background: var(--sk); border-radius: 8px; max-width: 100%; }
+.sk-circle { border-radius: 50%; flex-shrink: 0; }
+.sk-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Full-area cover shown while sign-in is checked. Starts under the real nav bar. */
+.sk-overlay {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 99998;
+  background: var(--cream); overflow: hidden; overscroll-behavior: contain;
+}
+
+.sk-frame { max-width: var(--page-max); margin: 0 auto; padding: 36px var(--gutter) 80px; }
+.sk-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 16px; overflow: hidden; min-width: 0;
+}
+.sk-pad { padding: 28px 32px 32px; }
+.sk-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 0; }
+.sk-row.gap12 { gap: 12px; }
+.sk-stack { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+
+/* Resource card (browse) */
+.sk-thumb { height: 130px; border-radius: 0; }
+.sk-body { padding: 16px; }
+.sk-foot {
+  display: flex; justify-content: space-between; align-items: center; gap: 8px;
+  border-top: 1px solid var(--border); padding-top: 12px; margin-top: 16px;
+}
+
+.sk-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 22px; }
+.sk-grid2 { display: grid; grid-template-columns: minmax(0, 1fr) 296px; gap: 18px; align-items: start; }
+.sk-hero { border-radius: 20px; margin-bottom: 22px; }
+
+@media (max-width: 900px) {
+  .sk-grid2 { grid-template-columns: minmax(0, 1fr); }
+  .sk-side { display: none; }
+}
+@media (max-width: 768px) {
+  .sk-frame { padding: 20px var(--gutter) 60px; }
+  .sk-pad { padding: 20px; }
+  .sk-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .sk-more { display: none; }                       /* filter groups: phones only see the short version */
+  .sk-res:nth-child(n+4) { display: none; }         /* one column on phones: 3 cards fill the screen */
+  .sk-hero { height: 190px !important; }
 }

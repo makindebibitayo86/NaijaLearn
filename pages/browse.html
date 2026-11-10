@@ -65,8 +65,7 @@
   <div class="nav-links">
     <a href="browse.html" class="active nav-browse-tip" title="Search lesson notes, past questions &amp; schemes of work by subject, class, term or type">Browse</a>
     <a href="upload.html" title="Share lesson notes, past questions &amp; schemes of work with Nigerian students">Upload</a>
-    <a href="signin.html" title="Sign in to your NaijaLearn account to upload, save and download resources" style="color:var(--sage)">Sign In</a>
-    <button class="btn-nav" title="Create a free account to access all resources" onclick="window.location.href='signup.html'">Get Started Free</button>
+    <button class="btn-nav" title="Create a free account to access all resources" onclick="window.location.href='signin.html#signup'">Get Started</button>
   </div>
   <button class="nav-toggle">☰</button>
 </nav>
@@ -592,7 +591,7 @@
   }
 
   function loadResources() {
-    setGrid('<div style="grid-column:1/-1;text-align:center;padding:80px 0;color:var(--muted)"><div style="font-size:32px;margin-bottom:12px">⏳</div><div>Loading resources…</div></div>');
+    setGrid(window.nlSkeleton ? nlSkeleton.browseGrid() : '<div style="grid-column:1/-1;text-align:center;padding:80px 0;color:var(--muted)"><div>Loading resources…</div></div>');
     sb.from('resources')
       .select('id,title,description,subject,class_level,term,week,type,file_url,uploader_id,downloads,verified,created_at,profiles(full_name,verified,avatar_url)')
       .order('downloads', {ascending:false})
